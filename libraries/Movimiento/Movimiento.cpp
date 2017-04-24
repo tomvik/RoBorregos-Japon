@@ -1214,3 +1214,4 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, ch
 void Movimiento::encoder(){
     eCount1++;
 }
+//FUNCION PARA QUE EL ROBOT NO SE DETENGA
