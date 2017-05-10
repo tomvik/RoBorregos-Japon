@@ -11,7 +11,6 @@ IDEAS:
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
-#include <LCD.h>
 #include <LiquidCrystal_I2C.h>
 #define I2C_ADDR    0x3F
 #define BACKLIGHT_PIN     3
@@ -22,7 +21,8 @@ IDEAS:
 #define D5_pin  5
 #define D6_pin  6
 #define D7_pin  7
-LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
+LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
+//LiquidCrystal_I2C lcd(I2C_ADDR,En_pin,Rw_pin,Rs_pin,D4_pin,D5_pin,D6_pin,D7_pin);
 /*
 cDir (dirección)
 n = norte
@@ -85,9 +85,8 @@ Movimiento::Movimiento(){
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin(16,2);// Indicamos medidas de LCD   
-  	lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
-  	lcd.setBacklight(HIGH);
+	lcd.begin();// Indicamos medidas de LCD   
+  	lcd.backlight();
   	limit_Vision = 0;
 }
 //Puede que no sea necesaria
@@ -124,9 +123,8 @@ Movimiento::Movimiento(uint8_t iPowi, uint8_t iPowd, uint8_t iT, SensarRealidad 
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin(16,2);// Indicamos medidas de LCD   
-  	lcd.setBacklightPin(BACKLIGHT_PIN,POSITIVE);
-  	lcd.setBacklight(HIGH);
+	lcd.begin();// Indicamos medidas de LCD   
+  	lcd.backlight();
   	limit_Vision = 0;
 }
 void Movimiento::Stop(){
@@ -411,7 +409,12 @@ void Movimiento::pasaRampa(char cDir){
 			fDeseado = fRef < 90 ? fRef+270 : fRef-90;
 			break;
 	}
-	while(real->sensarRampa() < -16){
+	while(real->sensarRampa() < -16 || real->sensarRampa() > 16){
+		grados = real->sensarOrientacion();
+		potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
+		Front(iPowDD, iPowII);
+	}
+	/*while(real->sensarRampa() < -16){
 		grados = real->sensarOrientacion();
 		potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
 		despues = millis();
@@ -529,7 +532,7 @@ void Movimiento::pasaRampa(char cDir){
 		  	digitalWrite(lVictima, LOW);
 		  	vR = false;
 		}
-	}
+	}*/
 	Stop();
 	Front(100, 100);
 	delay(800);

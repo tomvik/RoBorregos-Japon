@@ -1,4 +1,9 @@
-LiquidCrystal_I2C
-=================
+# Installation #
+Create a new folder called "LiquidCrystal_I2C" under the folder named "libraries" in your Arduino sketchbook folder.
+Create the folder "libraries" in case it does not exist yet. Place all the files in the "LiquidCrystal_I2C" folder.
 
-A reimplementation of the standard Arduino LCD library, configured to work with parallel HD44780 compatible LCDs, and interfaced via a Chinese PCF8574 I2C serial extender.
+# Usage #
+To use the library in your own sketch, select it from *Sketch > Import Library*.
+
+-------------------------------------------------------------------------------------------------------------------
+This library is based on work done by DFROBOT (www.dfrobot.com).
