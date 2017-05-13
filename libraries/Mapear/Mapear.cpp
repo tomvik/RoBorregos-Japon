@@ -25,12 +25,14 @@ NUNCA va a haber un caso atras
 Mapear::Mapear(){
 	iTamano = 10;
 	iPisoMax = 0;
+	iRampa = 17;
 }
 Mapear::Mapear(SensarRealidad *ma, Movimiento *ro){
 	iTamano = 10;
 	mapa = ma;
 	robot = ro;
 	iPisoMax = 0;
+	iRampa = 17;
 }
 
 void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow){
@@ -181,7 +183,7 @@ void Mapear::moverColDer(Tile tMapa[3][10][10], uint8_t &iPiso){
 }
 
 //Llama a las cuatro funciones anteriores y decide cuál hacer y modifica la posición para que concuerde con el nuevo mapa->
-void Mapear::desplazaDatos(Tile tMapa[3][10][10], char cDir, char cCase, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+void Mapear::desplazaDatos(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase){
 	switch(cDir){
 		case 'n':
 			switch(cCase){
@@ -252,7 +254,7 @@ void Mapear::desplazaDatos(Tile tMapa[3][10][10], char cDir, char cCase, uint8_t
 
 //Si es true, pone a ese cuadro como existente, si es false, le pone pared.
 //Lo unico es que EL PRIMER CUADRO donde empiece el robot, debe ser marcado como existente manualmente
-void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, char cCase, bool bLoP, uint8_t &iPiso){
+void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP){
 	switch(cDir){
 		case 'n':
 			switch(cCase){
@@ -436,25 +438,14 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 //Llena el mapa dependiendo de los valores que mande la clase SensarMapa. Y en dado caso, desplaza los datos.
 //Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
 void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
-	/*for(int i=0; i<100; i++){
-    	Serial.println(mapa->sensarRampa());
-	}
-	delay(1000);*/
-    //Serial.println("RAMPA?");
-    //delay(5000);
-    //char inChar = (char)Serial.read();
-    //if(inChar == 'r'){
-	if(mapa->sensarRampa() > 17 || mapa->sensarRampa() < -17){
+	if(mapa->sensarRampa() > iRampa || mapa->sensarRampa() < -iRampa){
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()){
 			uint8_t iTemp = iPiso;
 			robot->pasaRampa(cDir);
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
-			//Serial.print("ESTOY EN: "); Serial.println(iTemp);
-			//Serial.print("QUIERO IR A: "); Serial.println(iPiso);
 			uint8_t i = 0;
 			uint8_t j = 0;
 			bool bT = false;
-			//Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
 			while(i < iTamano && bT == false){
 				j = 0;
 				while(j < iTamano && bT == false){
@@ -463,38 +454,21 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 						iCol = j;
 						iRow = i;
 						bT = true;
-						//Serial.println("ENCONTRAMOS ALGO");
-						//Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
 					}
-					//Serial.print(tMapa[iPiso][i][j].piso());
 					j++;
 				}
-				//Serial.println(" ");
 				i++;
 			}
 			afterRampa(cDir, iCol, iRow);
-			//Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
-			//Serial.println("ME SALGO");
 		}
 		else{
 		//Modifica el piso maximo
-		//Serial.print("iPisoMax = ");
-		//Serial.println(iPisoMax);
 		iPisoMax++;
-		//Serial.print("iPisoMax = ");
-		//Serial.println(iPisoMax);
-		//delay(2000);
-		//Pone actual como RampaArriba o Abajo e inicializa el segundo piso
-		//Serial.println("RAMPA ARRIBA O ABAJO?");
-		//delay(1000);
-		//inChar = (char)Serial.read();
-		//if(inChar == 'u'){
-		if(mapa->sensarRampa() > 18){
+		if(mapa->sensarRampa() > iRampa){
 			tMapa[iPiso][iRow][iCol].rampaArriba(true);
 			tMapa[iPisoMax][4][4].rampaAbajo(true);
 		}
-		//if(inChar == 'd'){
-		if(mapa->sensarRampa() < -20){
+		if(mapa->sensarRampa() < -iRampa){
 			tMapa[iPiso][iRow][iCol].rampaAbajo(true);
 			tMapa[iPisoMax][4][4].rampaArriba(true);
 		}
@@ -503,19 +477,11 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		tMapa[iPisoMax][4][4].existe(true);
 		tMapa[iPisoMax][4][4].visitado(true);
 		tMapa[iPiso][iRow][iCol].piso(iPisoMax);
-		//Serial.print("CONECTO A: "); Serial.println(tMapa[iPiso][iRow][iCol].piso()); 
 		tMapa[iPiso][iRow][iCol].visitado(true);
 		//Poner como camino cerrado del piso actual
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', false, iPiso);
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', false, iPiso);
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', false, iPiso);
-		//Pone como cerrado MENOS a donde está viendo
-		/*escribeMapaLoP(tMapa, cDir, 4, 4, 'a', false, iPisoMax);
-		escribeMapaLoP(tMapa, cDir, 4, 4, 'd', false, iPisoMax);
-		escribeMapaLoP(tMapa, cDir, 4, 4, 'i', false, iPisoMax);*/
-		//Prende motores y los apaga cuando acaba de subir o bajar
-		//Serial.println("LISTO");
-		//delay(5000);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 		robot->pasaRampa(cDir);
 		//Pone la posición en after rampa dependiendo de la direccion
 		iPiso = iPisoMax;
@@ -523,84 +489,47 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		afterRampa(cDir, iCol, iRow);
 		}
 	}
-	/*Serial.println("Sensa Enfrente");
-	delay(1000);
-	inChar = (char)Serial.read();
-	if(inChar == 'l'){
-		Serial.println("LIBRE ENFRENTE");
-		if(!espacio(cDir, iCol, iRow, 'e')){
-			desplazaDatos(tMapa, cDir, 'e', iCol, iRow, iPiso);
-		}
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', true, iPiso);
-	}
-	else//Pone pared
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', false, iPiso);
-	Serial.println("Sensa Derecha");
-	delay(1000);
-	inChar = (char)Serial.read();
-	if(inChar == 'l'){
-		Serial.println("LIBRE DERECHA");
-		if(!espacio(cDir, iCol, iRow, 'd')){
-			Serial.println("NO HAY ESPACIO");
-			desplazaDatos(tMapa, cDir, 'd', iCol, iRow, iPiso);
-		}
-		else
-			Serial.println("HAY ESPACIO Y SOY UN MENTIROSO");
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', true, iPiso);
-	}
-	else
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', false, iPiso);
-	Serial.println("Sensa Izquierda");
-	delay(1000);
-	inChar = (char)Serial.read();
-	if(inChar == 'l'){
-		Serial.println("LIBRE IZQUIERDA");
-		if(!espacio(cDir, iCol, iRow, 'i')){
-			desplazaDatos(tMapa, cDir, 'i', iCol, iRow, iPiso);
-		}
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', true, iPiso);
-	}
-	else
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', false, iPiso);*/
-	//Serial.println("Sensa Enfrente");
-	////delay(2000);
+	//Lectura enfrente
+	//Libre
 	if(mapa->sensarEnfrente()){
 		if(!espacio(cDir, iCol, iRow, 'e')){
-			desplazaDatos(tMapa, cDir, 'e', iCol, iRow, iPiso);
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 		}
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', true, iPiso);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
 	}
-	else//Pone pared
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', false, iPiso);
-	//Serial.println("Sensa Derecha");
-	////delay(2000);
+	//Pared
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+	//Lectura Derecha
+	//Libre
 	if(mapa->sensarDerecha()){
 		if(!espacio(cDir, iCol, iRow, 'd')){
-			desplazaDatos(tMapa, cDir, 'd', iCol, iRow, iPiso);
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 		}
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', true, iPiso);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 	}
+	//Pared
 	else
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', false, iPiso);
-	//Serial.println("Sensa Izquierda");
-	////delay(2000);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+	//Lectura I<quierda
+	//Libre
 	if(mapa->sensarIzquierda()){
 		if(!espacio(cDir, iCol, iRow, 'i')){
-			desplazaDatos(tMapa, cDir, 'i', iCol, iRow, iPiso);
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 		}
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', true, iPiso);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
 	}
+	//Pared
 	else
-		escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', false, iPiso);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	//Si es un cuadro negro
 	if(mapa->prueba() == 1){
 		if(mapa->prueba() == 1){
-			//Serial.println("COLOR");
 			//Poner pared a los cuatro lados
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, 'e', false, iPiso);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, 'd', false, iPiso);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, 'i', false, iPiso);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, 'a', false, iPiso);
+			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
+			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
 			tMapa[iPiso][iRow][iCol].cuadroNegro(true);
 		}
 	}

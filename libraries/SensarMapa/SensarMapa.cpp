@@ -23,7 +23,7 @@ SensarMapa::SensarMapa(uint8_t iT){ iTamano = iT; }
 
 //Regresa TRUE si es que NO hay una pared a donde se quiere checar
 //Se podría usar bitwise para combinar los dos char, pero se me hace mucho pedo e inecesario para ahorrarnos sólo 1 byte
-bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, char cDir, char cCase, uint8_t &iPiso){
+bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
 	switch(cCase){
 		case 'r':		//Derecha
 			switch(cDir){
@@ -73,7 +73,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, 
 	}
 }
 //Regresa TRUE si NO ha sido visitado
-bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, char cDir, char cCase, uint8_t &iPiso){
+bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
 	switch(cCase){
 		case 'r':				//Derecha
 			switch(cDir){
@@ -122,7 +122,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow
 	}
 }
 //Regresa TRUE si EXISTE la coordenada
-bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, char cDir, char cCase, uint8_t &iPiso){
+bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
 	switch(cCase){
 		case 'r':				//Derecha
 			switch(cDir){
@@ -174,7 +174,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, 
 void SensarMapa::llenaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, uint8_t &iPiso){
 	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
 	//hay que poner primero el del rango, es como una "seguridad" para lo demás. Luego no sé si sería mejor poner el de la pared o existe (Cual es falso más seguido?)
-	if(iCol < iTamano-1 && sensaExiste(tMapa, iCol, iRow, 'n', 'r', iPiso) && sensa_Pared(tMapa, iCol, iRow, 'n', 'r', iPiso)){	//Derecha
+	if(iCol < iTamano-1 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'r')){	//Derecha
 		//Si el tile de la derecha ES 0 Ó es mayor al numero en el que estoy, llama recursivamente la función sumandole 1.
 		if(iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol])
 		{
@@ -183,7 +183,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t
 		}
 	}
 	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
-	if(iRow > 0 && sensaExiste(tMapa, iCol, iRow, 'n', 'u', iPiso) && sensa_Pared(tMapa, iCol, iRow, 'n', 'u', iPiso)){	//Enfrente
+	if(iRow > 0 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'u')){	//Enfrente
 		//Si el tile de enfrente ES 0 Ó es mayor al numero en el que estoy, llama recursivamente la función sumandole 1.
 		if(iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol])
 		{
@@ -192,7 +192,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t
 		}
 	}
 	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
-	if(iCol > 0 && sensaExiste(tMapa, iCol, iRow, 'n', 'l', iPiso) && sensa_Pared(tMapa, iCol, iRow, 'n', 'l', iPiso)){	//izquierda
+	if(iCol > 0 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'l')){	//izquierda
 		//Si el tile de la izquierda ES 0 Ó es mayor al numero en el que estoy, llama recursivamente la función sumandole 1.
 		if(iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol])
 		{
@@ -201,7 +201,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t
 		}
 	}
 	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
-	if(iRow < iTamano-1 && sensaExiste(tMapa, iCol, iRow, 'n', 'd', iPiso) && sensa_Pared(tMapa, iCol, iRow, 'n', 'd', iPiso)){	//Atras
+	if(iRow < iTamano-1 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'd')){	//Atras
 		//Si el tile de atras ES 0 Ó es mayor al numero en el que estoy, llama recursivamente la función sumandole 1.
 		if(iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol])
 		{
@@ -212,7 +212,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t
 }
 //Compara las distancias de un NO VISITADO al inicio con los demás y modifica las variables iNCol e iNRow para indicar a dónde ir.
 //Esta función se puede modificar recibiendo un "caso" para decidir si busca No visitado ó Rampa ó Inicio ó lo que sea.
-bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], uint8_t iCol, uint8_t iRow, uint8_t &iNCol, uint8_t &iNRow, char cD, uint8_t &iPiso){
+bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char cD, uint8_t iCol, uint8_t iRow, uint8_t &iNCol, uint8_t &iNRow, uint8_t &iPiso){
 	//Lo declaré en un 100 porque es casi imposible que haya uno mayor a eso.
 	uint8_t iC = 100;
 	bool bT = false;
@@ -257,22 +257,22 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[10][10], Tile tMapa[3][10][10]
 	uint8_t iPos = iMapa[iNRow][iNCol];
 	while(iPos > 1){
 		Serial.print("QUIERO IR A: "); Serial.print(iNCol); Serial.print(", "); Serial.println(iNRow);
-		if(sensa_Pared(tMapa, iNCol, iNRow, 'n', 'r', iPiso) && iMapa[iNRow][iNCol+1] == iPos-1){
+		if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && iMapa[iNRow][iNCol+1] == iPos-1){
 			sIns += "i";
 			iPos--;
 			iNCol++;
 		}
-		if(sensa_Pared(tMapa, iNCol, iNRow, 'n', 'u', iPiso) && iMapa[iNRow-1][iNCol] == iPos-1){
+		if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'u') && iMapa[iNRow-1][iNCol] == iPos-1){
 			sIns += "a";
 			iPos--;
 			iNRow--;
 		}
-		if(sensa_Pared(tMapa, iNCol, iNRow, 'n', 'l', iPiso) && iMapa[iNRow][iNCol-1] == iPos-1){
+		if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'l') && iMapa[iNRow][iNCol-1] == iPos-1){
 			sIns += "d";
 			iPos--;
 			iNCol--;
 		}
-		if(sensa_Pared(tMapa, iNCol, iNRow, 'n', 'd', iPiso) && iMapa[iNRow+1][iNCol] == iPos-1){
+		if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'd') && iMapa[iNRow+1][iNCol] == iPos-1){
 			sIns += "e";
 			iPos--;
 			iNRow++;

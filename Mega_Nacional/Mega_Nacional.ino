@@ -37,11 +37,11 @@ void setup() {
   }
   mover->Stop();
   mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
-  while (mover->decidir(tMapa, iCol, iRow, cDir, iPiso)) {
+  while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso)) {
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   }
   while(true){
-    mover->goToVisitado(tMapa, iCol, iRow, cDir, 'i', iPiso);
+    mover->goToVisitado(tMapa, cDir, 'i', iCol, iRow, iPiso);
     mover->Stop();
   }
 }
