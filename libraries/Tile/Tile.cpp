@@ -57,7 +57,7 @@ bool Tile::rampaArriba(){
     return dato2&'\x2';//0b00000010;
 }
 
-bool Tile::botella(){
+bool Tile::bumper(){
     return dato2&'\x1';//0b00000001;
 }
 
@@ -116,7 +116,7 @@ void Tile::rampaArriba(const bool &b){
     //dato2= b? dato2|'\x2':dato2&'\xfd';//0b00000010:0b1111 1101
 }    
 
-void Tile::botella(const bool &b){
+void Tile::bumper(const bool &b){
     dato2 |= b;
     //dato2= b? dato2|'\x1':dato2&'\xfe';//0b00000001:0b1111 1110
 }

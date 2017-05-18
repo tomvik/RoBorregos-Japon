@@ -42,7 +42,7 @@ class Tile{
 
         bool rampaAbajo();
 
-        bool botella();
+        bool bumper();
 
         bool existe();
 
@@ -64,7 +64,7 @@ class Tile{
 
         void rampaArriba(const bool &b);
 
-        void botella(const bool &b);
+        void bumper(const bool &b);
 
         void arriba(const bool &b, Tile *laDeArriba);
 
@@ -82,7 +82,8 @@ class Tile{
 
     private:
         char dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada 
-            dato2; //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, botella
+            dato2; //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper
+            //dato3; //vicArr, vicDer, vicIzq
             //Ultimos 3 combinación de pisos
 };
 
