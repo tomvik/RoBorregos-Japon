@@ -41,6 +41,7 @@ public:
 	
 	////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
 	bool decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	bool decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 private:
 	uint8_t iPowI, iPowD, iTamano, limit_Vision, kParedAlinear, iRampa;
 	int encoder30, eCount1, pos;

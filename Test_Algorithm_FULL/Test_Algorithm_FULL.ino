@@ -89,12 +89,11 @@ void setup() {
   //delay(3000);
   //MOSTRAR DÓNDE Y HACIA DÓNDE ESTÁ
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
-    muestra(tMapa, cMapa, iPiso);
+  muestra(tMapa, cMapa, iPiso);
   //GIRAR A LA DERECHA Y MAPEA
-  mover->derecha(cDir, tMapa, iCol, iRow, iPiso);
-  mover->Stop();
-  //Serial.println("Gira derecha");
-  //delay(2000);
+  cDir = 'e';
+  Serial.println("Gira derecha");
+  delay(2000);
   Serial.println("ANTES DE MAPEAR");
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
@@ -102,27 +101,27 @@ void setup() {
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
   //GIRA A LA IZQUIERDA Y MAPEA
-  mover->izquierda(cDir, tMapa, iCol, iRow, iPiso);
-  mover->Stop();
-  //Serial.println("Gira izquierda");
-  //delay(2000);
+  cDir = 'n';
+  Serial.println("Gira izquierda");
+  delay(2000);
   Serial.println("ANTES DE MAPEAR");
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   //MOSTRAR DÓNDE Y HACIA DÓNDE ESTÁ
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
-  //Serial.println("A COMENZAR EL LOOP");
-  //delay(5000);
-  while (mover->decidir(tMapa, iCol, iRow, cDir, iPiso)) {
+  Serial.println("A COMENZAR EL LOOP");
+  delay(5000);
+  while (mover->decidir_Prueba(tMapa, cDir, iCol, iRow, iPiso)) {
+    delay(1000);
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
     Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
     muestra(tMapa, cMapa, iPiso);
   }
   Serial.println("SALI");
+  delay(5000);
   while(true){
-    mover->goToVisitado(tMapa, iCol, iRow, cDir, 'i', iPiso);
-    mover->Stop();
+    mover->goToVisitado(tMapa, cDir, 'i', iCol, iRow, iPiso);
     Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
     muestra(tMapa, cMapa, iPiso);
   }

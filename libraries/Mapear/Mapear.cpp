@@ -489,8 +489,44 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		afterRampa(cDir, iCol, iRow);
 		}
 	}
-	//Lectura enfrente
-	//Libre
+	//////////////////////////////PRUEBAS DE LOGICA/////////////////////////////////////////
+	/*char inChar;
+	Serial.println("Sensa Enfrente");
+	delay(2000);
+	inChar = (char)Serial.read();
+	if(inChar == 'l'){
+		Serial.println("LIBRE ENFRENTE");
+		if(!espacio(cDir, iCol, iRow, 'e')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
+	}
+	else//Pone pared
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+	Serial.println("Sensa Derecha");
+	delay(2000);
+	inChar = (char)Serial.read();
+	if(inChar == 'l'){
+		Serial.println("LIBRE DERECHA");
+		if(!espacio(cDir, iCol, iRow, 'd')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
+	}
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+	Serial.println("Sensa Izquierda");
+	delay(2000);
+	inChar = (char)Serial.read();
+	if(inChar == 'l'){
+		Serial.println("LIBRE IZQUIERDA");
+		if(!espacio(cDir, iCol, iRow, 'i')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
+	}
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);*/
 	if(mapa->sensarEnfrente()){
 		if(!espacio(cDir, iCol, iRow, 'e')){
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');

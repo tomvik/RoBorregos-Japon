@@ -16,7 +16,7 @@ Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
 */  
 
 //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada 
-//0, 0, 0, Rampabajo, existe, inicio, rampaArriba, botella
+//0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper
 bool Tile::arriba(){
     return dato1&'\x80';//0b10000000;
 }

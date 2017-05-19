@@ -906,6 +906,7 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
 	lcd.clear();
 	lcd.print("PATH");
+	delay(1000);
 	for(int i=sMov.length()-1; i>=0; i--){
 		if(cDir == 'n')
 			switch(sMov[i]){
@@ -994,13 +995,13 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_
 	//Declara un mapa de int, debe ser del tamaño que el otro mapa. Será mejor declararlo desde un principio del código?
 	uint8_t iMapa[10][10];
 	//Llena el mapa de 0
-	for (uint8_t i = 0; i < iTamano; ++i)
-		for(uint8_t j=0; j < iTamano; j++)
+	for (uint8_t i = 0; i < iTamano; i++)
+		for(uint8_t j = 0; j < iTamano; j++)
 			iMapa[i][j] = 0;
 	//Pone 1 en donde vamos a iniciar
 	iMapa[iRow][iCol] = 1;
 	//LA FUNCION RECURSIVA
-	mapa.llenaMapa(iMapa, tMapa, iCol, iRow, iPiso);
+	mapa.llenaMapa(iMapa, tMapa, cDir, iCol, iRow, iPiso);
 	//Imprime el mapa
 	/*for (uint8_t i = 0; i < iTamano; ++i){
 		for(uint8_t j=0; j<iTamano; j++){
@@ -1008,7 +1009,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_
 		}
 		Serial.println();
 	}
-	delay(4000);	*/
+	delay(5000);*/
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
@@ -1088,6 +1089,92 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 		derecha(tMapa, cDir, iCol, iRow, iPiso);
 		avanzar(tMapa, cDir, iCol, iRow, iPiso);
 		Stop();
+		return true;
+	}
+	//Aquí es cuando entra a lo recursivo
+	else{
+		//Llama la función recursiva
+		return goToVisitado(tMapa, cDir, 'n', iCol, iRow, iPiso);
+	}
+}
+
+bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
+	tMapa[iPiso][iRow][iCol].existe(true);
+	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
+	tMapa[iPiso][iRow][iCol].visitado(true);
+	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
+	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
+	if(mapa.sensa_Pared(tMapa, cDir, 'r', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'r', iCol, iRow, iPiso)){
+		switch(cDir){
+			case 'n':
+				iCol++;
+				break;
+			case 'e':
+				iRow++;
+				break;
+			case 's':
+				iCol--;
+				break;
+			case 'w':
+				iRow--;
+				break;
+		}
+		return true;
+	}
+	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
+	else if(mapa.sensa_Pared(tMapa, cDir, 'u', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'u', iCol, iRow, iPiso)){
+		switch(cDir){
+			case 'n':
+				iRow--;
+				break;
+			case 'e':
+				iCol++;
+				break;
+			case 's':
+				iRow++;
+				break;
+			case 'w':
+				iCol--;
+				break;
+		}
+		return true;
+	}
+	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
+	else if(mapa.sensa_Pared(tMapa, cDir, 'l', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'l', iCol, iRow, iPiso)){
+		switch(cDir){
+			case 'n':
+				iCol--;
+				break;
+			case 'e':
+				iRow--;
+				break;
+			case 's':
+				iCol++;
+				break;
+			case 'w':
+				iRow++;
+				break;
+		}
+		return true;
+	}
+	//Si no hay pared atrás y no está visitado, muevete hacia allá
+	//Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
+	else if(mapa.sensa_Pared(tMapa, cDir, 'd', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'd', iCol, iRow, iPiso)){
+		switch(cDir){
+			case 'n':
+				iRow++;
+				break;
+			case 'e':
+				iCol--;
+				break;
+			case 's':
+				iRow--;
+				break;
+			case 'w':
+				iCol++;
+				break;
+		}
 		return true;
 	}
 	//Aquí es cuando entra a lo recursivo
