@@ -4,6 +4,7 @@
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
+#include <EEPROM.h>
 /*
 #define sIFtrig 30
 #define sIFecho 31
@@ -35,7 +36,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 
 #define toleranciaSwitchIMU 5
 
-SensarRealidad::SensarRealidad(){
+SensarRealidad::SensarRealidad() {
 	if(!bno.begin())
  	{
     	/* There was a problem detecting the BNO055 ... check your connections */
@@ -70,7 +71,7 @@ byte SensarRealidad::getIMUCalStatus()
   return gyro;
 }
 
-uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo){
+uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo) {
    digitalWrite(trigger,LOW);
    delayMicroseconds(5);
    digitalWrite(trigger,HIGH);
@@ -79,17 +80,17 @@ uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo){
    return uint8_t(0.017 * tiempo);
 }
 
-uint8_t SensarRealidad::calcDistanciaSharp(uint8_t sensor){
+uint8_t SensarRealidad::calcDistanciaSharp(uint8_t sensor) {
    uint8_t lectura, cm;
    float volts = analogRead(sensor)*0.0048828125;  // value from sensor * (5/1024)
    uint8_t distance = 13*pow(volts, -1); // worked out from datasheet graph
    return distance;
 }
 
-bool SensarRealidad::sensarEnfrente(){
+bool SensarRealidad::sensarEnfrente() {
 	//Con sharp o ultrasonico
 	int iD = 0;
-	for(uint8_t i = 0; i < 2; i++){
+	for(uint8_t i = 0; i < 2; i++) {
 		iD += calcDistanciaUS(TAdeIzq, EAdeIzq);
 		delay(10);
 		iD += calcDistanciaUS(TAdeDer, EAdeDer);
@@ -102,9 +103,9 @@ bool SensarRealidad::sensarEnfrente(){
 	//iD /= 20;
 	return iD > 14;
 }
-bool SensarRealidad::sensarAtras(){
+bool SensarRealidad::sensarAtras() {
 	int iD = 0;
-	for(uint8_t i = 0; i < 2; i++){
+	for(uint8_t i = 0; i < 2; i++) {
 		iD += calcDistanciaUS(TAtr, EAtr);
 		delay(10);
 	}
@@ -112,9 +113,9 @@ bool SensarRealidad::sensarAtras(){
 	//Serial.println(iD);
 	return iD > 14;
 }
-uint8_t SensarRealidad::sensarEnfrentePared(){
+uint8_t SensarRealidad::sensarEnfrentePared() {
 	int iD = 0;
-	for(uint8_t i = 0; i < 2; i++){
+	for(uint8_t i = 0; i < 2; i++) {
 		iD += calcDistanciaUS(TAdeIzq, EAdeIzq);
 		delay(10);
 		iD += calcDistanciaUS(TAdeDer, EAdeDer);
@@ -125,9 +126,9 @@ uint8_t SensarRealidad::sensarEnfrentePared(){
 	iD /= 4;
 	return iD;
 }
-bool SensarRealidad::sensarDerecha(){
+bool SensarRealidad::sensarDerecha() {
 	int iD = 0;
-	for(uint8_t i = 0; i < 4; i++){
+	for(uint8_t i = 0; i < 4; i++) {
 		iD += calcDistanciaUS(TDerAde, EDerAde);
 		delay(10);
 		/*iD += calcDistanciaSharp(ShRight);
@@ -137,18 +138,18 @@ bool SensarRealidad::sensarDerecha(){
 	//Serial.print("Derecha: "); Serial.println(iD);
 	return iD > 14;
 }
-uint8_t SensarRealidad::sensarDerechaPared(){
+uint8_t SensarRealidad::sensarDerechaPared() {
 	int iD = 0;
-	for(uint8_t i = 0; i < 2; i++){
+	for(uint8_t i = 0; i < 2; i++) {
 		iD += calcDistanciaUS(TDerAde, EDerAde);
 		delay(10);
 	}
 	iD /= 2;
 	return iD;
 }
-bool SensarRealidad::sensarIzquierda(){
+bool SensarRealidad::sensarIzquierda() {
 	int iD = 0;
-	for(int i = 0; i < 4; i++){
+	for(int i = 0; i < 4; i++) {
 		/*iD += calcDistanciaUS(TIzqAtr, EIzqAtr);
 		delay(10);*/
 		iD += calcDistanciaUS(TIzqAde, EIzqAde);
@@ -161,9 +162,9 @@ bool SensarRealidad::sensarIzquierda(){
 	return iD > 14;
 }
 
-uint8_t SensarRealidad::sensarIzquierdaPared(){
+uint8_t SensarRealidad::sensarIzquierdaPared() {
 	int iD = 0;
-	for(int i = 0; i < 2; i++){
+	for(int i = 0; i < 2; i++) {
 		iD += calcDistanciaUS(TIzqAde, EIzqAde);
 		delay(10);
 	}
@@ -171,19 +172,19 @@ uint8_t SensarRealidad::sensarIzquierdaPared(){
 	return iD;
 }
 
-int SensarRealidad::sensarRampa(){
+int SensarRealidad::sensarRampa() {
   sensors_event_t event;
   bno.getEvent(&event);
   return int(event.orientation.y);
 }
 
-float SensarRealidad::sensarRampaFloat(){
+float SensarRealidad::sensarRampaFloat() {
   sensors_event_t event;
   bno.getEvent(&event);
   return event.orientation.y;
 }
 
-float SensarRealidad::sensarOrientacion(){
+float SensarRealidad::sensarOrientacion() {
   sensors_event_t event;
   bno.getEvent(&event);
   return float(event.orientation.x);
@@ -191,7 +192,7 @@ float SensarRealidad::sensarOrientacion(){
 
 
 //No falta cuando ambos estan presionados?
-uint8_t SensarRealidad::switches(){
+uint8_t SensarRealidad::switches() {
 	if(digitalRead(switchIzquierda) == 1)
 		return 1;
 	if(digitalRead(switchDerecha) == 1)
@@ -199,15 +200,15 @@ uint8_t SensarRealidad::switches(){
 	return 0;
 }
 
-uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados){
+uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados) {
 	if(abs(fDeseado - grados) <= toleranciaSwitchIMU)
 		return 0;
 	return fDeseado > grados ? 1 : 2;
 }
 /*// 0 = nada, 1 = der, 2 = left, 3 = ambos
-uint8_t SensarRealidad::sensarTemperatura(){
+uint8_t SensarRealidad::sensarTemperatura() {
 	//Serial.print("Derecho: "); Serial.print(mlxRight.readObjectTempC()); Serial.print(" Izquierda "); Serial.println(mlxLeft.readObjectTempC());
-	if(mlxRight.readObjectTempC() > temp+5){
+	if(mlxRight.readObjectTempC() > temp+5) {
 		return 1;
 	}
 	if(mlxLeft.readObjectTempC() > temp+4)
@@ -217,6 +218,21 @@ uint8_t SensarRealidad::sensarTemperatura(){
 	//Serial.println(mlxLeft.readObjectTempC());
 }*/
 
-uint8_t SensarRealidad::prueba(){
+uint8_t SensarRealidad::prueba() {
 	return(digitalRead(colorIn));
+}
+
+void escribirEEPROM(int dir, int val) {
+	byte lowByte = ((val >> 0) & 0xFF);
+	byte highByte = ((val >> 8) & 0xFF);
+
+	EEPROM.write(dir, lowByte);
+	EEPROM.write(dir + 1, highByte);
+}
+
+int leerEEPROM(int dir) {
+	byte lowByte = EEPROM.read(dir);
+	byte highByte = EEPROM.read(dir + 1);
+
+	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
 }

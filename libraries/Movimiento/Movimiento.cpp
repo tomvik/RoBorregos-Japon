@@ -43,6 +43,7 @@ Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);//al revés
 Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(2);
 Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(4);//al revés
 Servo myservo;
+int dir = 0;
 
 
 #define victimaIn 25
@@ -747,11 +748,14 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	    	acomodaChoque(switchCase);
 	    }
 			//bumper
-			bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
 			bumperMin = real->sensarRampaFloat() < bumperMin ? real->sensarRampaFloat() : bumperMin;
+			bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
 			if (bumperMax - bumperMin >= toleranciaBumper)
 				tMapa[iPiso][iRow][iCol].bumper(true);
     }
+		SensarRealidad::escribirEEPROM(dir++, (int) bumperMin);
+		SensarRealidad::escribirEEPROM(dir++, (int) bumperMax);
+
     VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
    	eCount1 = 0;
    	switch(cDir)
