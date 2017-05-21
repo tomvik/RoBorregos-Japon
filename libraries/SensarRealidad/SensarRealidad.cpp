@@ -5,7 +5,7 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 /*
-#define sIFtrig 30                                                                                                                                                       
+#define sIFtrig 30
 #define sIFecho 31
 #define sIBtrig 32
 #define sIBecho 33
@@ -33,6 +33,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 
 #define colorIn 23
 
+#define toleranciaSwitchIMU 5
+
 SensarRealidad::SensarRealidad(){
 	if(!bno.begin())
  	{
@@ -45,13 +47,13 @@ SensarRealidad::SensarRealidad(){
   	//while(getIMUCalStatus() <= 0);
   	Serial.println("TERMINE");
 	//Todos los pines declarados
-	pinMode(TIzqAde,OUTPUT); 
+	pinMode(TIzqAde,OUTPUT);
 	pinMode(EIzqAde,INPUT);
-	pinMode(TAdeIzq,OUTPUT); 
+	pinMode(TAdeIzq,OUTPUT);
 	pinMode(EAdeIzq,INPUT);
-	pinMode(TAdeDer,OUTPUT); 
+	pinMode(TAdeDer,OUTPUT);
 	pinMode(EAdeDer,INPUT);
-	pinMode(TDerAde,OUTPUT); 
+	pinMode(TDerAde,OUTPUT);
 	pinMode(EDerAde,INPUT);
 	pinMode(TAtr, OUTPUT);
 	pinMode(EAtr, INPUT);
@@ -175,18 +177,32 @@ int SensarRealidad::sensarRampa(){
   return int(event.orientation.y);
 }
 
+float SensarRealidad::sensarRampaFloat(){
+  sensors_event_t event;
+  bno.getEvent(&event);
+  return event.orientation.y;
+}
+
 float SensarRealidad::sensarOrientacion(){
   sensors_event_t event;
   bno.getEvent(&event);
   return float(event.orientation.x);
 }
 
+
+//No falta cuando ambos estan presionados?
 uint8_t SensarRealidad::switches(){
 	if(digitalRead(switchIzquierda) == 1)
 		return 1;
 	if(digitalRead(switchDerecha) == 1)
 		return 2;
 	return 0;
+}
+
+uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados){
+	if(abs(fDeseado - grados) <= toleranciaSwitchIMU)
+		return 0;
+	return fDeseado > grados ? 1 : 2;
 }
 /*// 0 = nada, 1 = der, 2 = left, 3 = ambos
 uint8_t SensarRealidad::sensarTemperatura(){

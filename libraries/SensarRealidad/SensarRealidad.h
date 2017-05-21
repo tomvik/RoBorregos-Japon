@@ -25,9 +25,11 @@ public:
 	bool sensarDerecha();
 	bool sensarIzquierda();
 	int sensarRampa();
+	float sensarRampaFloat();
 	float sensarOrientacion();
 	//uint8_t sensarTemperatura();
 	uint8_t switches();
+	uint8_t switchesIMU(float fDeseado, float grados);
 private:
 };
 

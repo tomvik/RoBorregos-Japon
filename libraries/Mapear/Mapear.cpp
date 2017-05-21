@@ -47,7 +47,7 @@ void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow){
 			iRow++;
 			break;
 		case 'w':
-			iCol--;	
+			iCol--;
 			break;
 	}
 }
@@ -98,7 +98,7 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase){
 void Mapear::moverRowAbajo(Tile tMapa[3][10][10], uint8_t &iPiso){
 	Tile tTemp1, tTemp2;
 	for (uint8_t iCol = 0; iCol < iTamano; ++iCol)
-	{	
+	{
 		tTemp1 = tMapa[iPiso][iTamano-1][iCol];
 		tTemp2 = tMapa[iPiso][0][iCol];
 		tMapa[iPiso][0][iCol] = tMapa[iPiso][iTamano-1][iCol];
@@ -439,6 +439,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 //Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
 void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
 	if(mapa->sensarRampa() > iRampa || mapa->sensarRampa() < -iRampa){
+		tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()){
 			uint8_t iTemp = iPiso;
 			robot->pasaRampa(cDir);
@@ -449,7 +450,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 			while(i < iTamano && bT == false){
 				j = 0;
 				while(j < iTamano && bT == false){
-					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp){ 
+					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp){
 						//Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
 						iCol = j;
 						iRow = i;

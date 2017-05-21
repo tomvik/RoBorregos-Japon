@@ -21,6 +21,7 @@ IDEAS:
 #define D5_pin  5
 #define D6_pin  6
 #define D7_pin  7
+#define toleranciaBumper 10
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 /*
 cDir (dirección)
@@ -36,7 +37,7 @@ i = izquierda
 a = atrás
 
 */
-Adafruit_MotorShield AFMS = Adafruit_MotorShield(); 
+Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(3);//al revés
 Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);//al revés
 Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(2);
@@ -79,14 +80,14 @@ Movimiento::Movimiento(){
     pos = 90;
     myservo.attach(9);
     myservo.write(pos);
-    pinMode(lVictima,OUTPUT); 
+    pinMode(lVictima,OUTPUT);
     alinear = false;
     kParedAlinear = 12;
     encoder30 = 1250;
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin();// Indicamos medidas de LCD   
+	lcd.begin();// Indicamos medidas de LCD
   	lcd.backlight();
   	limit_Vision = 0;
 }
@@ -118,14 +119,14 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
     pos = 90;
     myservo.attach(pin_Servo);
     myservo.write(pos);
-    pinMode(lVictima,OUTPUT); 
+    pinMode(lVictima,OUTPUT);
     alinear = false;
     kParedAlinear = 12;
 	encoder30 = 1250;
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin();// Indicamos medidas de LCD   
+	lcd.begin();// Indicamos medidas de LCD
   	lcd.backlight();
   	limit_Vision = 0;
 }
@@ -160,7 +161,7 @@ void Movimiento::Back(uint8_t PowD, uint8_t PowI){
 
    myMotorRightF->run(BACKWARD);
    myMotorRightB->run(BACKWARD);
-   
+
    myMotorLeftF->run(BACKWARD);
    myMotorLeftB->run(BACKWARD);
    while(digitalRead(lack) == 0){
@@ -175,7 +176,7 @@ void Movimiento::Right(uint8_t PowD, uint8_t PowI){
 
    myMotorRightF->run(BACKWARD);
    myMotorRightB->run(BACKWARD);
-   
+
    myMotorLeftF->run(FORWARD);
    myMotorLeftB->run(FORWARD);
    while(digitalRead(lack) == 0){
@@ -190,7 +191,7 @@ void Movimiento::Left(uint8_t PowD, uint8_t PowI){
 
    myMotorRightF->run(FORWARD);
    myMotorRightB->run(FORWARD);
-   
+
    myMotorLeftF->run(BACKWARD);
    myMotorLeftB->run(BACKWARD);
    while(digitalRead(lack) == 0){
@@ -263,13 +264,14 @@ void Movimiento::ErrorGradosVuelta(float fDeseado, float &grados){
 		iM = grados;
 		iM /= 180;
 		grados = -( 180 - (grados - 180 * iM) );
-	} 
+	}
 	else if (grados < -180){
 		iM = -grados;
 		iM /= 180;
 		grados = ( 180 - (grados - 180 * iM) );
 	}
 }
+
 void Movimiento::VueltaGyro(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado){
 	int iPowII, iPowDD;
 	float grados = real->sensarOrientacion(), kitActual;
@@ -394,7 +396,7 @@ void Movimiento::pasaRampa(char cDir){
 	unsigned long ahora = millis(), despues = millis();
 	int iPowII, iPowDD;
 	float fDeseado, grados;
-	bool vR = true; 
+	bool vR = true;
 	int iCase;
 	switch(cDir)
 	{
@@ -644,7 +646,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	int iPowDD, iPowII;
 	uint8_t switchCase;
 	uint8_t iCase;
-	AlineaPA(cDir); 
+	AlineaPA(cDir);
 	switch(cDir)
 	{
 		case 'n':
@@ -674,8 +676,10 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	  	digitalWrite(nanoOut, LOW);
 	    dejarKit(tMapa, iCol, iRow, iPiso, iCase, fDeseado);
 	}
+
+	float bumperMax = 0.0, bumperMin = 0.0;
 	while(eCount1 < encoder30 && real->sensarEnfrentePared() > 7){
-		potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
+			potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
 	    Front(iPowDD, iPowII);
 	    //Visual
 	    if(Serial2.available() && eCount1 < 900){
@@ -704,7 +708,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	    	if(countT > (encoder30/2)){
 	    		switch(cDir)
 				{
-					case 'n':	
+					case 'n':
 						iR--;
 						break;
 					case 'e':
@@ -734,16 +738,25 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			    eCount1 = countT;
 	    	}
 	    }
-	    switchCase = real->switches();
+			switchCase = real->switches();
 	    if(switchCase > 0 && real->sensarEnfrente()){
 	    	acomodaChoque(switchCase);
 	    }
+			switchCase = real->switchesIMU(fDeseado, grados);
+	    if(switchCase > 0 && real->sensarEnfrente()){
+	    	acomodaChoque(switchCase);
+	    }
+			//bumper
+			bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
+			bumperMin = real->sensarRampaFloat() < bumperMin ? real->sensarRampaFloat() : bumperMin;
+			if (bumperMax - bumperMin >= toleranciaBumper)
+				tMapa[iPiso][iRow][iCol].bumper(true);
     }
     VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
    	eCount1 = 0;
    	switch(cDir)
 	{
-		case 'n':	
+		case 'n':
 			iRow--;
 			break;
 		case 'e':
