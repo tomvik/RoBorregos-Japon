@@ -1098,7 +1098,7 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 }
 
 bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
-	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
+	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad mejor mejor mejor
 	tMapa[iPiso][iRow][iCol].existe(true);
 	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
 	tMapa[iPiso][iRow][iCol].visitado(true);
