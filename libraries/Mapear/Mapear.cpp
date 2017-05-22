@@ -492,7 +492,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	//////////////////////////////PRUEBAS DE LOGICA/////////////////////////////////////////
 	/*char inChar;
 	Serial.println("Sensa Enfrente");
-	delay(2000);
+	//delay(2000);
 	inChar = (char)Serial.read();
 	if(inChar == 'l'){
 		Serial.println("LIBRE ENFRENTE");
@@ -504,7 +504,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else//Pone pared
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 	Serial.println("Sensa Derecha");
-	delay(2000);
+	//delay(2000);
 	inChar = (char)Serial.read();
 	if(inChar == 'l'){
 		Serial.println("LIBRE DERECHA");
@@ -516,7 +516,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 	Serial.println("Sensa Izquierda");
-	delay(2000);
+	//delay(2000);
 	inChar = (char)Serial.read();
 	if(inChar == 'l'){
 		Serial.println("LIBRE IZQUIERDA");
@@ -527,6 +527,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	}
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);*/
+	/////////////////////////////NORMAL//////////////////////////////////
 	if(mapa->sensarEnfrente()){
 		if(!espacio(cDir, iCol, iRow, 'e')){
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');

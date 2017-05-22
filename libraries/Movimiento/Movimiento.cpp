@@ -906,83 +906,32 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
 	lcd.clear();
 	lcd.print("PATH");
-	for(int i=sMov.length()-1; i>=0; i--){
-		if(cDir == 'n')
-			switch(sMov[i]){
-				case 'd':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'e':
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'i':
-					izquierda(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'a':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-			}
-		else if(cDir == 'e')
-			switch(sMov[i]){
-				case 'd':
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'e':
-					izquierda(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'i':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'a':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-			}
-		else if(cDir == 's')
-			switch(sMov[i]){
-				case 'd':
-					izquierda(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'e':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'i':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'a':
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-			}
-		else if(cDir == 'w')
-			switch(sMov[i]){
-				case 'd':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'e':
-					derecha(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'i':
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-				case 'a':
-					izquierda(tMapa, cDir, iCol, iRow, iPiso);
-					avanzar(tMapa, cDir, iCol, iRow, iPiso);
-					break;
-			}
+	///////////////////////////TEST/////////////////////////////////
+	/*for(int i = sMov.length()-1; i >= 0; i--){
+		Serial.print(sMov[i]);
+	}
+	Serial.println(" ");
+	delay(5000);
+	cDir = (char)Serial.read();*/
+	for(int i = sMov.length()-1; i >= 0; i--){
+		switch(sMov[i]){
+			case 'r':
+				derecha(tMapa, cDir, iCol, iRow, iPiso);
+				avanzar(tMapa, cDir, iCol, iRow, iPiso);
+				break;
+			case 'u':
+				avanzar(tMapa, cDir, iCol, iRow, iPiso);
+				break;
+			case 'l':
+				izquierda(tMapa, cDir, iCol, iRow, iPiso);
+				avanzar(tMapa, cDir, iCol, iRow, iPiso);
+				break;
+			case 'd':
+				derecha(tMapa, cDir, iCol, iRow, iPiso);
+				derecha(tMapa, cDir, iCol, iRow, iPiso);
+				avanzar(tMapa, cDir, iCol, iRow, iPiso);
+				break;	
+		}
 	}
 	Stop();
 }
@@ -993,18 +942,30 @@ void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &
 bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
 	//Declara un mapa de int, debe ser del tamaño que el otro mapa. Será mejor declararlo desde un principio del código?
 	uint8_t iMapa[10][10];
+	char cMapa[10][10];
 	//Llena el mapa de 0
 	for (uint8_t i = 0; i < iTamano; i++)
-		for(uint8_t j = 0; j < iTamano; j++)
+		for(uint8_t j = 0; j < iTamano; j++){
 			iMapa[i][j] = 0;
+			cMapa[i][j] = 'n';
+		}
 	//Pone 1 en donde vamos a iniciar
 	iMapa[iRow][iCol] = 1;
+	cMapa[iRow][iCol] = 'i';
 	//LA FUNCION RECURSIVA
-	mapa.llenaMapa(iMapa, tMapa, cDir, iCol, iRow, iPiso);
-	//Imprime el mapa
+	mapa.llenaMapa(iMapa, cMapa, tMapa, cDir, iCol, iRow, iPiso);
+	///////////////Imprime el mapa//////////////////////////////
 	/*for (uint8_t i = 0; i < iTamano; ++i){
 		for(uint8_t j=0; j<iTamano; j++){
 			Serial.print(iMapa[i][j]); Serial.print(" ");
+		}
+		Serial.println();
+	}
+	Serial.println();
+	Serial.println();
+	for (uint8_t i = 0; i < iTamano; ++i){
+		for(uint8_t j=0; j<iTamano; j++){
+			Serial.print(cMapa[i][j]); Serial.print(" ");
 		}
 		Serial.println();
 	}
@@ -1013,7 +974,9 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
 	if(mapa.comparaMapa(iMapa, tMapa, cD, iCol, iRow, iNCol, iNRow, iPiso)){//Hace las instrucciones que recibe de la función en forma de string
-			hacerInstrucciones(tMapa, cDir, iCol, iRow, iPiso, mapa.getInstrucciones(iMapa, tMapa, iNCol, iNRow, iPiso));
+		hacerInstrucciones(tMapa, cDir, iCol, iRow, iPiso, mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, iPiso));
+		//hacerInstrucciones(cMapa, tMapa, cDir, iCol, iRow, iPiso);
+		iCol = iNCol, iRow = iNRow;
 		return true;
 	}
 	return false;
@@ -1098,61 +1061,76 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 }
 
 bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
-	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad mejor mejor mejor
+	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
 	tMapa[iPiso][iRow][iCol].existe(true);
 	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
 	tMapa[iPiso][iRow][iCol].visitado(true);
 	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
 	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
 	if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'r')){
+		Serial.println("DER");
 		switch(cDir){
 			case 'n':
 				iCol++;
+				cDir = 'e';
 				break;
 			case 'e':
 				iRow++;
+				cDir = 's';
 				break;
 			case 's':
 				iCol--;
+				cDir = 'w';
 				break;
 			case 'w':
 				iRow--;
+				cDir = 'n';
 				break;
 		}
 		return true;
 	}
 	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
 	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'u')){
+		Serial.println("ENF");
 		switch(cDir){
 			case 'n':
 				iRow--;
+				cDir = 'n';
 				break;
 			case 'e':
 				iCol++;
+				cDir = 'e';
 				break;
 			case 's':
 				iRow++;
+				cDir = 's';
 				break;
 			case 'w':
 				iCol--;
+				cDir = 'w';
 				break;
 		}
 		return true;
 	}
 	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
 	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'l')){
+		Serial.println("IZQ");
 		switch(cDir){
 			case 'n':
 				iCol--;
+				cDir = 'w';
 				break;
 			case 'e':
 				iRow--;
+				cDir = 'n';
 				break;
 			case 's':
 				iCol++;
+				cDir = 'e';
 				break;
 			case 'w':
 				iRow++;
+				cDir = 's';
 				break;
 		}
 		return true;
@@ -1160,18 +1138,23 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 	//Si no hay pared atrás y no está visitado, muevete hacia allá
 	//Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
 	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'd')){
+		Serial.println("ATR");
 		switch(cDir){
 			case 'n':
 				iRow++;
+				cDir = 's';
 				break;
 			case 'e':
 				iCol--;
+				cDir = 'w';
 				break;
 			case 's':
 				iRow--;
+				cDir = 'n';
 				break;
 			case 'w':
 				iCol++;
+				cDir = 'e';
 				break;
 		}
 		return true;

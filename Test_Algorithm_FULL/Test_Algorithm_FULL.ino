@@ -138,3 +138,7 @@ void loop() {
 void encoder1() {
   mover->encoder();
 }
+///////////nnllnllnnnnllnllnlnnllnnnnllnllnllnn
+///////////nnllnllnnnnllnllnlnnllnnnnllnllnlnnn
+////////Two not visited//////////
+///////////nnllnllnnnnllnllnllnllnlnnllnnnnllnllnllnllnllnnslnnnlnnslnnennl
