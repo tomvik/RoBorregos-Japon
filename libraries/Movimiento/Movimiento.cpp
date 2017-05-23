@@ -9,7 +9,7 @@ IDEAS:
 #include "Movimiento.h"
 #include <Servo.h>
 #include <Wire.h>
-#include <../Adafruit_MotorShield.h>
+#include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <LiquidCrystal_I2C.h>
 #define I2C_ADDR    0x3F
