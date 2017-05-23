@@ -1,5 +1,5 @@
 #define trig 22
-#define ech 23
+#define ech 24
 
 uint8_t calcDistanciaUS(uint8_t trigger, uint8_t echo){
    digitalWrite(trigger,LOW);
@@ -11,7 +11,6 @@ uint8_t calcDistanciaUS(uint8_t trigger, uint8_t echo){
 }
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
   
   pinMode(ech, INPUT);
@@ -19,6 +18,6 @@ void setup() {
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  delay(30);
   Serial.println(calcDistanciaUS(trig, ech));
 }
