@@ -81,7 +81,6 @@ uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo) {
 }
 
 uint8_t SensarRealidad::calcDistanciaSharp(uint8_t sensor) {
-   uint8_t lectura, cm;
    float volts = analogRead(sensor)*0.0048828125;  // value from sensor * (5/1024)
    uint8_t distance = 13*pow(volts, -1); // worked out from datasheet graph
    return distance;

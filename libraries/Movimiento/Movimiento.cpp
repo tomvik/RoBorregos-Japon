@@ -9,7 +9,7 @@ IDEAS:
 #include "Movimiento.h"
 #include <Servo.h>
 #include <Wire.h>
-#include <Adafruit_MotorShield.h>
+#include <../Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #include <LiquidCrystal_I2C.h>
 #define I2C_ADDR    0x3F
@@ -643,7 +643,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
     }
 	char cT = 'n';
 	probVisual = probVisual2 = 'n';
-	float fDeseado, grados = real->sensarOrientacion();
+	float fDeseado, grados = real->sensarOrientacion(), pasado;
 	int iPowDD, iPowII;
 	uint8_t switchCase;
 	uint8_t iCase;
@@ -740,21 +740,33 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	    	}
 	    }
 			switchCase = real->switches();
-	    if(switchCase > 0 && real->sensarEnfrente()){
+	    if(switchCase > 0 && real->sensarEnfrente() && millis()){
 	    	acomodaChoque(switchCase);
 	    }
-			switchCase = real->switchesIMU(fDeseado, grados);
-	    if(switchCase > 0 && real->sensarEnfrente()){
+			/*switchCase = real->switchesIMU(fDeseado, real->sensarOrientacion());
+	    if(switchCase > 0 && real->sensarEnfrente() && millis() >= pasado + 500){
+				lcd.print(fDeseado);
+				lcd.print(" ed ");
+				lcd.print(real->sensarOrientacion());
+				delay(2000);
 	    	acomodaChoque(switchCase);
-	    }
+				pasado = millis();
+	    }*/
 			//bumper
 			bumperMin = real->sensarRampaFloat() < bumperMin ? real->sensarRampaFloat() : bumperMin;
 			bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
 			if (bumperMax - bumperMin >= toleranciaBumper)
 				tMapa[iPiso][iRow][iCol].bumper(true);
     }
-		SensarRealidad::escribirEEPROM(dir++, (int) bumperMin);
-		SensarRealidad::escribirEEPROM(dir++, (int) bumperMax);
+		lcd.print(bumperMin);
+		lcd.print(" ");
+		lcd.print(bumperMax);
+		lcd.print(" ");
+		lcd.print(bumperMax - bumperMin);
+
+
+		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMin);
+		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMax);
 
     VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
    	eCount1 = 0;
