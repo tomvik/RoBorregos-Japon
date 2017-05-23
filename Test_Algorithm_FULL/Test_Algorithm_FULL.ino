@@ -88,10 +88,10 @@ void setup() {
   }
   //delay(3000);
   //MOSTRAR DÓNDE Y HACIA DÓNDE ESTÁ
-  Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
+/*  Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
   //GIRAR A LA DERECHA Y MAPEA
-  cDir = 'e';
+  mover->derecha(tMapa, cDir, iCol, iRow, iPiso);
   Serial.println("Gira derecha");
   delay(2000);
   Serial.println("ANTES DE MAPEAR");
@@ -101,19 +101,28 @@ void setup() {
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
   //GIRA A LA IZQUIERDA Y MAPEA
-  cDir = 'n';
+  mover->izquierda(tMapa, cDir, iCol, iRow, iPiso);
   Serial.println("Gira izquierda");
   delay(2000);
   Serial.println("ANTES DE MAPEAR");
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
+  mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);*/
+  if(sensar->sensarAtras()){
+    tMapa[iPiso][iRow+1][iCol].existe(true);
+  }
+  else{
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
+  }
+  mover->Stop();
   mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   //MOSTRAR DÓNDE Y HACIA DÓNDE ESTÁ
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
   Serial.println("A COMENZAR EL LOOP");
-  delay(5000);
-  while (mover->decidir_Prueba(tMapa, cDir, iCol, iRow, iPiso)) {
-    delay(1000);
+  mover->Stop();
+  //delay(5000);
+  while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso)) {
+    //delay(1000);
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
     Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
     muestra(tMapa, cMapa, iPiso);

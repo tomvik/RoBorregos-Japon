@@ -179,25 +179,25 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa
 	switch(cDir){
 		case 'n':
 			//Right
-			if(iCol < iTamano-1 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'r') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+2)){
+			if(iCol < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow][iCol+1] = ( tMapa[iPiso][iRow][iCol+1].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow][iCol+1] = 'r';
 				llenaMapa(iMapa, cMapa, tMapa, 'e', iCol+1, iRow, iPiso);
 			}
 			//UP
-			if(iRow > 0 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'u') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+1)){
+			if(iRow > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+1)){
 				iMapa[iRow-1][iCol] = ( tMapa[iPiso][iRow-1][iCol].bumper() ) ? iMapa[iRow][iCol]+1+iBumper : iMapa[iRow][iCol]+1;
 				cMapa[iRow-1][iCol] = 'u';
 				llenaMapa(iMapa, cMapa, tMapa, 'n', iCol, iRow-1, iPiso);
 			}
 			//LEFT
-			if(iCol > 0 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'l') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+2)){
+			if(iCol > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow][iCol-1] = ( tMapa[iPiso][iRow][iCol-1].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow][iCol-1] = 'l';
 				llenaMapa(iMapa, cMapa, tMapa, 'w', iCol-1, iRow, iPiso);
 			}
 			//DOWN
-			if(iRow < iTamano-1 && sensaExiste(tMapa, 'n', iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, 'n', iCol, iRow, iPiso, 'd') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+3)){
+			if(iRow < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+3)){
 				iMapa[iRow+1][iCol] = ( tMapa[iPiso][iRow+1][iCol].bumper() ) ? iMapa[iRow][iCol]+3+iBumper : iMapa[iRow][iCol]+3;
 				cMapa[iRow+1][iCol] = 'd';
 				llenaMapa(iMapa, cMapa, tMapa, 's', iCol, iRow+1, iPiso);
@@ -205,25 +205,25 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa
 			break;
 		case 'e':
 			//Right
-			if(iRow < iTamano-1 && sensaExiste(tMapa, 'e', iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, 'e', iCol, iRow, iPiso, 'r') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+2)){
+			if(iRow < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow+1][iCol] = ( tMapa[iPiso][iRow+1][iCol].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow+1][iCol] = 'r';
 				llenaMapa(iMapa, cMapa, tMapa, 's', iCol, iRow+1, iPiso);
 			}
 			//UP
-			if(iCol < iTamano-1 && sensaExiste(tMapa, 'e', iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, 'e', iCol, iRow, iPiso, 'u') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+1)){
+			if(iCol < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+1)){
 				iMapa[iRow][iCol+1] = ( tMapa[iPiso][iRow][iCol+1].bumper() ) ? iMapa[iRow][iCol]+1+iBumper : iMapa[iRow][iCol]+1;
 				cMapa[iRow][iCol+1] = 'u';
 				llenaMapa(iMapa, cMapa, tMapa, 'e', iCol+1, iRow, iPiso);
 			}
 			//LEFT
-			if(iRow > 0 && sensaExiste(tMapa, 'e', iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, 'e', iCol, iRow, iPiso, 'l') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+2)){
+			if(iRow > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow-1][iCol] = ( tMapa[iPiso][iRow-1][iCol].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow-1][iCol] = 'l';
 				llenaMapa(iMapa, cMapa, tMapa, 'n', iCol, iRow-1, iPiso);
 			}
 			//DOWN
-			if(iCol > 0 && sensaExiste(tMapa, 'e', iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, 'e', iCol, iRow, iPiso, 'd') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+3)){
+			if(iCol > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+3)){
 				iMapa[iRow][iCol-1] = ( tMapa[iPiso][iRow][iCol-1].bumper() ) ? iMapa[iRow][iCol]+3+iBumper : iMapa[iRow][iCol]+3;
 				cMapa[iRow][iCol-1] = 'd';
 				llenaMapa(iMapa, cMapa, tMapa, 'w', iCol-1, iRow, iPiso);
@@ -231,25 +231,25 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa
 			break;
 		case 's':
 			//Right
-			if(iCol > 0 && sensaExiste(tMapa, 's', iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, 's', iCol, iRow, iPiso, 'r') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+2)){
+			if(iCol > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow][iCol-1] = ( tMapa[iPiso][iRow][iCol-1].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow][iCol-1] = 'r';
 				llenaMapa(iMapa, cMapa, tMapa, 'w', iCol-1, iRow, iPiso);
 			}
 			//UP
-			if(iRow < iTamano-1 && sensaExiste(tMapa, 's', iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, 's', iCol, iRow, iPiso, 'u') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+1)){
+			if(iRow < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+1)){
 				iMapa[iRow+1][iCol] = ( tMapa[iPiso][iRow+1][iCol].bumper() ) ? iMapa[iRow][iCol]+1+iBumper : iMapa[iRow][iCol]+1;
 				cMapa[iRow+1][iCol] = 'u';
 				llenaMapa(iMapa, cMapa, tMapa, 's', iCol, iRow+1, iPiso);
 			}
 			//LEFT
-			if(iCol < iTamano-1 && sensaExiste(tMapa, 's', iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, 's', iCol, iRow, iPiso, 'l') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+2)){
+			if(iCol < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow][iCol+1] = ( tMapa[iPiso][iRow][iCol+1].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow][iCol+1] = 'l';
 				llenaMapa(iMapa, cMapa, tMapa, 'e', iCol+1, iRow, iPiso);
 			}
 			//DOWN
-			if(iRow > 0 && sensaExiste(tMapa, 's', iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, 's', iCol, iRow, iPiso, 'd') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+3)){
+			if(iRow > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+3)){
 				iMapa[iRow-1][iCol] = ( tMapa[iPiso][iRow-1][iCol].bumper() ) ? iMapa[iRow][iCol]+3+iBumper : iMapa[iRow][iCol]+3;
 				cMapa[iRow-1][iCol] = 'd';
 				llenaMapa(iMapa, cMapa, tMapa, 'n', iCol, iRow-1, iPiso);
@@ -257,25 +257,25 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa
 			break;
 		case 'w':
 			//Right
-			if(iRow > 0 && sensaExiste(tMapa, 'w', iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, 'w', iCol, iRow, iPiso, 'r') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+2)){
+			if(iRow > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'r') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && (iMapa[iRow-1][iCol] == 0 || iMapa[iRow-1][iCol] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow-1][iCol] = ( tMapa[iPiso][iRow-1][iCol].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow-1][iCol] = 'r';
 				llenaMapa(iMapa, cMapa, tMapa, 'n', iCol, iRow-1, iPiso);
 			}
 			//UP
-			if(iCol > 0 && sensaExiste(tMapa, 'w', iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, 'w', iCol, iRow, iPiso, 'u') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+1)){
+			if(iCol > 0 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'u') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && (iMapa[iRow][iCol-1] == 0 || iMapa[iRow][iCol-1] > iMapa[iRow][iCol]+1)){
 				iMapa[iRow][iCol-1] = ( tMapa[iPiso][iRow][iCol-1].bumper() ) ? iMapa[iRow][iCol]+1+iBumper : iMapa[iRow][iCol]+1;
 				cMapa[iRow][iCol-1] = 'u';
 				llenaMapa(iMapa, cMapa, tMapa, 'w', iCol-1, iRow, iPiso);
 			}
 			//LEFT
-			if(iRow < iTamano-1 && sensaExiste(tMapa, 'w', iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, 'w', iCol, iRow, iPiso, 'l') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+2)){
+			if(iRow < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'l') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && (iMapa[iRow+1][iCol] == 0 || iMapa[iRow+1][iCol] > iMapa[iRow][iCol]+2)){
 				iMapa[iRow+1][iCol] = ( tMapa[iPiso][iRow+1][iCol].bumper() ) ? iMapa[iRow][iCol]+2+iBumper : iMapa[iRow][iCol]+2;
 				cMapa[iRow+1][iCol] = 'l';
 				llenaMapa(iMapa, cMapa, tMapa, 's', iCol, iRow+1, iPiso);
 			}
 			//DOWN
-			if(iCol < iTamano-1 && sensaExiste(tMapa, 'w', iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, 'w', iCol, iRow, iPiso, 'd') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+3)){
+			if(iCol < iTamano-1 && sensaExiste(tMapa, cDir, iCol, iRow, iPiso, 'd') && sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && (iMapa[iRow][iCol+1] == 0 || iMapa[iRow][iCol+1] > iMapa[iRow][iCol]+3)){
 				iMapa[iRow][iCol+1] = ( tMapa[iPiso][iRow][iCol+1].bumper() ) ? iMapa[iRow][iCol]+3+iBumper : iMapa[iRow][iCol]+3;
 				cMapa[iRow][iCol+1] = 'd';
 				llenaMapa(iMapa, cMapa, tMapa, 'e', iCol+1, iRow, iPiso);
