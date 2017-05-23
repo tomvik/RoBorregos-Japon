@@ -935,7 +935,6 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
 	lcd.clear();
 	lcd.print("PATH");
-	delay(1000);
 	for(int i=sMov.length()-1; i>=0; i--){
 		if(cDir == 'n')
 			switch(sMov[i]){
@@ -1092,20 +1091,20 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 	tMapa[iPiso][iRow][iCol].visitado(true);
 	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
 	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
-	if(mapa.sensa_Pared(tMapa, cDir, 'r', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'r', iCol, iRow, iPiso)){
+	if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'r')){
 		derecha(tMapa, cDir, iCol, iRow, iPiso);
 		avanzar(tMapa, cDir, iCol, iRow, iPiso);
 		Stop();
 		return true;
 	}
 	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, cDir, 'u', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'u', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'u')){
 		avanzar(tMapa, cDir, iCol, iRow, iPiso);
 		Stop();
 		return true;
 	}
 	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, cDir, 'l', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'l', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'l')){
 		izquierda(tMapa, cDir, iCol, iRow, iPiso);
 		avanzar(tMapa, cDir, iCol, iRow, iPiso);
 		Stop();
@@ -1113,7 +1112,7 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 	}
 	//Si no hay pared atrás y no está visitado, muevete hacia allá
 	//Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
-	else if(mapa.sensa_Pared(tMapa, cDir, 'd', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'd', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'd')){
 		derecha(tMapa, cDir, iCol, iRow, iPiso);
 		derecha(tMapa, cDir, iCol, iRow, iPiso);
 		avanzar(tMapa, cDir, iCol, iRow, iPiso);
@@ -1134,7 +1133,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 	tMapa[iPiso][iRow][iCol].visitado(true);
 	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
 	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
-	if(mapa.sensa_Pared(tMapa, cDir, 'r', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'r', iCol, iRow, iPiso)){
+	if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'r') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'r')){
 		switch(cDir){
 			case 'n':
 				iCol++;
@@ -1152,7 +1151,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 		return true;
 	}
 	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, cDir, 'u', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'u', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'u') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'u')){
 		switch(cDir){
 			case 'n':
 				iRow--;
@@ -1170,7 +1169,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 		return true;
 	}
 	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, cDir, 'l', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'l', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'l') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'l')){
 		switch(cDir){
 			case 'n':
 				iCol--;
@@ -1189,7 +1188,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 	}
 	//Si no hay pared atrás y no está visitado, muevete hacia allá
 	//Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
-	else if(mapa.sensa_Pared(tMapa, cDir, 'd', iCol, iRow, iPiso) && mapa.sensaVisitado(tMapa, cDir, 'd', iCol, iRow, iPiso)){
+	else if(mapa.sensa_Pared(tMapa, cDir, iCol, iRow, iPiso, 'd') && mapa.sensaVisitado(tMapa, cDir, iCol, iRow, iPiso, 'd')){
 		switch(cDir){
 			case 'n':
 				iRow++;
