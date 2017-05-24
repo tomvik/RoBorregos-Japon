@@ -11,18 +11,7 @@ IDEAS:
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
-#include <LiquidCrystal_I2C.h>
-#define I2C_ADDR    0x3F
-#define BACKLIGHT_PIN     3
-#define En_pin  2
-#define Rw_pin  1
-#define Rs_pin  0
-#define D4_pin  4
-#define D5_pin  5
-#define D6_pin  6
-#define D7_pin  7
 #define toleranciaBumper 10
-LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 /*
 cDir (dirección)
 n = norte
@@ -88,8 +77,6 @@ Movimiento::Movimiento(){
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin();// Indicamos medidas de LCD
-  	lcd.backlight();
   	limit_Vision = 0;
 }
 //Puede que no sea necesaria
@@ -127,8 +114,6 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-	lcd.begin();// Indicamos medidas de LCD
-  	lcd.backlight();
   	limit_Vision = 0;
 }
 void Movimiento::Stop(){
@@ -204,8 +189,7 @@ void Movimiento::SepararPared(){
 	unsigned long ahora = millis(), despues = millis();
 	uint8_t iActual = real->sensarEnfrentePared();
 	uint8_t iPowDD;
-	lcd.clear();
-	lcd.print("SEPARA");
+	real->escribirLCD("SEPARA");
 	while (iActual != 6 && ahora+2000 > despues) {
 	  iActual = real->sensarEnfrentePared();
 	  if(iActual < 6){//Muy cerca
@@ -281,8 +265,7 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow,
 	ErrorGradosVuelta(fDeseado, grados);
 	while (grados < -6 || grados > 6) {
 	  	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-	  		lcd.clear();
-			lcd.print("Victima");
+			real->escribirLCD("Victima");
 	  		digitalWrite(nanoOut, HIGH);
 	  		delay(200);
 	  		if(digitalRead(victimaIn) == 1){
@@ -392,8 +375,7 @@ void Movimiento::pasaRampa(char cDir){
 	while(Serial2.available()){
 		Serial2.read();
 	}
-	lcd.clear();
-	lcd.print("Rampa");
+	real->escribirLCD("Rampa");
 	unsigned long ahora = millis(), despues = millis();
 	int iPowII, iPowDD;
 	float fDeseado, grados;
@@ -455,8 +437,7 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, u
     VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
 }
 void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado){
-	lcd.clear();
-	lcd.print("IDENTIFICA");
+	real->escribirLCD("IDENTIFICA");
 	float fDeseadoT;
 	switch(iCase){
 		case 2:
@@ -493,8 +474,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 	}
 	Stop();
 	char letra = 'p';
-	lcd.clear();
-	lcd.print("CUAL?");
+	real->escribirLCD("CUAL?");
 	Serial2.println("Identifica");
 	ahora = millis(), despues = millis();
 	while(letra != 'H' && letra != 'S' && letra != 'U' && letra != 'L' && letra != 'N' && (ahora+1800) > despues){
@@ -510,8 +490,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 		}
 		despues = millis();
 	}
-	lcd.clear();
-	lcd.print("YA ESTA");
+	real->escribirLCD("YA ESTA");
 	int i = 2;
 	SepararPared();
 	Stop();
@@ -520,9 +499,8 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 		//2 kits
 		case 'H':
 			probVisual = probVisual2 = 'n';
-			lcd.clear();
-			//lcd.print("HHHHHHHHHHHHHHHH");
-			lcd.print("Visual");
+			//real->escribirLCD("HHHHHHHHHHHHHHHH");
+			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
 			tMapa[iPiso][iRow][iCol].victima(true);
 			i = 0;
@@ -531,31 +509,27 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 		case 'S':
 			i = 1;
 			probVisual = probVisual2 = 'n';
-			lcd.clear();
-			//lcd.print("SSSSSSSSSSSSSSSS");
-			lcd.print("Visual");
+			//real->escribirLCD("SSSSSSSSSSSSSSSS");
+			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
 			tMapa[iPiso][iRow][iCol].victima(true);
 			break;
 		//0 kits
 		case 'U':
 			probVisual = probVisual2 = 'n';
-			lcd.clear();
-			//lcd.print("UUUUUUUUUUUUUUUU");
-			lcd.print("Visual");
+			//real->escribirLCD("UUUUUUUUUUUUUUUU");
+			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
 			tMapa[iPiso][iRow][iCol].victima(true);
 			i = 1;
 			break;
 		case 'N':
-			lcd.clear();
-			//lcd.print("NNNNNNNNNNNNNNNN");
-			lcd.print("Visual");
+			//real->escribirLCD("NNNNNNNNNNNNNNNN");
+			real->escribirLCD("Visual");
 			break;
 		case 'L':
-			lcd.clear();
-			//lcd.print("LLLLLLLLLLLLLLLL");
-			lcd.print("Visual");
+			//real->escribirLCD("LLLLLLLLLLLLLLLL");
+			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
 			tMapa[iPiso][iRow][iCol].victima(true);
 			i = 1;
@@ -572,14 +546,13 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 	    	delay(15);
 	  	}
 	}
-	lcd.clear();
+	
 	digitalWrite(lVictima, LOW);
 	VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
 }
 
 void Movimiento::retroceder(Tile tMapa[3][10][10],  char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
-	lcd.clear();
-	lcd.print("NEGRO");
+	real->escribirLCD("NEGRO");
 	float fDeseado;
   	float grados = real->sensarOrientacion();
 	int iPowDD, iPowII;
@@ -609,11 +582,10 @@ void Movimiento::retroceder(Tile tMapa[3][10][10],  char cDir, uint8_t &iCol, ui
 	}
 	eCount1 = 0;
 	probVisual = 'n';
-	lcd.clear();
+	
 }
 void Movimiento::acomodaChoque(uint8_t switchCase){
-	lcd.clear();
-	lcd.print("AUCH");
+	real->escribirLCD("AUCH");
 	int encoderTemp = eCount1;
 	Stop();
 	switch(switchCase){
@@ -632,11 +604,10 @@ void Movimiento::acomodaChoque(uint8_t switchCase){
 	}
 	encoderTemp -= eCount1;
 	eCount1 = encoderTemp;
-	lcd.clear();
+	
 }
 void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){						//Modificarse en realidad
-	lcd.clear();
-	lcd.print("FRONT");
+	real->escribirLCD("FRONT");
 	Serial2.println("Avanza");
 	while(Serial2.available()){
     	Serial2.read();
@@ -664,8 +635,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			break;
 	}
 	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-		lcd.clear();
-		lcd.print("Victima");
+		real->escribirLCD("Victima");
 		digitalWrite(nanoOut, HIGH);
 	  	delay(200);
 	  	if(digitalRead(victimaIn) == 1){
@@ -724,8 +694,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 				}
 	    	}
 	    	if(!tMapa[iPiso][iR][iC].victima()){
-	    		lcd.clear();
-				lcd.print("Victima");
+				real->escribirLCD("Victima");
 	    		Stop();
 	    		digitalWrite(nanoOut, HIGH);
 			  	delay(200);
@@ -745,9 +714,9 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	    }
 			/*switchCase = real->switchesIMU(fDeseado, real->sensarOrientacion());
 	    if(switchCase > 0 && real->sensarEnfrente() && millis() >= pasado + 500){
-				lcd.print(fDeseado);
-				lcd.print(" ed ");
-				lcd.print(real->sensarOrientacion());
+				real->escribirLCD(fDeseado);
+				real->escribirLCD(" ed ");
+				real->escribirLCD(real->sensarOrientacion());
 				delay(2000);
 	    	acomodaChoque(switchCase);
 				pasado = millis();
@@ -758,13 +727,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			if (bumperMax - bumperMin >= toleranciaBumper)
 				tMapa[iPiso][iRow][iCol].bumper(true);
     }
-		lcd.print(bumperMin);
-		lcd.print(" ");
-		lcd.print(bumperMax);
-		lcd.print(" ");
-		lcd.print(bumperMax - bumperMin);
-
-
+		real->escribirLCD(String(bumperMin)+" "+String(bumperMax)+" "+String(bumperMax - bumperMin));
 		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMin);
 		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMax);
 
@@ -788,13 +751,12 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
    	if(real->prueba() == 0 &&(real->sensarRampa() < iRampa && real->sensarRampa() > -iRampa)){
 	    int iActual = real->sensarEnfrentePared();
 	    if(iActual < 20){
-   			lcd.clear();
-   			lcd.print("Separar");
+   			real->escribirLCD("Separar");
    			Back(80, 80);
    			delay(100);
    			SepararPared();
-   			lcd.clear();
-   			lcd.print("Acabe");
+   			
+   			real->escribirLCD("Acabe");
 			if(!tMapa[iPiso][iRow][iCol].victima() && limit_Vision < 4){
 				Stop();
 				Serial2.println("Enfrente");
@@ -820,8 +782,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 					identificaVictima(tMapa, iCol, iRow, iPiso, 0, fDeseado);
 				}
 				else{
-					lcd.clear();
-					lcd.print("NO HAY");
+					real->escribirLCD("NO HAY");
 				}
 			}
 			Serial2.println("Avanza");
@@ -842,8 +803,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){														//Modificarse en realidad
 	probVisual = probVisual2 = 'n';
 	Serial2.println("Avanza");
-	lcd.clear();
-	lcd.print("DER");
+	real->escribirLCD("DER");
 	digitalWrite(nanoOut, LOW);
 	alinear = !(real->sensarIzquierda());
 	float fDeseado, fActual = real->sensarOrientacion();
@@ -868,8 +828,7 @@ void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 			break;
 	}
 	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-		lcd.clear();
-		lcd.print("Victima");
+		real->escribirLCD("Victima");
 		digitalWrite(nanoOut, HIGH);
 	  	delay(200);
 	  	if(digitalRead(victimaIn) == 1){
@@ -888,8 +847,7 @@ void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
 	probVisual = probVisual2 = 'n';
 	Serial2.println("Avanza");
-	lcd.clear();
-	lcd.print("IZQ");
+	real->escribirLCD("IZQ");
 	digitalWrite(nanoOut, LOW);
 	alinear = !(real->sensarDerecha());
     float fDeseado, fActual = real->sensarOrientacion();
@@ -915,8 +873,7 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 	}
 	//Por si se nos pasó y lo busque antes de empezar a dar la vuelta
 	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-		lcd.clear();
-		lcd.print("Victima");
+		real->escribirLCD("Victima");
 		digitalWrite(nanoOut, HIGH);
 	  	delay(200);
 	  	if(digitalRead(victimaIn) == 1){
@@ -933,8 +890,7 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 }
 //Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
-	lcd.clear();
-	lcd.print("PATH");
+	real->escribirLCD("PATH");
 	///////////////////////////TEST/////////////////////////////////
 	/*for(int i = sMov.length()-1; i >= 0; i--){
 		Serial.print(sMov[i]);

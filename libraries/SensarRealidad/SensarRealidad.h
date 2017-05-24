@@ -30,6 +30,7 @@ public:
 	//uint8_t sensarTemperatura();
 	uint8_t switches();
 	uint8_t switchesIMU(float fDeseado, float grados);
+	void escribirLCD(String sE);
 
 	static void escribirEEPROM(int dir, int value);
 	static int leerEEPROM(int dir);

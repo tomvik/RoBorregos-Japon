@@ -5,13 +5,25 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include <EEPROM.h>
+//LED
+#include <LiquidCrystal_I2C.h>
+#define I2C_ADDR    0x3F
+#define BACKLIGHT_PIN     3
+#define En_pin  2
+#define Rw_pin  1
+#define Rs_pin  0
+#define D4_pin  4
+#define D5_pin  5
+#define D6_pin  6
+#define D7_pin  7
+LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 /*
 #define sIFtrig 30
 #define sIFecho 31
 #define sIBtrig 32
 #define sIBecho 33
 */
-//Izquierda adelanto
+//Izquierda adelante
 #define TIzqAde 51
 #define EIzqAde 49
 //Adelante izquierda
@@ -62,6 +74,9 @@ SensarRealidad::SensarRealidad() {
   	pinMode(switchIzquierda, INPUT);
     pinMode(switchDerecha, INPUT);
     pinMode(colorIn, INPUT);
+
+    lcd.begin();// Indicamos medidas de LCD
+  	lcd.backlight();
 }
 byte SensarRealidad::getIMUCalStatus()
 {
@@ -234,4 +249,9 @@ int leerEEPROM(int dir) {
 	byte highByte = EEPROM.read(dir + 1);
 
 	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
+}
+
+void SensarRealidad::escribirLCD(String sE){
+	lcd.clear();
+	lcd.print(sE);
 }
