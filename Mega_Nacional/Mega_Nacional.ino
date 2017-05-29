@@ -13,6 +13,7 @@ Movimiento *mover;
 void setup() {
   SensarRealidad sensarr;
   SensarRealidad *sensar = &sensarr;
+  sensar->escribirLCD("El", "Mariachi");
   Movimiento robot(150, 150, 10, sensar);
   mover = &robot;
   Serial.begin(9600);
@@ -40,9 +41,11 @@ void setup() {
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso)) {
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   }
+  sensar->escribirLCD("Let's go home");
   while(true){
     mover->goToVisitado(tMapa, cDir, 'i', iCol, iRow, iPiso);
     mover->Stop();
+    sensar->escribirLCD("Inicio");
   }
 }
 

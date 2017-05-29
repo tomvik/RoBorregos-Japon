@@ -251,7 +251,9 @@ int leerEEPROM(int dir) {
 	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
 }
 
-void SensarRealidad::escribirLCD(String sE){
+void SensarRealidad::escribirLCD(String sE1, String sE2){
 	lcd.clear();
-	lcd.print(sE);
+	lcd.print(sE1);
+	lcd.setCursor(0, 1);
+    lcd.print(sE2);
 }
