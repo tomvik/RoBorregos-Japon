@@ -12,7 +12,7 @@ class Movimiento{
 public:
 	//////////////////////////////////Constructores////////////////////////////////////
 	Movimiento();
-	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
+	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *r);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
 	void StopInterrupt();
