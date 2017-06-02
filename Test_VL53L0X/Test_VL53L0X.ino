@@ -4,15 +4,18 @@
 //We create the sensors objects
 VL53L0X sensor;
 VL53L0X sensor2;
+VL53L0X sensor3;
 
 void setup()
 {
   //These pins are going connected to the XSHUT of each sensor
   pinMode(4, OUTPUT);
   pinMode(5, OUTPUT);
+  pinMode(6, OUTPUT);
   //First we put them in '0', so they are disabled
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
+  digitalWrite(6, LOW);
   //We wait a little bit until they are actually disabled and start the I2C communication
   delay(500);
   Wire.begin();
@@ -45,6 +48,11 @@ void setup()
   sensor2.setAddress((uint8_t)25);
   Serial.println("04");
 
+  
+  pinMode(6, INPUT);
+  delay(150);
+  sensor3.init(true);
+  
   Serial.println("");
   Serial.println("addresses set");
   Serial.println("");
@@ -93,6 +101,7 @@ void loop()
   //CHECK DISTANCES
   long DISTANCE_FWD = (sensor.readRangeSingleMillimeters());
   long DISTANCE_FLT = (sensor2.readRangeSingleMillimeters());
+  long DISTANCE_FZT = (sensor3.readRangeSingleMillimeters());
 
   //FWD OR SENSOR
   if (sensor.timeoutOccurred())
