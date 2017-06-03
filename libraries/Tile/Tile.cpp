@@ -3,8 +3,7 @@
 
 //Constructor
 Tile::Tile(){
-    dato1= 0;
-    dato2= 0;
+    dato1 = dato2 = dato3 = 0;
 }
 
 
@@ -80,6 +79,38 @@ uint8_t Tile::piso(){
     return 0;
 }
 
+bool Tile::calorArriba(){
+    return dato3&'\x80';
+}
+
+bool Tile::calorDerecha(){
+    return dato3&'\x40';
+}
+
+bool Tile::calorAbajo(){
+    return dato3&'\x20';
+}
+
+bool Tile::calorIzquierda(){
+    return dato3&'\x10';
+}
+
+bool Tile::visualArriba(){
+    return dato3&'\x8';
+}
+
+bool Tile::visualDerecha(){
+    return dato3&'\x4';
+}
+
+bool Tile::visualAbajo(){
+    return dato3&'\x2';
+}
+
+bool Tile::visualIzquierda(){
+    return dato3&'\x1';
+}
+
 
 //Setters
 /* 
@@ -88,37 +119,30 @@ Con | or ponemos el 1 que manden, &and ponemos 0
 */
 void Tile::victima(const bool &b){
     dato1 |= (b<<3);
-    //dato1= b? dato1|'\x8':dato1&'\xf7'; //0b00001000:0b11110111;  si solo se quisiera poner 1 mejor dato1|= (b<<3);
 }
 
 void Tile::cuadroNegro(const bool &b){
     dato1 |= (b<<2);
-    //dato1= b? dato1|'\x4':dato1&'\xfb'; //0b00000100:0b11111011
 }
 
 void Tile::checkpoint(const bool &b){
     dato1 |= (b<<1);
-    //dato1= b? dato1|'\x2':dato1&'\xfd';//0b00000010:0b11111101
 }
 
 void Tile::visitado(const bool &b){
     dato1 |= b;
-    //dato1= b? dato1|'\x1':dato1&'\xfe';//0b00000001:0b1111 1110
 }
 
 void Tile::inicio(const bool &b){
     dato2 |= (b<<2);
-    //dato2= b? dato2|'\x4':dato2&'\xfb';//0b00000100:0b1111 1011
 }   
 
 void Tile::rampaArriba(const bool &b){
     dato2 |= (b<<1);
-    //dato2= b? dato2|'\x2':dato2&'\xfd';//0b00000010:0b1111 1101
 }    
 
 void Tile::bumper(const bool &b){
     dato2 |= b;
-    //dato2= b? dato2|'\x1':dato2&'\xfe';//0b00000001:0b1111 1110
 }
 
 void Tile::rampaAbajo(const bool &b){
@@ -149,37 +173,60 @@ void Tile::piso(const int &i){
 
 void Tile::arriba(const bool &b, Tile *laDeArriba){
     dato1 |= (b<<7);
-    //dato1= b? dato1|'\x80':dato1&'\x7f';//0b10000000 
     if(laDeArriba) 
         laDeArriba->dato1 |= (b<<5);
-        //laDeArriba->dato1= b? (laDeArriba->dato1)|'\x20':(laDeArriba->dato1)&'\xdf';//Modificamos pared de abajo del de arriba
 }
 
 void Tile::derecha(const bool &b, Tile *laDeDerecha){
     dato1 |= (b<<6);
-    //dato1= b? dato1|'\x40':dato1&'\xbf';//0b01000000 
     if(laDeDerecha)
         laDeDerecha->dato1 |= (b<<4);
-        //laDeDerecha->dato1= b? (laDeDerecha->dato1)|'\x10':(laDeDerecha->dato1)&'\xef';//Modificamos pared de izq del de derecha
 }
 
 void Tile::abajo(const bool &b, Tile *laDeAabajo){
     dato1 |= (b<<5);
-    //dato1= b? dato1|'\x20':dato1&'\xdf';//0b00100000 
     if(laDeAabajo) 
         laDeAabajo->dato1 |= (b<<7);
-        //laDeAabajo->dato1= b? (laDeAabajo->dato1)|'\x80':(laDeAabajo->dato1)&'\x7f';//Modificamos pared de arriba del de abajo
 }
 
 void Tile::izquierda(const bool &b, Tile *laDeIzquierda){
     dato1 |= (b<<4);
-    //dato1= b? dato1|'\x10':dato1&'\xef';//0b00010000 
     if(laDeIzquierda)
         laDeIzquierda->dato1 |= (b<<6);
-        //laDeIzquierda->dato1= b? (laDeIzquierda->dato1)|'\x40':(laDeIzquierda->dato1)&'\xbf';//Modificamos pared de der del de izquierda
 }
 
 void Tile::existe(const bool &b){
     dato2 |= (b<<3);
-    //dato2= b? dato1|'\x8':dato1&'\xf7'; //0b00001000:0b11110111;  si solo se quisiera poner 1 mejor dato1|= (b<<3);
+}
+
+void Tile::calorArriba(const bool &b){
+    dato3 |= (b<<7);
+}
+
+void Tile::calorDerecha(const bool &b){
+    dato3 |= (b<<6);
+}
+
+void Tile::calorAbajo(const bool &b){
+    dato3 |= (b<<5);
+}
+
+void Tile::calorIzquierda(const bool &b){
+    dato3 |= (b<<4);
+}
+
+void Tile::visualArriba(const bool &b){
+    dato3 |= (b<<3);
+}
+
+void Tile::visualDerecha(const bool &b){
+    dato3 |= (b<<2);
+}
+
+void Tile::visualAbajo(const bool &b){
+    dato3 |= (b<<1);
+}
+
+void Tile::visualIzquierda(const bool &b){
+    dato3 |= b;
 }

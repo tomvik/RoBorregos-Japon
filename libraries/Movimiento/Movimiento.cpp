@@ -58,15 +58,13 @@ Movimiento::Movimiento(){
     myMotorRightB->setSpeed(iPowD);
     myMotorRightB->run(FORWARD);
     myMotorRightB->run(RELEASE);
-	iPowI = 150;
-	iPowD = 150;
+	iPowI = iPowD = 150;
     iTamano = 10;
-    fRef = 0;
+    fRef = eCount1 = limit_Vision = 0;
     kp = 0.2;
     kpA = 4;
     iRampa = 17;
     probVisual = 'n';
-    eCount1 = 0;
     pos = 90;
     myservo.attach(9);
     myservo.write(pos);
@@ -77,7 +75,6 @@ Movimiento::Movimiento(){
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-  	limit_Vision = 0;
 }
 //Puede que no sea necesaria
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *r){
@@ -97,13 +94,12 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
 	iPowI = iPowi;
 	iPowD = iPowd;
 	iTamano = iT;
-	fRef = 0;
+	fRef = eCount1 = limit_Vision = 0;
 	real = r;
 	kp = 0.2;
 	kpA = 4;
 	iRampa = 17;
 	probVisual = 'n';
-    eCount1 = 0;
     pos = 90;
     myservo.attach(pin_Servo);
     myservo.write(pos);
@@ -114,7 +110,6 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
     pinMode(victimaIn, INPUT);
 	pinMode(nanoOut, OUTPUT);
 	digitalWrite(nanoOut, LOW);
-  	limit_Vision = 0;
 }
 void Movimiento::Stop(){
    myMotorRightB->run(RELEASE);
@@ -257,27 +252,19 @@ void Movimiento::ErrorGradosVuelta(float fDeseado, float &grados){
 	}
 }
 
-void Movimiento::VueltaGyro(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado){
+void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado, bool kit){
 	int iPowII, iPowDD;
 	float grados = real->sensarOrientacion(), kitActual;
 	uint8_t iCase;
-	unsigned long ahora = millis(), despues;
+	unsigned long ahora = millis();
 	ErrorGradosVuelta(fDeseado, grados);
 	while (grados < -6 || grados > 6) {
-	  	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
+	  	if(kit && digitalRead(victimaIn) == 1 && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, true, true, grados)){//Si no hay victima en el cuadro
+			Stop();
+			mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, true, true, grados);
 			real->escribirLCD("Victima");
-	  		digitalWrite(nanoOut, HIGH);
-	  		delay(200);
-	  		if(digitalRead(victimaIn) == 1){
-	  			iCase = 1;
-	  		}
-	  		else{
-	  			iCase = 2;
-	  		}
-	  		digitalWrite(nanoOut, LOW);
 	    	kitActual = real->sensarOrientacion();
-	    	Stop();
-		    dejarKit(tMapa, iCol, iRow, iPiso, iCase, kitActual);
+		    dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase, kitActual);
 	  	}
 	  grados = real->sensarOrientacion();
 	  ErrorGradosVuelta(fDeseado, grados);
@@ -293,11 +280,10 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow,
 	    iPowII = iPowDD;
 	    Left(iPowDD, iPowII);
 	  }
-	  despues = millis();
-	  if(despues-ahora > 4000){
+	  if(millis()-ahora > 4000){
 	  	Front(150, 150);
 	  	delay(200);
-	  	ahora += 4200;
+	  	ahora = millis();
 	  }
 
 	}
@@ -409,22 +395,546 @@ void Movimiento::pasaRampa(char cDir){
    		SepararPared();
    	}
 }
-void Movimiento::dejarKit(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado){
+bool Movimiento::victimaPosible(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, bool bCalor, float fGrados){
+	real->escribirLCD("Posible?", "O no posible?");
+	bool normal = true;
+	if(!tMapa[iPiso][iRow][iCol].victima()){//Si no hay ninguna, directamente manda true
+		return true;
+	}
+	Stop();
+	if(bCalor){
+		digitalWrite(nanoOut, HIGH);
+		delay(200);
+		if(digitalRead(victimaIn) == 1){
+			iCase = 1; //der
+		}
+		else{
+			iCase = 2; //izq
+		}
+		digitalWrite(nanoOut, LOW);
+	}
+	if(iCase == 0){
+		switch(cDir){
+			case 'n':
+				if(!tMapa[iPiso][iRow][iCol].visualArriba())
+					return true;
+				break;
+			case 'e':
+				if(!tMapa[iPiso][iRow][iCol].visualDerecha())
+					return true;
+				break;
+			case 's':
+				if(!tMapa[iPiso][iRow][iCol].visualAbajo())
+					return true;
+				break;
+			case 'w':
+				if(!tMapa[iPiso][iRow][iCol].visualIzquierda())
+					return true;
+				break;
+		}
+	}
+	else if(bVuelta){//Si está dando vuelta
+		if(fGrados > 45 || fGrados < -45){//Sigue viendo la pared a que si estuviera normal
+			normal = true;
+		}
+		else if(fGrados < 0){//A la derecha ahora está la pared que estaba enfrente
+			normal = false;
+			if(bCalor){//Si es victima de calor
+				switch(cDir){
+					case 'n':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+							return true;
+						}
+						break;
+					case 'e':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							return true;
+						}
+						break;
+					case 's':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+							return true;
+						}
+						break;
+					case 'w':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+							return true;
+						}
+						break;
+				}
+			}
+			else{//Si es victima visual
+				switch(cDir){
+					case 'n':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+							return true;
+						}
+						break;
+					case 'e':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							return true;
+						}
+						break;
+					case 's':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+							return true;
+						}
+						break;
+					case 'w':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+							return true;
+						}
+						break;
+				}
+			}
+		}
+		else{//A la derecha ahora está la pared que estaba atras
+			normal = false;
+			if(bCalor){//Si es victima de calor
+				switch(cDir){
+					case 'n':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+							return true;
+						}
+						break;
+					case 'e':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							return true;
+						}
+						break;
+					case 's':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+							return true;
+						}
+						break;
+					case 'w':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+							return true;
+						}
+						break;
+				}
+			}
+			else{//Si es victima visual
+				switch(cDir){
+					case 'n':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+							return true;
+						}
+						break;
+					case 'e':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							return true;
+						}
+						break;
+					case 's':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+							return true;
+						}
+						break;
+					case 'w':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							return true;
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+							return true;
+						}
+						break;
+				}
+			}
+		}
+	}
+	if(normal){//Si está andando normal
+		if(bCalor){//Si es victima de calor
+			switch(cDir){
+				case 'n':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+						return true;
+					}
+					break;
+				case 'e':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+						return true;
+					}
+					break;
+				case 's':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+						return true;
+					}
+					break;
+				case 'w':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+						return true;
+					}
+					break;
+			}
+		}
+		else{//Si es victima visual
+			switch(cDir){
+				case 'n':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+						return true;
+					}
+					break;
+				case 'e':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+						return true;
+					}
+					break;
+				case 's':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+						return true;
+					}
+					break;
+				case 'w':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+						return true;
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+						return true;
+					}
+					break;
+			}
+		}
+	}
+	return false;
+}
+void Movimiento::mapearVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, bool bCalor, float fGrados){
+	bool normal = true;
+	tMapa[iPiso][iRow][iCol].victima(true);
+	if(iCase == 0){
+		normal = false;
+		switch(cDir){
+			case 'n':
+				if(!tMapa[iPiso][iRow][iCol].visualArriba())
+					tMapa[iPiso][iRow][iCol].visualArriba(true);
+				break;
+			case 'e':
+				if(!tMapa[iPiso][iRow][iCol].visualDerecha())
+					tMapa[iPiso][iRow][iCol].visualDerecha(true);
+				break;
+			case 's':
+				if(!tMapa[iPiso][iRow][iCol].visualAbajo())
+					tMapa[iPiso][iRow][iCol].visualAbajo(true);
+				break;
+			case 'w':
+				if(!tMapa[iPiso][iRow][iCol].visualIzquierda())
+					tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+				break;
+		}
+	}
+	else if(bVuelta){//Si está dando vuelta
+		if(fGrados > 45 || fGrados < -45){//Sigue viendo la pared a que si estuviera normal
+			normal = true;
+		}
+		else if(fGrados < 0){//A la derecha ahora está la pared que estaba enfrente
+			normal = false;
+			if(bCalor){//Si es victima de calor
+				switch(cDir){
+					case 'n':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+							tMapa[iPiso][iRow][iCol].calorArriba(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+							tMapa[iPiso][iRow][iCol].calorAbajo(true);
+						}
+						break;
+					case 'e':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+							tMapa[iPiso][iRow][iCol].calorDerecha(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+						}
+						break;
+					case 's':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+							tMapa[iPiso][iRow][iCol].calorAbajo(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+							tMapa[iPiso][iRow][iCol].calorArriba(true);
+						}
+						break;
+					case 'w':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+							tMapa[iPiso][iRow][iCol].calorDerecha(true);
+						}
+						break;
+				}
+			}
+			else{//Si es victima visual
+				switch(cDir){
+					case 'n':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+							tMapa[iPiso][iRow][iCol].visualArriba(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+							tMapa[iPiso][iRow][iCol].visualAbajo(true);
+						}
+						break;
+					case 'e':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+							tMapa[iPiso][iRow][iCol].visualDerecha(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+						}
+						break;
+					case 's':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+							tMapa[iPiso][iRow][iCol].visualAbajo(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+							tMapa[iPiso][iRow][iCol].visualArriba(true);
+						}
+						break;
+					case 'w':
+						if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+							tMapa[iPiso][iRow][iCol].visualDerecha(true);
+						}
+						break;
+				}
+			}
+		}
+		else{//A la derecha ahora está la pared que estaba atras
+			normal = false;
+			if(bCalor){//Si es victima de calor
+				switch(cDir){
+					case 'n':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+							tMapa[iPiso][iRow][iCol].calorArriba(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+							tMapa[iPiso][iRow][iCol].calorAbajo(true);
+						}
+						break;
+					case 'e':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+							tMapa[iPiso][iRow][iCol].calorDerecha(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+						}
+						break;
+					case 's':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+							tMapa[iPiso][iRow][iCol].calorAbajo(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+							tMapa[iPiso][iRow][iCol].calorArriba(true);
+						}
+						break;
+					case 'w':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+							tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+							tMapa[iPiso][iRow][iCol].calorDerecha(true);
+						}
+						break;
+				}
+			}
+			else{//Si es victima visual
+				switch(cDir){
+					case 'n':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+							tMapa[iPiso][iRow][iCol].visualArriba(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+							tMapa[iPiso][iRow][iCol].visualAbajo(true);
+						}
+						break;
+					case 'e':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+							tMapa[iPiso][iRow][iCol].visualDerecha(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+						}
+						break;
+					case 's':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+							tMapa[iPiso][iRow][iCol].visualAbajo(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+							tMapa[iPiso][iRow][iCol].visualArriba(true);
+						}
+						break;
+					case 'w':
+						if(iCase == 2 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+							tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+						}
+						else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+							tMapa[iPiso][iRow][iCol].visualDerecha(true);
+						}
+						break;
+				}
+			}
+		}
+	}
+	if(normal){//Si está andando normal
+		if(bCalor){//Si es victima de calor
+			switch(cDir){
+				case 'n':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorDerecha()){
+						tMapa[iPiso][iRow][iCol].calorDerecha(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorIzquierda()){
+						tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+					}
+					break;
+				case 'e':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorAbajo()){
+						tMapa[iPiso][iRow][iCol].calorAbajo(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorArriba()){
+						tMapa[iPiso][iRow][iCol].calorArriba(true);
+					}
+					break;
+				case 's':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorIzquierda()){
+						tMapa[iPiso][iRow][iCol].calorIzquierda(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorDerecha()){
+						tMapa[iPiso][iRow][iCol].calorDerecha(true);
+					}
+					break;
+				case 'w':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].calorArriba()){
+						tMapa[iPiso][iRow][iCol].calorArriba(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].calorAbajo()){
+						tMapa[iPiso][iRow][iCol].calorAbajo(true);
+					}
+					break;
+			}
+		}
+		else{//Si es victima visual
+			switch(cDir){
+				case 'n':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualDerecha()){
+						tMapa[iPiso][iRow][iCol].visualDerecha(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualIzquierda()){
+						tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+					}
+					break;
+				case 'e':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualAbajo()){
+						tMapa[iPiso][iRow][iCol].visualAbajo(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualArriba()){
+						tMapa[iPiso][iRow][iCol].visualArriba(true);
+					}
+					break;
+				case 's':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualIzquierda()){
+						tMapa[iPiso][iRow][iCol].visualIzquierda(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualDerecha()){
+						tMapa[iPiso][iRow][iCol].visualDerecha(true);
+					}
+					break;
+				case 'w':
+					if(iCase == 1 && !tMapa[iPiso][iRow][iCol].visualArriba()){
+						tMapa[iPiso][iRow][iCol].visualArriba(true);
+					}
+					else if(!tMapa[iPiso][iRow][iCol].visualAbajo()){
+						tMapa[iPiso][iRow][iCol].visualAbajo(true);
+					}
+					break;
+			}
+		}
+	}
+}
+void Movimiento::dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado){
+	real->escribirLCD("DEJAR KIT");
 	digitalWrite(lVictima, HIGH);
 	int fDeseadoT;
-	tMapa[iPiso][iRow][iCol].victima(true);
 	if(real->sensarRampa() < 18 && real->sensarRampa() > -20){
 		switch(iCase){
-			case 2:
+			case 2: //izq
 				fDeseadoT = fDeseado < 90 ? fDeseado + 270 : fDeseado - 90;
 				break;
-			case 1:
+			case 1: //der
 				fDeseadoT = fDeseado > 270 ? fDeseado - 270 : fDeseado + 90;
 				break;
 		}
-		VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseadoT);
+		VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseadoT, false);
 	}
 	Stop();
+	real->escribirLCD("");
     for (pos = 90; pos <= 165; pos += 1) { // goes from 180 degrees to 0 degrees
     	myservo.write(pos);              // tell servo to go to position in variable 'pos'
     	delay(15);                       // waits 15ms for the servo to reach the position
@@ -434,9 +944,9 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, u
     	delay(15);                       // waits 15ms for the servo to reach the position
   	}
   	digitalWrite(lVictima, LOW);
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, false);
 }
-void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado){
+void Movimiento::identificaVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado){
 	real->escribirLCD("IDENTIFICA");
 	float fDeseadoT;
 	switch(iCase){
@@ -449,9 +959,9 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 		case 0:
 			fDeseadoT = fDeseado;
 	}
-	VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseadoT);
+	VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseadoT, false);
 	Stop();
-	VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseadoT);
+	VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseadoT, false);
 	Stop();
 	unsigned long ahora = millis(), despues = millis();
 	uint8_t iActual = real->sensarEnfrentePared();
@@ -502,7 +1012,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 			//real->escribirLCD("HHHHHHHHHHHHHHHH");
 			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
-			tMapa[iPiso][iRow][iCol].victima(true);
+			mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, false, 0);
 			i = 0;
 			break;
 		//1 kit
@@ -512,7 +1022,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 			//real->escribirLCD("SSSSSSSSSSSSSSSS");
 			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
-			tMapa[iPiso][iRow][iCol].victima(true);
+			mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, false, 0);
 			break;
 		//0 kits
 		case 'U':
@@ -520,18 +1030,18 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 			//real->escribirLCD("UUUUUUUUUUUUUUUU");
 			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
-			tMapa[iPiso][iRow][iCol].victima(true);
+			mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, false, 0);
 			i = 1;
 			break;
 		case 'N':
 			//real->escribirLCD("NNNNNNNNNNNNNNNN");
-			real->escribirLCD("Visual");
+			real->escribirLCD("Falso");
 			break;
 		case 'L':
 			//real->escribirLCD("LLLLLLLLLLLLLLLL");
 			real->escribirLCD("Visual");
 			digitalWrite(lVictima, HIGH);
-			tMapa[iPiso][iRow][iCol].victima(true);
+			mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, false, 0);
 			i = 1;
 			break;
 
@@ -548,7 +1058,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t
 	}
 	
 	digitalWrite(lVictima, LOW);
-	VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
+	VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, false);
 }
 
 void Movimiento::retroceder(Tile tMapa[3][10][10],  char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
@@ -634,23 +1144,17 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			fDeseado = fRef < 90 ? fRef+270 : fRef-90;
 			break;
 	}
-	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
+	if(digitalRead(victimaIn) == 1 && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fDeseado)){
+		Stop();
 		real->escribirLCD("Victima");
-		digitalWrite(nanoOut, HIGH);
-	  	delay(200);
-	  	if(digitalRead(victimaIn) == 1){
-	  		iCase = 1;
-	  	}
-	  	else{
-	  		iCase = 2;
-	  	}
-	  	digitalWrite(nanoOut, LOW);
-	    dejarKit(tMapa, iCol, iRow, iPiso, iCase, fDeseado);
+		mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fDeseado);
+	    dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase, fDeseado);
+	    eCount1 = 0;
 	}
 
 	float bumperMax = 0.0, bumperMin = 0.0;
 	while(eCount1 < encoder30 && real->sensarEnfrentePared() > 7){
-			potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
+		potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
 	    Front(iPowDD, iPowII);
 	    //Visual
 	    if(Serial2.available() && eCount1 < 900){
@@ -693,19 +1197,12 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 						break;
 				}
 	    	}
-	    	if(!tMapa[iPiso][iR][iC].victima()){
+	    	if(victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fDeseado)){
 				real->escribirLCD("Victima");
 	    		Stop();
-	    		digitalWrite(nanoOut, HIGH);
-			  	delay(200);
-			  	if(digitalRead(victimaIn) == 1){
-			  		iCase = 1;
-			  	}
-			  	else{
-			  		iCase = 2;
-			  	}
-		    	dejarKit(tMapa, iC, iR, iPiso, iCase, fDeseado);
-			    eCount1 = countT;
+	    		mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fDeseado);
+		    	dejarKit(tMapa, cDir, iC, iR, iPiso, iCase, fDeseado);
+		    	eCount1 = countT;
 	    	}
 	    }
 			switchCase = real->switches();
@@ -731,7 +1228,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMin);
 		//SensarRealidad::escribirEEPROM(dir++, (int) bumperMax);
 
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, true);
    	eCount1 = 0;
    	switch(cDir)
 	{
@@ -748,7 +1245,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			iCol--;
 			break;
 	}
-   	if(real->prueba() == 0 &&(real->sensarRampa() < iRampa && real->sensarRampa() > -iRampa)){
+   	if(real->color() == 0 &&(real->sensarRampa() < iRampa && real->sensarRampa() > -iRampa)){
 	    int iActual = real->sensarEnfrentePared();
 	    if(iActual < 20){
    			real->escribirLCD("Separar");
@@ -757,7 +1254,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
    			SepararPared();
    			
    			real->escribirLCD("Acabe");
-			if(!tMapa[iPiso][iRow][iCol].victima() && limit_Vision < 4){
+			if(victimaPosible(tMapa, cDir, iCol, iRow, iPiso, 0, false, false, 0) && limit_Vision < 4){//Aquí es verificar si enfrente hay una victima visual
 				Stop();
 				Serial2.println("Enfrente");
 				char letra = 'p';
@@ -775,11 +1272,11 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 					}
 					despues = millis();
 				}
-				if((ahora+1800) < despues){
+				if((ahora+1750) <= millis()){
 					limit_Vision++;
 				}
 				if(letra == 'E'){
-					identificaVictima(tMapa, iCol, iRow, iPiso, 0, fDeseado);
+					identificaVictima(tMapa, cDir, iCol, iRow, iPiso, 0, fDeseado);
 				}
 				else{
 					real->escribirLCD("NO HAY");
@@ -788,14 +1285,12 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			Serial2.println("Avanza");
 			SepararPared();
    		}
-   		if(!tMapa[iPiso][iRow][iCol].victima()){
-   			if( (probVisual == 'i' || probVisual2 == 'i') && !real->sensarIzquierda()){
-	    		identificaVictima(tMapa, iCol, iRow, iPiso, 2, fDeseado);
-	    	}
-	    	else if( (probVisual == 'd' || probVisual2 == 'd')  && !real->sensarDerecha()){
-	    		identificaVictima(tMapa, iCol, iRow, iPiso, 1, fDeseado);
-	    	}
-   		}
+   		if( (probVisual == 'i' || probVisual2 == 'i') && !real->sensarIzquierda() && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, 2, false, false, 0)){
+	    	identificaVictima(tMapa, cDir, iCol, iRow, iPiso, 2, fDeseado);
+	    }
+	    else if( (probVisual == 'd' || probVisual2 == 'd')  && !real->sensarDerecha() && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, 2, false, false, 0)){
+	    	identificaVictima(tMapa, cDir, iCol, iRow, iPiso, 1, fDeseado);
+	    }
    	}
    	probVisual = probVisual2 = 'n';
 }
@@ -808,6 +1303,12 @@ void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 	alinear = !(real->sensarIzquierda());
 	float fDeseado, fActual = real->sensarOrientacion();
 	uint8_t iCase;
+	if(digitalRead(victimaIn) == 1 && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fActual)){
+		Stop();
+		mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fActual);
+		real->escribirLCD("Victima");
+	    dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase, fActual);
+	}
     switch(cDir)
 	{
 		case 'n':
@@ -827,21 +1328,8 @@ void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 			cDir = 'n';
 			break;
 	}
-	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-		real->escribirLCD("Victima");
-		digitalWrite(nanoOut, HIGH);
-	  	delay(200);
-	  	if(digitalRead(victimaIn) == 1){
-	  		iCase = 1;
-	  	}
-	  	else{
-	  		iCase = 2;
-	  	}
-	  	digitalWrite(nanoOut, LOW);
-	    dejarKit(tMapa, iCol, iRow, iPiso, iCase, fActual);
-	}
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, true);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, true);
 }
 //Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
@@ -852,6 +1340,14 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 	alinear = !(real->sensarDerecha());
     float fDeseado, fActual = real->sensarOrientacion();
     uint8_t iCase;
+    //Por si se nos pasó y lo busque antes de empezar a dar la vuelta
+	if(digitalRead(victimaIn) == 1 && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fActual)){
+		Stop();
+		Stop();
+		mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, fActual);
+		real->escribirLCD("Victima");
+	    dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase, fActual);
+	}
     switch(cDir)
 	{
 		case 'n':
@@ -871,22 +1367,8 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 			cDir = 's';
 			break;
 	}
-	//Por si se nos pasó y lo busque antes de empezar a dar la vuelta
-	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-		real->escribirLCD("Victima");
-		digitalWrite(nanoOut, HIGH);
-	  	delay(200);
-	  	if(digitalRead(victimaIn) == 1){
-	  		iCase = 1;
-	  	}
-	  	else{
-	  		iCase = 2;
-	  	}
-	  	digitalWrite(nanoOut, LOW);
-	    dejarKit(tMapa, iCol, iRow, iPiso, iCase, fActual);
-	}
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
-    VueltaGyro(tMapa, iCol, iRow, iPiso, fDeseado);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, true);
+    VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, fDeseado, true);
 }
 //Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
@@ -992,17 +1474,11 @@ bool Movimiento::decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 			break;
 	}
 	uint8_t iCase;
-   	if(digitalRead(victimaIn) == 1 && !tMapa[iPiso][iRow][iCol].victima()){
-   		digitalWrite(nanoOut, HIGH);
-	  	delay(200);
-	  	if(digitalRead(victimaIn) == 1){
-	  		iCase = 1;
-	  	}
-	  	else{
-	  		iCase = 2;
-	  	}
-	  	digitalWrite(nanoOut, LOW);
-	    dejarKit(tMapa, iCol, iRow, iPiso, iCase, fDeseado);
+   	if(digitalRead(victimaIn) == 1 && victimaPosible(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, 0)){
+   		Stop();
+   		mapearVictima(tMapa, cDir, iCol, iRow, iPiso, iCase, false, true, 0);
+   		real->escribirLCD("Victima");
+	    dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase, fDeseado);
 	}
 	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
 	tMapa[iPiso][iRow][iCol].existe(true);
