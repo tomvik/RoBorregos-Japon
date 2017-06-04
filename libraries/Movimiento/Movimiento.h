@@ -48,6 +48,7 @@ public:
 private:
 	uint8_t iPowI, iPowD, iTamano, limit_Vision, kParedAlinear, iRampa;
 	int encoder30, eCount1, pos;
+	unsigned long tVictima;
 	float kpA, kp, fRef;
 	SensarMapa mapa;
 	SensarRealidad *real;
