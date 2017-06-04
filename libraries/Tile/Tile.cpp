@@ -79,38 +79,34 @@ uint8_t Tile::piso(){
     return 0;
 }
 
-bool Tile::calorArriba(){
+bool Tile::victimaArriba(){
     return dato3&'\x80';
 }
 
-bool Tile::calorDerecha(){
+bool Tile::victimaDerecha(){
     return dato3&'\x40';
 }
 
-bool Tile::calorAbajo(){
+bool Tile::victimaAbajo(){
     return dato3&'\x20';
 }
 
-bool Tile::calorIzquierda(){
+bool Tile::victimaIzquierda(){
     return dato3&'\x10';
 }
 
-bool Tile::visualArriba(){
+/*bool Tile::visualArriba(){
     return dato3&'\x8';
 }
-
 bool Tile::visualDerecha(){
     return dato3&'\x4';
 }
-
 bool Tile::visualAbajo(){
     return dato3&'\x2';
 }
-
 bool Tile::visualIzquierda(){
     return dato3&'\x1';
-}
-
+}*/
 
 //Setters
 /* 
@@ -199,23 +195,23 @@ void Tile::existe(const bool &b){
     dato2 |= (b<<3);
 }
 
-void Tile::calorArriba(const bool &b){
+void Tile::victimaArriba(const bool &b){
     dato3 |= (b<<7);
 }
 
-void Tile::calorDerecha(const bool &b){
+void Tile::victimaDerecha(const bool &b){
     dato3 |= (b<<6);
 }
 
-void Tile::calorAbajo(const bool &b){
+void Tile::victimaAbajo(const bool &b){
     dato3 |= (b<<5);
 }
 
-void Tile::calorIzquierda(const bool &b){
+void Tile::victimaIzquierda(const bool &b){
     dato3 |= (b<<4);
 }
 
-void Tile::visualArriba(const bool &b){
+/*void Tile::visualArriba(const bool &b){
     dato3 |= (b<<3);
 }
 
@@ -229,4 +225,4 @@ void Tile::visualAbajo(const bool &b){
 
 void Tile::visualIzquierda(const bool &b){
     dato3 |= b;
-}
+}*/

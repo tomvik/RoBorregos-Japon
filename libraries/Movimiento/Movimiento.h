@@ -25,8 +25,8 @@ public:
 	void SepararPared();
 	void AlineaPA(char cDir);
 	void potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII);
-	bool victimaPosible(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, bool bCalor, float fGrados);
-	void mapearVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, bool bCalor, float fGrados);
+	bool victimaPosible(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t &iCase, bool bVuelta, bool bCalor, float fGrados);
+	void mapearVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, float fGrados);
 	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
 	void identificaVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
 	void ErrorGradosVuelta(float fDeseado, float &grados);
