@@ -18,16 +18,14 @@ uint8_t utemp;
 char cSend;
 //1 es negro
 //0 es blanco
-uint8_t sensorR() {
+bool sensorR() {
   int frequency = 0;
   digitalWrite(S2, HIGH);
   digitalWrite(S3, HIGH);
-  for (uint8_t i = 0; i < 5; i++)
+  for (uint8_t i = 0; i < 3; i++)
     frequency += pulseIn(sensorOut, LOW);
-  frequency /= 5;
-  if (frequency >= 120)
-    return 1;
-  return 0;
+  frequency /= 3;
+  return (frequency >= 120);
 }
 //0 = nada
 //1 = derecha
@@ -43,7 +41,7 @@ uint8_t sensarTemperatura() {
 }
 
 void setup() {
-  Serial.begin(9600);
+  Serial.begin(115200);
   mlxRight.begin();
   mlxLeft.begin();
   pinMode(S0, OUTPUT);
@@ -54,15 +52,9 @@ void setup() {
 
   digitalWrite(S0, HIGH);
   digitalWrite(S1, LOW);
-  //for(int i= 0; i< 100; i++){
-  // digitalWrite(victimaOut, LOW);
-  // digitalWrite(colorOut, LOW); 
-  //}
 }
-//Color
-//0 si es blanco, 1 si es negro
-//Temp
-//0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
+//Color ////// 0 si es blanco, 1 si es negro
+//Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
 //0, 0, 0, 0,  color, izq, victima, der
 void loop() {
   cSend = 0;
@@ -78,45 +70,6 @@ void loop() {
       cSend|=0b00000111;
       break;
   }
-  if(sensorR() == 1){
-    cSend|=0b00001000;
-  }
+  cSend |= (sensorR() == 1) ? 0b00001000 : 0b00000000;
   Serial.print(cSend);
-  /*
-  if (sensarTemperatura() > 0) {
-    digitalWrite(victimaOut, HIGH);
-    tiempoAntes = millis();
-    while (digitalRead(megaIn) == 0 && tiempoAntes + 200 > tiempoYa) {
-      tiempoYa = millis();
-    }
-    if (tiempoAntes + 200 > tiempoYa) {
-      //Serial.println("ENTRO");
-      digitalWrite(victimaOut, LOW);
-      digitalWrite(colorOut, LOW);
-      if (sensarTemperatura() == 1) {
-        digitalWrite(victimaOut, HIGH);
-      }
-      else {
-        digitalWrite(colorOut, HIGH);
-      }
-      delay(100);
-      digitalWrite(victimaOut, LOW);
-      digitalWrite(colorOut, LOW);
-    }
-    digitalWrite(victimaOut, LOW);
-    digitalWrite(colorOut, LOW);
-  }
-  else{
-    digitalWrite(victimaOut, LOW);
-  }
-  if (sensorR() == 1) {
-    digitalWrite(colorOut, HIGH);
-  }
-  else {
-    digitalWrite(colorOut, LOW);
-  }*/
 }
-//MEGA
-//Color 34
-//Temp 33
-//Escribir 32

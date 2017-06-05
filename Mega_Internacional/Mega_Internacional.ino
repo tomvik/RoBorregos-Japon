@@ -17,7 +17,7 @@ void setup() {
   Movimiento robot(150, 150, 10, sensar);
   mover = &robot;
   Serial.begin(9600);
-  Serial2.begin(9600);
+  Serial2.begin(115200);
   while(Serial2.available()){
       Serial2.read();
   }
@@ -29,7 +29,6 @@ void setup() {
   tMapa[iPiso][iCol][iRow].inicio(true);
   tMapa[iPiso][iCol][iRow].visitado(true);
   tMapa[iPiso][iCol][iRow].existe(true);
-  //Serial2.println("Avanza");
   if(sensar->sensarAtras()){
     tMapa[iPiso][iRow+1][iCol].existe(true);
   }

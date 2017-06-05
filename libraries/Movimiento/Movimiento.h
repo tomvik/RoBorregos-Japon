@@ -53,7 +53,7 @@ private:
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
-	char probVisual, probVisual2;
+	char probVisual, probVisual2, cVictima;
 };
 
 #endif
