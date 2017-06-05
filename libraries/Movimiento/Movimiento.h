@@ -25,10 +25,12 @@ public:
 	void SepararPared();
 	void AlineaPA(char cDir);
 	void potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII);
-	void dejarKit(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
-	void identificaVictima(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
+	bool victimaPosible(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t &iCase, bool bVuelta, bool bCalor, float fGrados);
+	void mapearVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, float fGrados);
+	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
+	void identificaVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
 	void ErrorGradosVuelta(float fDeseado, float &grados);
-	void VueltaGyro(Tile tMapa[3][10][10], uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado);
+	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado, bool kit);
 	void pasaRampa(char cDir);
 	void retroceder(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
@@ -46,11 +48,12 @@ public:
 private:
 	uint8_t iPowI, iPowD, iTamano, limit_Vision, kParedAlinear, iRampa;
 	int encoder30, eCount1, pos;
+	unsigned long tVictima;
 	float kpA, kp, fRef;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
-	char probVisual, probVisual2;
+	char probVisual, probVisual2, cVictima;
 };
 
 #endif

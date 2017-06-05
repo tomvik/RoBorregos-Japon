@@ -219,21 +219,12 @@ uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados) {
 		return 0;
 	return fDeseado > grados ? 1 : 2;
 }
-/*// 0 = nada, 1 = der, 2 = left, 3 = ambos
-uint8_t SensarRealidad::sensarTemperatura() {
-	//Serial.print("Derecho: "); Serial.print(mlxRight.readObjectTempC()); Serial.print(" Izquierda "); Serial.println(mlxLeft.readObjectTempC());
-	if(mlxRight.readObjectTempC() > temp+5) {
-		return 1;
-	}
-	if(mlxLeft.readObjectTempC() > temp+4)
-		return 2;
-	return 0;
-	//Serial.println(mlxRight.readObjectTempC());
-	//Serial.println(mlxLeft.readObjectTempC());
-}*/
-
-uint8_t SensarRealidad::prueba() {
-	return(digitalRead(colorIn));
+//1 = negro 0 = blanco
+bool SensarRealidad::color() {
+	char cc = 0;
+	while(Serial2.available())
+		cc = (char)Serial2.read();
+	return(cc&0b00001000);
 }
 
 void escribirEEPROM(int dir, int val) {

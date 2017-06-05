@@ -1,8 +1,8 @@
 /* FreqCount Library, for measuring frequencies
  * http://www.pjrc.com/teensy/td_libs_FreqCount.html
- * Copyright (c) 2011 PJRC.COM, LLC - Paul Stoffregen <paul@pjrc.com>
+ * Copyright (c) 2014 PJRC.COM, LLC - Paul Stoffregen <paul@pjrc.com>
  *
- * Version 1.0
+ * Version 1.1
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -24,7 +24,7 @@
  */
 
 #include "FreqCount.h"
-#include "util/timers.h"
+#include "util/FreqCountTimers.h"
 
 static uint16_t count_msw;
 static uint32_t count_prev;
@@ -36,7 +36,7 @@ static uint16_t gate_index;
 
 void FreqCountClass::begin(uint16_t msec)
 {
-	if (msec < 10) return;
+	if (msec < 1) return;
 	gate_index = 0;
 	count_msw = 0;
 	count_prev = 0;
