@@ -5,13 +5,25 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include <EEPROM.h>
+//LED
+#include <LiquidCrystal_I2C.h>
+#define I2C_ADDR    0x3F
+#define BACKLIGHT_PIN     3
+#define En_pin  2
+#define Rw_pin  1
+#define Rs_pin  0
+#define D4_pin  4
+#define D5_pin  5
+#define D6_pin  6
+#define D7_pin  7
+LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 /*
 #define sIFtrig 30
 #define sIFecho 31
 #define sIBtrig 32
 #define sIBecho 33
 */
-//Izquierda adelanto
+//Izquierda adelante
 #define TIzqAde 51
 #define EIzqAde 49
 //Adelante izquierda
@@ -36,18 +48,6 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 
 #define toleranciaSwitchIMU 5
 
-//LED
-#include <LiquidCrystal_I2C.h>
-#define I2C_ADDR    0x3F
-#define BACKLIGHT_PIN     3
-#define En_pin  2
-#define Rw_pin  1
-#define Rs_pin  0
-#define D4_pin  4
-#define D5_pin  5
-#define D6_pin  6
-#define D7_pin  7
-LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
 SensarRealidad::SensarRealidad() {
 	if(!bno.begin())
@@ -72,20 +72,14 @@ SensarRealidad::SensarRealidad() {
 	pinMode(TAtr, OUTPUT);
 	pinMode(EAtr, INPUT);
 
-  	pinMode(switchIzquierda, INPUT);
-    pinMode(switchDerecha, INPUT);
-    pinMode(colorIn, INPUT);
+	pinMode(switchIzquierda, INPUT);
+	pinMode(switchDerecha, INPUT);
+	pinMode(colorIn, INPUT);
 
-		lcd.begin();// Indicamos medidas de LCD
-		lcd.backlight();
+	lcd.begin();// Indicamos medidas de LCD
+	lcd.backlight();
 }
 
-void SensarRealidad::escribirLCD(String sE1, String sE2){
-	lcd.clear();
-	lcd.print(sE1);
-	lcd.setCursor(0, 1);
-  lcd.print(sE2);
-}
 
 byte SensarRealidad::getIMUCalStatus()
 {
@@ -222,9 +216,12 @@ uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados) {
 		return 0;
 	return fDeseado > grados ? 1 : 2;
 }
-
-uint8_t SensarRealidad::color() {
-	return(digitalRead(colorIn));
+//1 = negro 0 = blanco
+bool SensarRealidad::color() {
+	char cc = 0;
+	while(Serial2.available())
+		cc = (char)Serial2.read();
+	return(cc&0b00001000);
 }
 
 void escribirEEPROM(int dir, int val) {
@@ -240,4 +237,11 @@ int leerEEPROM(int dir) {
 	byte highByte = EEPROM.read(dir + 1);
 
 	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
+}
+
+void SensarRealidad::escribirLCD(String sE1, String sE2){
+	lcd.clear();
+	lcd.print(sE1);
+	lcd.setCursor(0, 1);
+    lcd.print(sE2);
 }

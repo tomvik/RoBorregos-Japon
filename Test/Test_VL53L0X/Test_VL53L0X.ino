@@ -5,7 +5,10 @@
 VL53L0X sensor;
 VL53L0X sensor2;
 VL53L0X sensor3;
+<<<<<<< HEAD
+=======
 VL53L0X sensor4;
+>>>>>>> 10b34a572189e29bc83a9b6bf38603e851dd0cf1
 
 void setup()
 {
@@ -13,12 +16,18 @@ void setup()
   pinMode(4, OUTPUT);
   pinMode(5, OUTPUT);
   pinMode(6, OUTPUT);
+<<<<<<< HEAD
+=======
   pinMode(7, OUTPUT);
+>>>>>>> 10b34a572189e29bc83a9b6bf38603e851dd0cf1
   //First we put them in '0', so they are disabled
   digitalWrite(4, LOW);
   digitalWrite(5, LOW);
   digitalWrite(6, LOW);
+<<<<<<< HEAD
+=======
   digitalWrite(7, LOW);
+>>>>>>> 10b34a572189e29bc83a9b6bf38603e851dd0cf1
   //We wait a little bit until they are actually disabled and start the I2C communication
   delay(1000);
   Wire.begin();
@@ -50,6 +59,13 @@ void setup()
   delay(200);
   sensor2.setAddress((uint8_t)23);
   Serial.println("04");
+<<<<<<< HEAD
+
+  
+  pinMode(6, INPUT);
+  delay(150);
+  sensor3.init(true);
+=======
   delay(200);
   //SENSOR 3//////////////
   pinMode(6, INPUT);
@@ -69,6 +85,7 @@ void setup()
   sensor4.setAddress((uint8_t)25);
   Serial.println("08");
   delay(200);
+>>>>>>> 10b34a572189e29bc83a9b6bf38603e851dd0cf1
   
   Serial.println("");
   Serial.println("addresses set");
@@ -120,8 +137,12 @@ void loop()
   //CHECK DISTANCES
   long DISTANCE_FWD = (sensor.readRangeSingleMillimeters());
   long DISTANCE_FLT = (sensor2.readRangeSingleMillimeters());
+<<<<<<< HEAD
+  long DISTANCE_FZT = (sensor3.readRangeSingleMillimeters());
+=======
   long DISTANCE_FKT = (sensor3.readRangeSingleMillimeters());
   long DISTANCE_FZT = (sensor4.readRangeSingleMillimeters());
+>>>>>>> 10b34a572189e29bc83a9b6bf38603e851dd0cf1
 
   //FWD OR SENSOR
   if (sensor.timeoutOccurred())
