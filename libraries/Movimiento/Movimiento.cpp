@@ -368,31 +368,34 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
     iPowDD/=2;
     iPowII/=2;
 }*/
-void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII){
-	int pDeseado = 5, pDeseadoI = 5, pow_DD_Now, pow_II_Now, iError, pNow = real->sensarDerechaPared(), pNowI = real->sensarIzquierdaPared();
+
+void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &potenciaDer, int &potenciaIzq) {
+	int pDeseadoIzq = 5, pDeseadoDer = 5, potenciaIzq_Act, potenciaDer_Act, iError;
+	int pNow = real->sensarDerechaPared(), pNowI = real->sensarIzquierdaPared();
 	if(pNow < 15){
-		iError = pDeseado-pNow;
-		pow_DD_Now = iPowD + iError * kParedAlinear;
-		pow_II_Now = iPowI - iError * kParedAlinear;
+		iError = pDeseadoDer-pNow;
+		potenciaDer_Act = iPowD + iError * kParedAlinear;
+		potenciaIzq_Act = iPowI - iError * kParedAlinear;
 	}
 	if(pNowI < 15){
-		iError = pDeseadoI-pNowI;
-		pow_DD_Now = iPowD - iError * kParedAlinear;
-		pow_II_Now = iPowI + iError * kParedAlinear;
+		iError = pDeseadoIzq-pNowI;
+		potenciaDer_Act = iPowD - iError * kParedAlinear;
+		potenciaIzq_Act = iPowI + iError * kParedAlinear;
 	}
 	else{
 		//TODO:
-		pow_DD_Now = pow_II_Now = 200;
+		potenciaDer_Act = potenciaIzq_Act = 200;
 	}
 	grados = real->sensarOrientacion();
 	ErrorGradosVuelta(fDeseado, grados);
-	iPowDD = iPowD + (grados * kpA) + pow_DD_Now;
-	iPowII = iPowI - (grados * kpA) + pow_II_Now;
-    iPowDD/=2;
-    iPowII/=2;
-    iPowII = iPowII > 200 ? 200 : (iPowII < 0 ? 0 : iPowII);
-    iPowDD = iPowDD > 200 ? 200 : (iPowDD < 0 ? 0 : iPowDD);
+	potenciaDer = iPowD + (grados * kpA) + potenciaDer_Act;
+	potenciaIzq = iPowI - (grados * kpA) + potenciaIzqActual;
+    potenciaDer/=2;
+    potenciaIzq/=2;
+    potenciaIzq = potenciaIzq > 200 ? 200 : (potenciaIzq < 0 ? 0 : potenciaIzq);
+    potenciaDer = potenciaDer > 200 ? 200 : (potenciaDer < 0 ? 0 : potenciaDer);
 }
+
 void Movimiento::pasaRampa(char cDir){
 	Serial2.println("PARA");
 	while(Serial2.available()){
@@ -1089,7 +1092,7 @@ void Movimiento::identificaVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &i
 			break;
 
 	}
-	for(i; i < 2; i++){
+	for(i=0; i < 2; i++){
 		for (pos = 90; pos <= 165; pos += 1) {
 	    	myservo.write(pos);
 	    	delay(15);
@@ -1338,6 +1341,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	    }
    	}
    	probVisual = probVisual2 = 'n';
+}
 }
 //Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){														//Modificarse en realidad

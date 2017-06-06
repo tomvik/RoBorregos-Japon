@@ -36,6 +36,19 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 
 #define toleranciaSwitchIMU 5
 
+//LED
+#include <LiquidCrystal_I2C.h>
+#define I2C_ADDR    0x3F
+#define BACKLIGHT_PIN     3
+#define En_pin  2
+#define Rw_pin  1
+#define Rs_pin  0
+#define D4_pin  4
+#define D5_pin  5
+#define D6_pin  6
+#define D7_pin  7
+LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
+
 SensarRealidad::SensarRealidad() {
 	if(!bno.begin())
  	{
@@ -62,7 +75,18 @@ SensarRealidad::SensarRealidad() {
   	pinMode(switchIzquierda, INPUT);
     pinMode(switchDerecha, INPUT);
     pinMode(colorIn, INPUT);
+
+		lcd.begin();// Indicamos medidas de LCD
+		lcd.backlight();
 }
+
+void SensarRealidad::escribirLCD(String sE1, String sE2){
+	lcd.clear();
+	lcd.print(sE1);
+	lcd.setCursor(0, 1);
+  lcd.print(sE2);
+}
+
 byte SensarRealidad::getIMUCalStatus()
 {
   uint8_t system, gyro, accel, mag;
@@ -72,16 +96,15 @@ byte SensarRealidad::getIMUCalStatus()
 }
 
 uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo) {
-   digitalWrite(trigger,LOW);
+   digitalWrite(trigger, LOW);
    delayMicroseconds(5);
-   digitalWrite(trigger,HIGH);
+   digitalWrite(trigger, HIGH);
    delayMicroseconds(10);
-   long tiempo = pulseIn(echo,HIGH);
+   long tiempo = pulseIn(echo, HIGH);
    return uint8_t(0.017 * tiempo);
 }
 
 uint8_t SensarRealidad::calcDistanciaSharp(uint8_t sensor) {
-   uint8_t lectura, cm;
    float volts = analogRead(sensor)*0.0048828125;  // value from sensor * (5/1024)
    uint8_t distance = 13*pow(volts, -1); // worked out from datasheet graph
    return distance;
@@ -139,13 +162,10 @@ bool SensarRealidad::sensarDerecha() {
 	return iD > 14;
 }
 uint8_t SensarRealidad::sensarDerechaPared() {
-	int iD = 0;
-	for(uint8_t i = 0; i < 2; i++) {
-		iD += calcDistanciaUS(TDerAde, EDerAde);
-		delay(10);
-	}
-	iD /= 2;
-	return iD;
+	uint8_t iD = calcDistanciaUS(TDerAde, EDerAde);
+	delay(10);
+	iD += calcDistanciaUS(TDerAde, EDerAde);
+	return iD / 2;
 }
 bool SensarRealidad::sensarIzquierda() {
 	int iD = 0;
@@ -163,13 +183,10 @@ bool SensarRealidad::sensarIzquierda() {
 }
 
 uint8_t SensarRealidad::sensarIzquierdaPared() {
-	int iD = 0;
-	for(int i = 0; i < 2; i++) {
-		iD += calcDistanciaUS(TIzqAde, EIzqAde);
-		delay(10);
-	}
-	iD /= 2;
-	return iD;
+	uint8_t iD = calcDistanciaUS(TIzqAde, EIzqAde);
+	delay(10);
+	iD += calcDistanciaUS(TIzqAde, EIzqAde);
+	return iD / 2;
 }
 
 int SensarRealidad::sensarRampa() {
