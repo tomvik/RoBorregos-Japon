@@ -301,7 +301,7 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
 	}
 	eCount1 = 0;
 }
-void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII){
+/*void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII){
 	int pDeseado = 5, pDeseadoI = 6;
 	uint8_t pow_DD = 150, pow_II = 150;
 	int pow_DD_Now, pow_II_Now, iError;
@@ -367,6 +367,31 @@ void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &iPowDD, in
     iPowII += pow_II_Now;
     iPowDD/=2;
     iPowII/=2;
+}*/
+void Movimiento::potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII){
+	int pDeseado = 5, pDeseadoI = 5, pow_DD_Now, pow_II_Now, iError, pNow = real->sensarDerechaPared(), pNowI = real->sensarIzquierdaPared();
+	if(pNow < 15){
+		iError = pDeseado-pNow;
+		pow_DD_Now = iPowD + iError * kParedAlinear;
+		pow_II_Now = iPowI - iError * kParedAlinear;
+	}
+	if(pNowI < 15){
+		iError = pDeseadoI-pNowI;
+		pow_DD_Now = iPowD - iError * kParedAlinear;
+		pow_II_Now = iPowI + iError * kParedAlinear;
+	}
+	else{
+		//TODO:
+		pow_DD_Now = pow_II_Now = 200;
+	}
+	grados = real->sensarOrientacion();
+	ErrorGradosVuelta(fDeseado, grados);
+	iPowDD = iPowD + (grados * kpA) + pow_DD_Now;
+	iPowII = iPowI - (grados * kpA) + pow_II_Now;
+    iPowDD/=2;
+    iPowII/=2;
+    iPowII = iPowII > 200 ? 200 : (iPowII < 0 ? 0 : iPowII);
+    iPowDD = iPowDD > 200 ? 200 : (iPowDD < 0 ? 0 : iPowDD);
 }
 void Movimiento::pasaRampa(char cDir){
 	Serial2.println("PARA");
