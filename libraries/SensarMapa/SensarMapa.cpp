@@ -9,7 +9,6 @@ n = norte
 e = este
 s = sur
 w = oeste
-
 cCase Caso a verificar
 r = right = derecha
 u = up = arriba

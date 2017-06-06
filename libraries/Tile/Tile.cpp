@@ -214,15 +214,12 @@ void Tile::victimaIzquierda(const bool &b){
 /*void Tile::visualArriba(const bool &b){
     dato3 |= (b<<3);
 }
-
 void Tile::visualDerecha(const bool &b){
     dato3 |= (b<<2);
 }
-
 void Tile::visualAbajo(const bool &b){
     dato3 |= (b<<1);
 }
-
 void Tile::visualIzquierda(const bool &b){
     dato3 |= b;
 }*/

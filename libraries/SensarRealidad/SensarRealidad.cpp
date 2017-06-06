@@ -5,13 +5,25 @@
 #include <Adafruit_BNO055.h>
 #include <utility/imumaths.h>
 #include <EEPROM.h>
+//LED
+#include <LiquidCrystal_I2C.h>
+#define I2C_ADDR    0x3F
+#define BACKLIGHT_PIN     3
+#define En_pin  2
+#define Rw_pin  1
+#define Rs_pin  0
+#define D4_pin  4
+#define D5_pin  5
+#define D6_pin  6
+#define D7_pin  7
+LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 /*
 #define sIFtrig 30
 #define sIFecho 31
 #define sIBtrig 32
 #define sIBecho 33
 */
-//Izquierda adelanto
+//Izquierda adelante
 #define TIzqAde 51
 #define EIzqAde 49
 //Adelante izquierda
@@ -62,6 +74,9 @@ SensarRealidad::SensarRealidad() {
   	pinMode(switchIzquierda, INPUT);
     pinMode(switchDerecha, INPUT);
     pinMode(colorIn, INPUT);
+
+    lcd.begin();// Indicamos medidas de LCD
+  	lcd.backlight();
 }
 byte SensarRealidad::getIMUCalStatus()
 {
@@ -81,7 +96,6 @@ uint8_t SensarRealidad::calcDistanciaUS(uint8_t trigger, uint8_t echo) {
 }
 
 uint8_t SensarRealidad::calcDistanciaSharp(uint8_t sensor) {
-   uint8_t lectura, cm;
    float volts = analogRead(sensor)*0.0048828125;  // value from sensor * (5/1024)
    uint8_t distance = 13*pow(volts, -1); // worked out from datasheet graph
    return distance;
@@ -226,4 +240,11 @@ int leerEEPROM(int dir) {
 	byte highByte = EEPROM.read(dir + 1);
 
 	return ((lowByte << 0) & 0xFF) + ((highByte << 8) & 0xFF00);
+}
+
+void SensarRealidad::escribirLCD(String sE1, String sE2){
+	lcd.clear();
+	lcd.print(sE1);
+	lcd.setCursor(0, 1);
+    lcd.print(sE2);
 }
