@@ -560,8 +560,8 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	//Si es un cuadro negro
-	if(mapa->prueba() == 1){
-		if(mapa->prueba() == 1){
+	if(mapa->color() == 1){
+		if(mapa->color() == 1){
 			//Poner pared a los cuatro lados
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
