@@ -441,15 +441,13 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	if(mapa->sensarRampa() > iRampa || mapa->sensarRampa() < -iRampa){
 		tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()){
-			uint8_t iTemp = iPiso;
+			uint8_t iTemp = iPiso, i = 0, j;
 			robot->pasaRampa(cDir);
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
-			uint8_t i = 0;
-			uint8_t j = 0;
 			bool bT = false;
-			while(i < iTamano && bT == false){
+			while(i < iTamano && !bT){ //CAMBIO AQUI DE bT == false a !bT
 				j = 0;
-				while(j < iTamano && bT == false){
+				while(j < iTamano && !bT){
 					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp){
 						//Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
 						iCol = j;
@@ -561,14 +559,12 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	//Si es un cuadro negro
-	if(mapa->color() == 1){
-		if(mapa->color() == 1){
-			//Poner pared a los cuatro lados
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
-			tMapa[iPiso][iRow][iCol].cuadroNegro(true);
-		}
+	if(mapa->color()){
+		//Poner pared a los cuatro lados
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
+		tMapa[iPiso][iRow][iCol].cuadroNegro(true);
 	}
 }

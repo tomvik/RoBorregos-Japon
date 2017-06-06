@@ -219,9 +219,12 @@ uint8_t SensarRealidad::switchesIMU(float fDeseado, float grados) {
 		return 0;
 	return fDeseado > grados ? 1 : 2;
 }
-
-uint8_t SensarRealidad::color() {
-	return(digitalRead(colorIn));
+//1 = negro 0 = blanco
+bool SensarRealidad::color() {
+	char cc = 0;
+	while(Serial2.available())
+		cc = (char)Serial2.read();
+	return(cc&0b00001000);
 }
 
 void escribirEEPROM(int dir, int val) {
