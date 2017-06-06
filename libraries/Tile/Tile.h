@@ -48,21 +48,21 @@ class Tile{
 
         uint8_t piso();
 
-        bool victimaArriba();
+        bool calorArriba();
 
-        bool victimaDerecha();
+        bool calorDerecha();
 
-        bool victimaAbajo();
+        bool calorAbajo();
 
-        bool victimaIzquierda();
+        bool calorIzquierda();
 
-        //bool visualArriba();
+        bool visualArriba();
 
-        //bool visualDerecha();
+        bool visualDerecha();
 
-        //bool visualAbajo();
+        bool visualAbajo();
 
-        //bool visualIzquierda();
+        bool visualIzquierda();
         //Setters
         /* 
         Nota: Los datos booleanos si true=1
@@ -96,27 +96,27 @@ class Tile{
 
         void rampaAbajo(const bool &b);
 
-        void victimaArriba(const bool &b);
+        void calorArriba(const bool &b);
 
-        void victimaDerecha(const bool &b);
+        void calorDerecha(const bool &b);
 
-        void victimaAbajo(const bool &b);
+        void calorAbajo(const bool &b);
 
-        void victimaIzquierda(const bool &b);
+        void calorIzquierda(const bool &b);
 
-        //void visualArriba(const bool &b);
+        void visualArriba(const bool &b);
 
-        //void visualDerecha(const bool &b);
+        void visualDerecha(const bool &b);
 
-        //void visualAbajo(const bool &b);
+        void visualAbajo(const bool &b);
 
-        //void visualIzquierda(const bool &b);
+        void visualIzquierda(const bool &b);
 
     private:
         char dato1, dato2, dato3; 
             //dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada 
             //dato2,  //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper...........//Primeros 3 usados para enumeración de piso
-            //dato3; //vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
+            //dato3; //calorArr, calorDer, calorAba, calorIzq, visualArr, visualDer, visualAba, visualIzq
 };
 
 #endif
