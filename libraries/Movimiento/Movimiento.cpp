@@ -829,6 +829,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 			fDeseado = fRef < 90 ? fRef+270 : fRef-90;
 			break;
 	}
+	eCount1 = 0;
 	while(eCount1 < encoder30 && real->sensarEnfrentePared() > 7){
 		potenciasDerecho(fDeseado, grados, iPowDD, iPowII);
 	    Front(iPowDD, iPowII);
