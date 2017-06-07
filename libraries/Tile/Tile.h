@@ -19,7 +19,7 @@ class Tile{
         Con & and comprobamos si es 0 o 1
          Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
         Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
-        */  
+        */
         bool arriba();
 
         bool derecha();
@@ -64,7 +64,7 @@ class Tile{
 
         //bool visualIzquierda();
         //Setters
-        /* 
+        /*
         Nota: Los datos booleanos si true=1
         Con | or ponemos el 1 que manden, &and ponemos 0
         */
@@ -96,13 +96,13 @@ class Tile{
 
         void rampaAbajo(const bool &b);
 
-        void victimaArriba(const bool &b);
+        //void victimaArriba(const bool &b);
 
-        void victimaDerecha(const bool &b);
+        //void victimaDerecha(const bool &b);
 
-        void victimaAbajo(const bool &b);
+        //void victimaAbajo(const bool &b);
 
-        void victimaIzquierda(const bool &b);
+        //void victimaIzquierda(const bool &b);
 
         //void visualArriba(const bool &b);
 
@@ -113,8 +113,8 @@ class Tile{
         //void visualIzquierda(const bool &b);
 
     private:
-        char dato1, dato2, dato3; 
-            //dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada 
+        char dato1, dato2/*, dato3*/;
+            //dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
             //dato2,  //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper...........//Primeros 3 usados para enumeración de piso
             //dato3; //vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
 };

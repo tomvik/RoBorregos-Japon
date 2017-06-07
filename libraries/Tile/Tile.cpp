@@ -3,7 +3,7 @@
 
 //Constructor
 Tile::Tile(){
-    dato1 = dato2 = dato3 = 0;
+    dato1 = dato2 = /*dato3 =*/ 0;
 }
 
 
@@ -12,9 +12,9 @@ Tile::Tile(){
 Con & and comprobamos si es 0 o 1
  Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
 Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
-*/  
+*/
 
-//arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada 
+//arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
 //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper
 bool Tile::arriba(){
     return dato1&'\x80';//0b10000000;
@@ -74,11 +74,11 @@ uint8_t Tile::piso(){
             return 3;
         return 2;
     }
-    if(dato2&'\x40') 
+    if(dato2&'\x40')
         return 1;
     return 0;
 }
-
+/*
 bool Tile::victimaArriba(){
     return dato3&'\x80';
 }
@@ -93,7 +93,7 @@ bool Tile::victimaAbajo(){
 
 bool Tile::victimaIzquierda(){
     return dato3&'\x10';
-}
+}*/
 
 /*bool Tile::visualArriba(){
     return dato3&'\x8';
@@ -109,7 +109,7 @@ bool Tile::visualIzquierda(){
 }*/
 
 //Setters
-/* 
+/*
 Nota: Los datos booleanos si true=1
 Con | or ponemos el 1 que manden, &and ponemos 0
 */
@@ -131,11 +131,11 @@ void Tile::visitado(const bool &b){
 
 void Tile::inicio(const bool &b){
     dato2 |= (b<<2);
-}   
+}
 
 void Tile::rampaArriba(const bool &b){
     dato2 |= (b<<1);
-}    
+}
 
 void Tile::bumper(const bool &b){
     dato2 = b ? dato2|b : dato2&b;
@@ -169,7 +169,7 @@ void Tile::piso(const int &i){
 
 void Tile::arriba(const bool &b, Tile *laDeArriba){
     dato1 |= (b<<7);
-    if(laDeArriba) 
+    if(laDeArriba)
         laDeArriba->dato1 |= (b<<5);
 }
 
@@ -181,7 +181,7 @@ void Tile::derecha(const bool &b, Tile *laDeDerecha){
 
 void Tile::abajo(const bool &b, Tile *laDeAabajo){
     dato1 |= (b<<5);
-    if(laDeAabajo) 
+    if(laDeAabajo)
         laDeAabajo->dato1 |= (b<<7);
 }
 
@@ -195,6 +195,7 @@ void Tile::existe(const bool &b){
     dato2 |= (b<<3);
 }
 
+/*
 void Tile::victimaArriba(const bool &b){
     dato3 |= (b<<7);
 }
@@ -209,7 +210,7 @@ void Tile::victimaAbajo(const bool &b){
 
 void Tile::victimaIzquierda(const bool &b){
     dato3 |= (b<<4);
-}
+}*/
 
 /*void Tile::visualArriba(const bool &b){
     dato3 |= (b<<3);
