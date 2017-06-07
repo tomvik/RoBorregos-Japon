@@ -526,7 +526,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);*/
 	/////////////////////////////NORMAL//////////////////////////////////
-	if(mapa->sensarEnfrente()){
+	if(!(robot->getParedes()&0b00000010)/* || mapa->sensarEnfrente()*/){
 		if(!espacio(cDir, iCol, iRow, 'e')){
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 		}
@@ -537,7 +537,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 	//Lectura Derecha
 	//Libre
-	if(mapa->sensarDerecha()){
+	if(!(robot->getParedes()&0b00000001)/* || mapa->sensarDerecha()*/){
 		if(!espacio(cDir, iCol, iRow, 'd')){
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 		}
@@ -548,7 +548,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 	//Lectura I<quierda
 	//Libre
-	if(mapa->sensarIzquierda()){
+	if(!(robot->getParedes()&0b00000100) /*|| mapa->sensarIzquierda()*/){
 		if(!espacio(cDir, iCol, iRow, 'i')){
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 		}

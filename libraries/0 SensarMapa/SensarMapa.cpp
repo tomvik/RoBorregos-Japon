@@ -44,7 +44,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uin
 					return !(tMapa[iPiso][iRow][iCol].abajo());
 				case 'w':
 					return !(tMapa[iPiso][iRow][iCol].izquierda());
-			}		
+			}
 		case 'l':		//Izquierda
 			switch(cDir){
 				case 'n':
@@ -311,9 +311,9 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char 
 				}
 	}
 	if(bT == false){
-		for (uint8_t i = 0; i < iTamano; ++i) 
+		for (uint8_t i = 0; i < iTamano; ++i)
 			for (uint8_t j = 0; j < iTamano; ++j)
-				if(iMapa[i][j] != 0 && ( tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba() ) && tMapa[iPiso][i][j].piso() < iPiso){ 
+				if(iMapa[i][j] != 0 && ( tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba() ) && tMapa[iPiso][i][j].piso() < iPiso){
 					//Aquí se verifica que NO sea 0, que SEA MENOR al numero en donde estoy, que SEA UNA RAMPA y QUE CONECTE A UN PISO MENOR
 					iC = iMapa[i][j];
 					iNCol = j;
@@ -328,7 +328,7 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char 
 String SensarMapa::getInstrucciones(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], uint8_t iNCol, uint8_t iNRow, uint8_t &iPiso){
 	String sIns = "";
 	sIns += cMapa[iNRow][iNCol];
-	uint8_t iPos = iMapa[iNRow][iNCol], iR, iU, iL, iD;
+	uint8_t iR, iU, iL, iD;
 	char cDir;
 	//Sacar la distancia de cada una
 	iR = iU = iL = iD = 255;
@@ -480,7 +480,7 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[10][10], char cMapa[10][10], T
 						break;
 				}
 				iNCol++;
-				break;	
+				break;
 		}
 	}
 	return sIns;
