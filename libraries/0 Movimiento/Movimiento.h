@@ -6,7 +6,7 @@
 #include <SensarRealidad.h>
 #include <Tile.h>
 
-//Mapa, direccion, col, row, piso, caso, fdeseado
+//Mapa, direccion, col, row, piso, caso, fdeseado e
 
 class Movimiento{
 public:
