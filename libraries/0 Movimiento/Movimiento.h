@@ -46,11 +46,13 @@ public:
 private:
 	uint8_t iPowI, iPowD, iTamano, kParedAlinear, iRampa, contadorIzq, contadorDer;
 	int encoder30, eCount1, pos;
-	float kpA, kp, fRef, fDeseado;
+	float kpA, kp, ki, fRef, fDeseado;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
 	char cVictima, cParedes;
+	unsigned long lastTime, SampleTime;
+	double ITerm, lastInput;
 };
 
 #endif
