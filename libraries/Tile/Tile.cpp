@@ -138,7 +138,7 @@ void Tile::rampaArriba(const bool &b){
 }
 
 void Tile::bumper(const bool &b){
-    dato2 = b ? dato2|b : dato2&b;
+    dato2 |= b;
 }
 
 void Tile::rampaAbajo(const bool &b){
