@@ -60,7 +60,7 @@ Movimiento::Movimiento() {
   alinear = false;
   kParedAlinear = 12;
   encoder30 = 1250;
-	SampleTime = 100;
+	SampleTime = 00;
   ITerm = 0;
 }
 //Puede que no sea necesaria
@@ -94,7 +94,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   alinear = false;
   kParedAlinear = 12;
   encoder30 = 1250;
-  SampleTime = 100;
+  SampleTime = 00;
   ITerm = 0;
 }
 void Movimiento::Stop(){
