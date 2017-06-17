@@ -251,10 +251,12 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
 }
 
 void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
+
 	unsigned long now = millis();
 
   if((now - lastTime) >= SampleTime) {
 	int pDeseadoIzq = 5, pDeseadoDer = 5, potenciaIzq_Act, potenciaDer_Act, iError;
+
 	int distanciaIzq = real->sensarIzquierdaPared(), distanciaDer = real->sensarDerechaPared();
 	float error;
 
@@ -312,35 +314,37 @@ void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
 }
 
 void Movimiento::pasaRampa(char cDir){
-  while(Serial2.available())
-	cVictima = (char)Serial2.read();
-  real->escribirLCD("Rampa");
-  int iPowII, iPowDD;
-  switch(cDir)
-  {
-  case 'n':
-	fDeseado = fRef;
-	break;
-  case 'e':
-	fDeseado = fRef < 270 ? fRef+90 : fRef-270;
-	break;
-  case 's':
-	fDeseado = fRef < 180 ? fRef+180 : fRef-180;
-	break;
-  case 'w':
-	fDeseado = fRef < 90 ? fRef+270 : fRef-90;
-	break;
-  }
-  while(real->sensarRampa() < -iRampa || real->sensarRampa() > iRampa) {
-	potenciasDerecho(iPowDD, iPowII);
-	Front(iPowDD, iPowII);
-  }
-  Front(100, 100);
-  delay(800);
-  Stop();
-  if(real->sensarEnfrentePared() < iRampa) {
-	SepararPared();
-  }
+	while(Serial2.available())
+		cVictima = (char)Serial2.read();
+	real->escribirLCD("Rampa");
+	int iPowII, iPowDD;
+	switch(cDir)
+	{
+		case 'n':
+			fDeseado = fRef;
+			break;
+		case 'e':
+			fDeseado = fRef < 270 ? fRef+90 : fRef-270;
+			break;
+		case 's':
+			fDeseado = fRef < 180 ? fRef+180 : fRef-180;
+			break;
+		case 'w':
+			fDeseado = fRef < 90 ? fRef+270 : fRef-90;
+			break;
+	}
+	while(real->sensarRampa() < -iRampa || real->sensarRampa() > iRampa){
+		potenciasDerecho(iPowDD, iPowII);
+		Front(iPowDD, iPowII);
+	}
+	cParedes = 0;
+	Front(100, 100);
+	delay(800);
+	Stop();
+	if(real->sensarEnfrentePared() < iRampa){
+   		SepararPared();
+   	}
+   	Stop();
 }
 
 void Movimiento::dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase){
