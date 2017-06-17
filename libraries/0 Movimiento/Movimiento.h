@@ -11,7 +11,6 @@
 class Movimiento{
 public:
 	//////////////////////////////////Constructores////////////////////////////////////
-	Movimiento();
 	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
@@ -38,6 +37,8 @@ public:
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	void hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov);
+
+	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	bool goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
 	////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////

@@ -1,10 +1,22 @@
-#include "Arduino.h"
+ #include "Arduino.h"
 #include "Movimiento.h"
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #define toleranciaBumper 10
+
+#include <iostream>
+
+using namespace std;
+
+int main(int argc, char *argv[])
+{
+
+
+    return 0;
+}
+
 /*
    cDir (dirección)
    n = norte
@@ -32,38 +44,6 @@ Servo myservo;
 //2 Atras derecha
 //3 Enfrente izquierda
 //4 Atras izquierda
-Movimiento::Movimiento() {
-  AFMS.begin();
-  myMotorLeftF->setSpeed(iPowI);
-  myMotorLeftF->run(FORWARD);
-  myMotorLeftF->run(RELEASE);
-  myMotorLeftB->setSpeed(iPowI);
-  myMotorLeftB->run(FORWARD);
-  myMotorLeftB->run(RELEASE);
-  myMotorRightF->setSpeed(iPowD);
-  myMotorRightF->run(FORWARD);
-  myMotorRightF->run(RELEASE);
-  myMotorRightB->setSpeed(iPowD);
-  myMotorRightB->run(FORWARD);
-  myMotorRightB->run(RELEASE);
-  iPowI = iPowD = 150;
-  iTamano = 10;
-  fRef = fDeseado = eCount1 = cVictima = cParedes = 0;
-  kp = 0.2;
-  ki = 0;
-  kpA = 4;
-  iRampa = 17;
-  pos = 90;
-  myservo.attach(9);
-  myservo.write(pos);
-  pinMode(lVictima,OUTPUT);
-  alinear = false;
-  kParedAlinear = 12;
-  encoder30 = 1250;
-	SampleTime = 00;
-  ITerm = 0;
-}
-//Puede que no sea necesaria
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *r){
   AFMS.begin();
   myMotorLeftF->setSpeed(iPowI);
@@ -84,8 +64,8 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   fRef = fDeseado = eCount1 = cVictima = cParedes = 0;
   real = r;
   kp = 0.2;
-  ki = 0;
-  kpA = 4;
+  ki = .2;
+  kpA = 0;//4
   iRampa = 17;
   pos = 90;
   myservo.attach(pin_Servo);
@@ -94,7 +74,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   alinear = false;
   kParedAlinear = 12;
   encoder30 = 1250;
-  SampleTime = 00;
+  SampleTime = 35;
   ITerm = 0;
 }
 void Movimiento::Stop(){
@@ -237,6 +217,7 @@ void Movimiento::ErrorGradosVuelta(float &error){
 }
 
 void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit){
+  ITerm = 0;
   int iPowDD;
   float error = 10;
   uint8_t iCase;
@@ -280,19 +261,19 @@ void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
 
 	if(distanciaIzq < 15 && distanciaDer < 15) {
 	  iError = distanciaDer - distanciaIzq;
-    ITerm += (ki * iError);
-    if(ITerm > 30) ITerm= 30;
-    else if(ITerm < -30) ITerm= -30;
+    ITerm += iError;
+    if(ITerm > 50) ITerm = 50;
+    else if(ITerm < -50) ITerm = -50;
 	  contadorIzq++;
 	  contadorDer++;
 	  if(iError <= -2) {
 		// Se tiene que mover a la izquierda
-		potenciaIzq_Act = iPowI - iError * kParedAlinear + ITerm;
-		potenciaDer_Act = iPowD + iError * kParedAlinear + ITerm;
+		potenciaIzq_Act = iPowI - iError * kParedAlinear - (ITerm * ki);
+		potenciaDer_Act = iPowD + iError * kParedAlinear + (ITerm * ki);
 	  } else if(iError >= 2) {
 		// Se tiene que mover a la derecha
-		potenciaIzq_Act = iPowI + iError * kParedAlinear + ITerm;
-		potenciaDer_Act = iPowD - iError * kParedAlinear + ITerm;
+		potenciaIzq_Act = iPowI + iError * kParedAlinear + (ITerm * ki);
+		potenciaDer_Act = iPowD - iError * kParedAlinear - (ITerm * ki);
 	  } else {
 		// Alinearse con las dos paredes
 		// TODO
@@ -300,30 +281,31 @@ void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
 	} else if(distanciaIzq < 15) {
 	  contadorIzq++;
 	  iError = pDeseadoIzq - distanciaIzq;
-    ITerm += (ki * iError);
-    if(ITerm > 30) ITerm= 30;
-    else if(ITerm < -30) ITerm= -30;
-	  potenciaDer_Act = iPowD - iError * kParedAlinear+ ITerm;
-	  potenciaIzq_Act = iPowI + iError * kParedAlinear+ ITerm;
+    ITerm += iError;
+    if(ITerm > 50) ITerm= 50;
+    else if(ITerm < -50) ITerm= -50;
+	  potenciaDer_Act = iPowD - iError * kParedAlinear - (ITerm * ki);
+	  potenciaIzq_Act = iPowI + iError * kParedAlinear + (ITerm * ki);
 	} else if(distanciaDer < 15) {
 	  contadorDer++;
 	  iError = pDeseadoDer - distanciaDer;
-    ITerm += (ki * iError);
-    if(ITerm > 30) ITerm= 30;
-    else if(ITerm < -30) ITerm= -30;
-	  potenciaDer_Act = iPowD + iError * kParedAlinear+ ITerm;
-	  potenciaIzq_Act = iPowI - iError * kParedAlinear+ ITerm;
+    ITerm += iError;
+    if(ITerm > 50) ITerm= 50;
+    else if(ITerm < -50) ITerm= -50;
+	  potenciaDer_Act = iPowD + iError * kParedAlinear + (ITerm * ki);
+	  potenciaIzq_Act = iPowI - iError * kParedAlinear - (ITerm * ki);
 	} else{
+    ITerm = 0;
 	  potenciaDer_Act = potenciaIzq_Act = 200;
 	}
 
-	ErrorGradosVuelta(error);
+	//ErrorGradosVuelta(error);
 	potenciaDer = iPowD + (error * kpA) + potenciaDer_Act;
 	potenciaIzq = iPowI - (error * kpA) + potenciaIzq_Act;
 	potenciaDer/=2;
 	potenciaIzq/=2;
-	potenciaIzq = potenciaIzq > 200 ? 200 : (potenciaIzq < 0 ? 0 : potenciaIzq);
-	potenciaDer = potenciaDer > 200 ? 200 : (potenciaDer < 0 ? 0 : potenciaDer);
+	potenciaIzq = potenciaIzq > 250 ? 250 : (potenciaIzq < 0 ? 0 : potenciaIzq);
+	potenciaDer = potenciaDer > 250 ? 250 : (potenciaDer < 0 ? 0 : potenciaDer);
 
 	lastTime = now;
   }
@@ -473,7 +455,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   }
 
   eCount1 = 0;
-  while(eCount1 < (encoder30 / 2) && real->sensarEnfrentePared() > 7) {
+  while(/*eCount1 < (encoder30 / 2) && real->sensarEnfrentePared() > 7*/true) {
 	potenciasDerecho(iPowDD, iPowII);
 	Front(iPowDD, iPowII);
 
