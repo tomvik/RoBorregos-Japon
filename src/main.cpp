@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <Wire.h>
 #include <Adafruit_Sensor.h>
 #include <Adafruit_BNO055.h>
@@ -7,7 +8,7 @@
 #include <Movimiento.h>
 #include <SensarRealidad.h>
 #include <Mapear.h>
- #include <Servo.h>
+#include <Servo.h>
 
 Movimiento *mover;
 
@@ -69,9 +70,4 @@ void setup() {
     mover->Stop();
     sensar->escribirLCD("Inicio");
   }
-}
-
-
-void loop() {
-  // put your main code here, to run repeatedly:
 }

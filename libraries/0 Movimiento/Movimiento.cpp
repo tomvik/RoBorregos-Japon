@@ -1,4 +1,4 @@
- #include "Arduino.h"
+#include "Arduino.h"
 #include "Movimiento.h"
 #include <Servo.h>
 #include <Wire.h>
@@ -9,13 +9,6 @@
 #include <iostream>
 
 using namespace std;
-
-int main(int argc, char *argv[])
-{
-
-
-    return 0;
-}
 
 /*
    cDir (dirección)
