@@ -6,10 +6,6 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 #define toleranciaBumper 10
 
-#include <iostream>
-
-using namespace std;
-
 /*
    cDir (dirección)
    n = norte

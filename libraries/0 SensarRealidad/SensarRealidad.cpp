@@ -244,5 +244,15 @@ void SensarRealidad::escribirLCD(String sE1, String sE2){
 	lcd.clear();
 	lcd.print(sE1);
 	lcd.setCursor(0, 1);
-    lcd.print(sE2);
+  lcd.print(sE2);
+}
+
+void SensarRealidad::apantallanteLCD(String sE1, String sE2){
+	escribirLCD(sE1, sE2);
+  for (size_t i = 0; i < 4; i++) {
+    lcd.noBacklight();
+    delay(25);
+    lcd.backlight();
+    delay(25);
+  }
 }
