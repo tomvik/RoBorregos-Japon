@@ -1,8 +1,5 @@
 #include "Arduino.h"
-#include "Tile.h"
-#include "SensarRealidad.h"
 #include "Mapear.h"
-#include <Movimiento.h>
 
 /*
 cDir Direccion
@@ -91,6 +88,7 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase){
 					return iRow < iTamano-1;
 			}
 	}
+	return false;
 }
 
 //Desplaza los datos HACIA ABAJO
