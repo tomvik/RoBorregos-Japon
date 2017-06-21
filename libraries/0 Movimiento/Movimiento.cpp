@@ -19,10 +19,10 @@
    a = atrás
  */
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(3);//al revés
-Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);//al revés
+Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(4);
+Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(2);
-Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(4);//al revés
+Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(3);//al revés
 Servo myservo;
 
 
@@ -36,16 +36,16 @@ Servo myservo;
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *r){
   AFMS.begin();
   myMotorLeftF->setSpeed(iPowI);
-  myMotorLeftF->run(FORWARD);
+  myMotorLeftF->run(BACKWARD);
   myMotorLeftF->run(RELEASE);
   myMotorLeftB->setSpeed(iPowI);
   myMotorLeftB->run(FORWARD);
   myMotorLeftB->run(RELEASE);
   myMotorRightF->setSpeed(iPowD);
-  myMotorRightF->run(FORWARD);
+  myMotorRightF->run(BACKWARD);
   myMotorRightF->run(RELEASE);
   myMotorRightB->setSpeed(iPowD);
-  myMotorRightB->run(FORWARD);
+  myMotorRightB->run(BACKWARD);
   myMotorRightB->run(RELEASE);
   iPowI = iPowi;
   iPowD = iPowd;
@@ -62,7 +62,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   pinMode(lVictima,OUTPUT);
   alinear = false;
   kParedAlinear = 12;
-  encoder30 = 1250;
+  encoder30 = 1200;
   SampleTime = 35;
   ITerm = 0;
 }
@@ -83,7 +83,7 @@ void Movimiento::Front(uint8_t PowD, uint8_t PowI){
   myMotorRightB->run(FORWARD);
 
   myMotorLeftF->run(FORWARD);
-  myMotorLeftB->run(FORWARD);
+  myMotorLeftB->run(BACKWARD);
   //while(digitalRead(lack) == 0){
   //	Stop();
   //}
@@ -98,7 +98,7 @@ void Movimiento::Back(uint8_t PowD, uint8_t PowI){
   myMotorRightB->run(BACKWARD);
 
   myMotorLeftF->run(BACKWARD);
-  myMotorLeftB->run(BACKWARD);
+  myMotorLeftB->run(FORWARD);
   //while(digitalRead(lack) == 0){
   //	Stop();
   //}
@@ -113,7 +113,7 @@ void Movimiento::Right(uint8_t PowD, uint8_t PowI){
   myMotorRightB->run(BACKWARD);
 
   myMotorLeftF->run(FORWARD);
-  myMotorLeftB->run(FORWARD);
+  myMotorLeftB->run(BACKWARD);
   //while(digitalRead(lack) == 0){
   //	Stop();
   //}
@@ -128,7 +128,7 @@ void Movimiento::Left(uint8_t PowD, uint8_t PowI){
   myMotorRightB->run(FORWARD);
 
   myMotorLeftF->run(BACKWARD);
-  myMotorLeftB->run(BACKWARD);
+  myMotorLeftB->run(FORWARD);
   //while(digitalRead(lack) == 0){
   //	Stop();
   //}
@@ -211,7 +211,7 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
   float error = 10;
   uint8_t iCase;
   unsigned long ahora = millis();
-  while (error < -6 || error > 6) {
+  while (error < -5 || error > 5) {
 	ErrorGradosVuelta(error);
 	while(Serial2.available())
 	  cVictima = (char)Serial2.read();
@@ -222,12 +222,12 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
 	  dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase);
 	}
 	if (error < 0) {
-	  iPowDD = 120 + (error * (-1) * kp);
+	  iPowDD = 100 + (error * (-1) * kp);
 	  iPowDD = iPowDD > 180 ? 180 : iPowDD;
 	  Right(iPowDD, iPowDD);
 	}
 	else {
-	  iPowDD = 120 + (error * kp);
+	  iPowDD = 100 + (error * kp);
 	  iPowDD = iPowDD > 180 ? 180 : iPowDD;
 	  Left(iPowDD, iPowDD);
 	}
@@ -428,7 +428,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   cParedes = 0;
   int iPowDD, iPowII;
   uint8_t switchCase, iCase;
-  real->escribirLCD("FRONT");
+  real->apantallanteLCD("FRONT");
   while(Serial2.available())
 	cVictima = (char)Serial2.read();
   AlineaPA(cDir);
@@ -448,7 +448,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   }
 
   eCount1 = 0;
-  while(/*eCount1 < (encoder30 / 2) && real->sensarEnfrentePared() > 7*/true) {
+  while(eCount1 < (encoder30 / 2) && real->sensarEnfrentePared() > 7) {
 	potenciasDerecho(iPowDD, iPowII);
 	Front(iPowDD, iPowII);
 
@@ -494,7 +494,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 
   contadorIzq = contadorDer = 0;
 
-  while(eCount1 < encoder30 && real->sensarEnfrentePared() > 7) {
+  while(eCount1 < (encoder30 / 2)  && real->sensarEnfrentePared() > 7) {
 	potenciasDerecho(iPowDD, iPowII);
 	Front(iPowDD, iPowII);
 
@@ -871,6 +871,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol
 
 void Movimiento::encoder() {
   eCount1++;
+
 }
 
 char Movimiento::getParedes() {
