@@ -35,8 +35,26 @@ void setup() {
   else{
     tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
   }
+  if(sensar->sensarEnfrente()){
+    tMapa[iPiso][iRow-1][iCol].existe(true);
+  }
+  else{
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow-1][iCol]);
+  }
+  if(sensar->sensarDerecha()){
+    tMapa[iPiso][iRow][iCol+1].existe(true);
+  }
+  else{
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol+1]);
+  }
+  if(sensar->sensarIzquierda()){
+    tMapa[iPiso][iRow][iCol-1].existe(true);
+  }
+  else{
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol-1]);
+  }
   mover->Stop();
-  mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
+  //mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso)) {
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   }

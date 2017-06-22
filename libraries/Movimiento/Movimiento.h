@@ -24,19 +24,17 @@ public:
 	void checarBumper();
 	void SepararPared();
 	void AlineaPA(char cDir);
-	void potenciasDerecho(float fDeseado, float &grados, int &iPowDD, int &iPowII);
-	bool victimaPosible(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t &iCase, bool bVuelta, bool bCalor, float fGrados);
-	void mapearVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, bool bVuelta, float fGrados);
-	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
-	void identificaVictima(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase, float fDeseado);
-	void ErrorGradosVuelta(float fDeseado, float &grados);
-	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, float fDeseado, bool kit);
+	void potenciasDerecho(int &potenciaDer, int &potenciaIzq);
+	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase);
+	void ErrorGradosVuelta(float &error);
+	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit);
 	void pasaRampa(char cDir);
 	void retroceder(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void encoder();
+	char getParedes();
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	void hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov);
@@ -47,14 +45,13 @@ public:
 	bool decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	bool decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 private:
-	uint8_t iPowI, iPowD, iTamano, limit_Vision, kParedAlinear, iRampa;
+	uint8_t iPowI, iPowD, iTamano, kParedAlinear, iRampa, contadorIzq, contadorDer;
 	int encoder30, eCount1, pos;
-	unsigned long tVictima;
-	float kpA, kp, fRef;
+	float kpA, kp, fRef, fDeseado;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
-	char probVisual, probVisual2, cVictima;
+	char cVictima, cParedes;
 };
 
 #endif

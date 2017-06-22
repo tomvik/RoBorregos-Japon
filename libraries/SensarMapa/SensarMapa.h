@@ -20,8 +20,7 @@ class SensarMapa{
 		String getInstrucciones(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], uint8_t iNCol, uint8_t iNRow, uint8_t &iPiso);
 
 	private:
-		uint8_t iTamano;
-		uint8_t iBumper;
+		uint8_t iTamano, iBumper;
 };
 
 #endif
