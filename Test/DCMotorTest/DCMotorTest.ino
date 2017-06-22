@@ -6,6 +6,10 @@ control
 For use with the Adafruit Motor Shield v2 
 ---->	http://www.adafruit.com/products/1438
 */
+//1 der atras     bien
+//4 der adelante  bien
+//2 izq adelante  bien
+//3 izq atras     alreves
 
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
@@ -17,8 +21,8 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 // Adafruit_MotorShield AFMS = Adafruit_MotorShield(0x61); 
 
 // Select which 'port' M1, M2, M3 or M4. In this case, M1
-Adafruit_DCMotor *myMotor = AFMS.getMotor(1);
-Adafruit_DCMotor *mySecondMotor = AFMS.getMotor(4);
+Adafruit_DCMotor *myMotor = AFMS.getMotor(2);
+Adafruit_DCMotor *mySecondMotor = AFMS.getMotor(3);
 // You can also make another motor on port M2
 //Adafruit_DCMotor *myOtherMotor = AFMS.getMotor(2);
 

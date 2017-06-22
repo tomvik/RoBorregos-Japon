@@ -9,6 +9,7 @@
 #include <Mapear.h>
 #include <Servo.h>
 
+
 Movimiento *mover;
 void setup() {
   SensarRealidad sensarr;
@@ -16,12 +17,12 @@ void setup() {
   sensar->escribirLCD("El", "Mariachi");
   Movimiento robot(150, 150, 10, sensar);
   mover = &robot;
+  attachInterrupt(4, encoder1, RISING);
   Serial.begin(9600);
   Serial2.begin(115200);
   while(Serial2.available()){
-      Serial2.read();
+    (char)Serial2.read();
   }
-  attachInterrupt(4, encoder1, RISING); 
   Mapear mapa(sensar, mover);
   Tile tMapa[3][10][10];
   uint8_t iRow = 4, iCol = 4, iPiso = 0;
