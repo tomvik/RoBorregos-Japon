@@ -10,11 +10,6 @@ public:
 	/////////////////////CONSTRUCTOR////////////////////
 	SensarRealidad();
 
-	////////////////////SENSA PARED/////////////////////
-	//Pensaba que estas funciones hacerlas con sharp
-	//Que regresen TRUE si NO HAY pared
-	uint8_t calcDistanciaUS(uint8_t trigger, uint8_t echo);
-	uint8_t calcDistanciaSharp(uint8_t sensor);
 	uint8_t sensarEnfrentePared();
 	uint8_t sensarDerechaPared();
 	uint8_t sensarIzquierdaPared();

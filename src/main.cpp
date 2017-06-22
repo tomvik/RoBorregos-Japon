@@ -8,6 +8,10 @@ void encoderAlfa() {
   mover->encoder();
 }
 
+void encoderBeta() {
+  mover->encoder();
+}
+
 void setup() {
   Serial.begin(9600);
   Serial2.begin(115200);
@@ -15,7 +19,7 @@ void setup() {
       Serial2.read();
 
   SensarRealidad *sensar = new SensarRealidad;
-  mover = new Movimiento(150, 150, 10, sensar);
+  mover = new Movimiento(185, 185, 10, sensar);
   Mapear mapa(sensar, mover);
   Tile tMapa[3][10][10];
   mover->Stop();
