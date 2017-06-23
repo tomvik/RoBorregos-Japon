@@ -20,6 +20,7 @@ LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
 // IMU
 Adafruit_BNO055 bno = Adafruit_BNO055();
+
 #define toleranciaSwitchIMU 5
 
 // SWITCH
@@ -159,6 +160,12 @@ float SensarRealidad::sensarOrientacion() {
   sensors_event_t event;
   bno.getEvent(&event);
   return float(event.orientation.x);
+}
+
+float SensarRealidad::getAngulo() {
+  sensors_event_t event;
+  bno.getEvent(&event);
+  return event.orientation.x;
 }
 
 

@@ -22,6 +22,7 @@ public:
 	int sensarRampa();
 	float sensarRampaFloat();
 	float sensarOrientacion();
+	float getAngulo();
 	//uint8_t sensarTemperatura();
 	uint8_t switches();
 	uint8_t switchesIMU(float fDeseado, float grados);

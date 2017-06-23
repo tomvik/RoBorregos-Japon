@@ -14,6 +14,7 @@ public:
 	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
+	void StopX();
 	void StopInterrupt();
 	void Front(uint8_t powD, uint8_t powI);
 	void Back(uint8_t powD, uint8_t powI);
@@ -34,6 +35,9 @@ public:
 	void izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void encoder();
 	char getParedes();
+	void vueltaIzq(char &cDir);
+	void vueltaDer(char &cDir);
+	void velocidad(int PowI, int PowD);
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	void hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov);
@@ -48,8 +52,8 @@ public:
 private:
 	uint8_t iPowI, iPowD, iTamano, kParedAlinear, iRampa, contadorIzq, contadorDer;
 	volatile int eCount1;
-	int encoder30, pos;
-	float kpA, kp, ki, fRef, fDeseado;
+	int encoder30, pos, vueltasDadas;
+	float kpA, kp, ki, fRef, fDeseado, fSetPoint;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
