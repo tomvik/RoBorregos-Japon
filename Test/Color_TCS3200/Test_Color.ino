@@ -1,22 +1,25 @@
+#include <Arduino.h>
 #define S0 2
 #define S1 3
 #define S2 4
 #define S3 5
-#define sensorOut 6+
+#define sensorOut 6
 int frequency = 0;
+
 void setup() {
   pinMode(S0, OUTPUT);
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   pinMode(S3, OUTPUT);
   pinMode(sensorOut, INPUT);
-  
+
   // Setting frequency-scaling to 20%
   digitalWrite(S0,HIGH);
   digitalWrite(S1,LOW);
-  
+
   Serial.begin(9600);
 }
+
 void loop() {
   // Setting red filtered photodiodes to be read
   digitalWrite(S2,LOW);

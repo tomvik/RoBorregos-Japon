@@ -185,24 +185,18 @@ void Movimiento::AlineaPA(char cDir){
   }
   alinear = false;
 }
-void Movimiento::ErrorGradosVuelta(float &error){
-  float grados = real->sensarOrientacion();
+void Movimiento::ErrorGradosVuelta(float &grados) {
+  grados = real->sensarOrientacion();
   int iM;
-  if(grados >= 360)
-	grados = 0;
-  grados -= fDeseado;
-
-  if (grados > 180) {
-	iM = grados;
-	iM /= 180;
-	grados = -( 180 - (grados - 180 * iM) );
+  grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
+  if(grados > 180) {
+    iM = grados/180;
+    grados = -( 180 - (grados - (iM + 180)));
+  } else if(grados < -180) {
+    grados *= -1;
+    iM = grados/180;
+    grados = ( 180 - (grados - (iM + 180)));
   }
-  else if (grados < -180) {
-	iM = -grados;
-	iM /= 180;
-	grados = ( 180 - (grados - 180 * iM) );
-  }
-  error = grados;
 }
 
 void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit){
