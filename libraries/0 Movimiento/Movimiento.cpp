@@ -15,7 +15,7 @@ PID izqPID(&inIzq, &outIzq, &fSet, 15, 0, 0, DIRECT);
 PID derPID(&inDer, &outDer, &fSet, 15, 0, 0, REVERSE);
 /*
    cDir (dirección)
-   n = norte
+   n = norteder
    e = este
    s = sur
    w = oeste
@@ -231,10 +231,14 @@ void Movimiento::vueltaIzq(char &cDir) {
     	break;
   }
 
+
+
   fSetPoint -= 90;
   if(fSetPoint < 0)
     fSetPoint += 360;
   fSet = fSetPoint;
+
+  real->escribirLCD(String(posInicial), String(fSet));
 
   limInf = fSetPoint - kPRECISION_IMU;
   if(limInf < 0)
@@ -245,7 +249,7 @@ void Movimiento::vueltaIzq(char &cDir) {
     limSup -= 360;
 
   unsigned long inicio = millis();
-  Left(150, 150);
+  Left(140, 140);
 
   if(limSup > limInf) {
       while(posInicial < limInf || posInicial > limSup) {
@@ -305,11 +309,12 @@ void Movimiento::vueltaDer(char &cDir) {
     limSup -= 360;
 
   unsigned long inicio = millis();
-  Right(150, 150);
+  Right(140, 140);
 
   if(limSup > limInf) {
       while(posInicial < limInf || posInicial > limSup) {
           posInicial = real->getAngulo();
+          real->escribirLCD(String(posInicial), String(fSet));
           if (millis() >= inicio + 10000) {
               velocidad(160, 160);
           } else if (millis() >= inicio + 5000) {
@@ -319,6 +324,7 @@ void Movimiento::vueltaDer(char &cDir) {
   } else {
       while(posInicial < limInf && posInicial > limSup) {
           posInicial = real->getAngulo();
+          real->escribirLCD(String(posInicial), String(fSet));
           if (millis() >= inicio + 10000) {
             velocidad(160, 160);
           } else if (millis() >= inicio + 5000) {
@@ -326,6 +332,9 @@ void Movimiento::vueltaDer(char &cDir) {
           }
       }
   }
+  real->escribirLCD("Aqui estoy: " + String(real->getAngulo()), String(fSet));
+  StopX();
+  delay(5);
   Stop();
   velocidad(180, 180);
 }

@@ -53,7 +53,12 @@ void setup() {
     tMapa[iPiso][iRow][iCol - 1].existe(true);
   else
     tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol - 1]);
-    char c = 'n';
+
+  char c = 'n';
+  while(true) {
+    mover->vueltaIzq(c);
+    delay(2000);
+  }
 
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso))
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);

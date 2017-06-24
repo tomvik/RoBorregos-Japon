@@ -14,12 +14,44 @@ const uint8_t kCantVL53 = 4;
 VL53L0X sensor[4];
 const uint8_t kXSHUT[4] = {25, 27, 29, 23};
 
+void SensarRealidad::inicializar(int x) {
+	for (int i = 0; i < kCantVL53; i++)
+	 pinMode(kXSHUT[i], OUTPUT);
+
+   for (int i = 0; i < kCantVL53; i++)
+ 	 digitalWrite(kXSHUT[i], LOW);
+
+   delay(1000);
+
+   for (int i = 0; i < kCantVL53; i++) {
+     //We put it in '1', so it's enabled.
+     //*IMPORTANT NOTE* we cannot send a HIGH signal, because we would burn it. So, what we do is put a really high impedance on it. Because by default, that pin is connected to HIGH.
+     pinMode(kXSHUT[i], INPUT);
+     //Must wait this time for it to actually be enabled
+     delay(200);
+
+     //Initialize the sensor
+     sensor[i].init(true);
+
+     //Wait for it to be initialized
+     delay(200);
+     //Set a new address
+     //*IMPORTANT NOTE* we have to check that the addresses doesn't match with those of other sensors
+     sensor[i].setAddress((uint8_t)(x + i));
+     delay(200);
+   	   sensor[i].setTimeout(500);
+			 /*delay(200);
+			 sensor[i].startContinuous(5);
+			 delay(200);*/
+   }
+}
+
 // LCD
 #define I2C_ADDR  0x3F
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
 // IMU
-Adafruit_BNO055 bno = Adafruit_BNO055();
+Adafruit_BNO055 bno = Adafruit_BNO055(/*Adafruit_BNO055::OPERATION_MODE_GYRONLY*/);
 
 #define toleranciaSwitchIMU 5
 
@@ -55,33 +87,9 @@ SensarRealidad::SensarRealidad() {
 	lcd.begin();// Indicamos medidas de LCD
 	lcd.backlight();
 
-  for (int i = 0; i < kCantVL53; i++)
-	 pinMode(kXSHUT[i], OUTPUT);
+	Wire.begin();
 
-   for (int i = 0; i < kCantVL53; i++)
- 	 digitalWrite(kXSHUT[i], LOW);
-
-   delay(1000);
-   Wire.begin();
-
-   for (int i = 0; i < kCantVL53; i++) {
-     //We put it in '1', so it's enabled.
-     //*IMPORTANT NOTE* we cannot send a HIGH signal, because we would burn it. So, what we do is put a really high impedance on it. Because by default, that pin is connected to HIGH.
-     pinMode(kXSHUT[i], INPUT);
-     //Must wait this time for it to actually be enabled
-     delay(200);
-
-     //Initialize the sensor
-     sensor[i].init(true);
-     //Wait for it to be initialized
-     delay(200);
-     //Set a new address
-     //*IMPORTANT NOTE* we have to check that the addresses doesn't match with those of other sensors
-     sensor[i].setAddress((uint8_t)(10 + i));
-     delay(200);
-   	   sensor[i].setTimeout(200);
-   }
-
+	inicializar(4);
 }
 
 
@@ -167,6 +175,49 @@ float SensarRealidad::getAngulo() {
   bno.getEvent(&event);
   return event.orientation.x;
 }
+
+
+
+
+void SensarRealidad::imu() {
+	sensors_event_t event;
+  bno.getEvent(&event);
+
+  /* Board layout:
+         +----------+
+         |         *| RST   PITCH  ROLL  HEADING
+     ADR |*        *| SCL
+     INT |*        *| SDA     ^            /->
+     PS1 |*        *| GND     |            |
+     PS0 |*        *| 3VO     Y    Z-->    \-X
+         |         *| VIN
+         +----------+
+  */
+
+  /* The processing sketch expects data as roll, pitch, heading */
+  Serial.print(F("Orientation: "));
+  Serial.print((float)event.orientation.x);
+  Serial.print(F(" "));
+  Serial.print((float)event.orientation.y);
+  Serial.print(F(" "));
+  Serial.print((float)event.orientation.z);
+  Serial.println(F(""));
+
+  /* Also send calibration data for each sensor. */
+  uint8_t sys, gyro, accel, mag = 0;
+  bno.getCalibration(&sys, &gyro, &accel, &mag);
+  Serial.print(F("Calibration: "));
+  Serial.print(sys, DEC);
+  Serial.print(F(" "));
+  Serial.print(gyro, DEC);
+  Serial.print(F(" "));
+  Serial.print(accel, DEC);
+  Serial.print(F(" "));
+  Serial.println(mag, DEC);
+
+  delay(100);
+}
+
 
 
 //No falta cuando ambos estan presionados?

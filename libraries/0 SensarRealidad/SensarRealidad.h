@@ -31,6 +31,8 @@ public:
 
 	static void escribirEEPROM(int dir, int value);
 	static int leerEEPROM(int dir);
+	void inicializar(int x);
+	void imu();
 
 private:
 };
