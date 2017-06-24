@@ -10,6 +10,11 @@ public:
 	/////////////////////CONSTRUCTOR////////////////////
 	SensarRealidad();
 
+	////////////////////SENSA PARED/////////////////////
+	//Pensaba que estas funciones hacerlas con sharp
+	//Que regresen TRUE si NO HAY pared
+	uint8_t calcDistanciaUS(uint8_t trigger, uint8_t echo);
+	uint8_t calcDistanciaSharp(uint8_t sensor);
 	uint8_t sensarEnfrentePared();
 	uint8_t sensarDerechaPared();
 	uint8_t sensarIzquierdaPared();
@@ -26,7 +31,6 @@ public:
 	uint8_t switches();
 	uint8_t switchesIMU(float fDeseado, float grados);
 	void escribirLCD(String sE1, String sE2 = " ");
-	void apantallanteLCD(String sE1, String sE2 = " ");
 
 	static void escribirEEPROM(int dir, int value);
 	static int leerEEPROM(int dir);

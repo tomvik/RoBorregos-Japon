@@ -57,9 +57,9 @@ namespace std{
 	using ::wcstombs;
 #endif
 
-	/*inline long abs(long i){
+	inline long abs(long i){
 		return labs(i);
-	}*/
+	}
 
 	inline ldiv_t div(long i, long j){
 		return ldiv(i, j);
@@ -70,3 +70,4 @@ namespace std{
 
 
 #endif
+
