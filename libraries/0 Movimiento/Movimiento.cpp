@@ -357,7 +357,7 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
   ITerm = 0;
   int iPowDD;
   float error = 10;
-  uint8_t iCase;
+  //uint8_t iCase;
   unsigned long ahora = millis();
   while (error < -5 || error > 5) {
 	ErrorGradosVuelta(error);
