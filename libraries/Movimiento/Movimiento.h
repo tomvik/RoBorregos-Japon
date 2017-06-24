@@ -11,7 +11,6 @@
 class Movimiento{
 public:
 	//////////////////////////////////Constructores////////////////////////////////////
-	Movimiento();
 	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
@@ -27,7 +26,7 @@ public:
 	void potenciasDerecho(int &potenciaDer, int &potenciaIzq);
 	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase);
 	void ErrorGradosVuelta(float &error);
-	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit);
+	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void pasaRampa(char cDir);
 	void retroceder(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 	void avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
@@ -38,6 +37,8 @@ public:
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	void hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov);
+
+	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	bool goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
 	////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
@@ -45,12 +46,15 @@ public:
 	bool decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 private:
 	uint8_t iPowI, iPowD, iTamano, kParedAlinear, iRampa, contadorIzq, contadorDer;
-	int encoder30, eCount1, pos;
-	float kpA, kp, fRef, fDeseado;
+	volatile int eCount1;
+	int encoder30, pos;
+	float kpA, kp, ki, fRef, fDeseado;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
 	char cVictima, cParedes;
+	unsigned long lastTime, SampleTime;
+	double ITerm, lastInput;
 };
 
 #endif
