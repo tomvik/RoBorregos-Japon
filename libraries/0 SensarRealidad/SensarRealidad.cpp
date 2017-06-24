@@ -12,7 +12,7 @@
 // enfrente, derecha, atras, izquerda
 const uint8_t kCantVL53 = 4;
 VL53L0X sensor[4];
-const uint8_t kXSHUT[4] = {25, 27, 29, 23};
+const uint8_t kXSHUT[4] = {25, 23, 29, 27};
 
 void SensarRealidad::inicializar(int x) {
 	for (int i = 0; i < kCantVL53; i++)
@@ -51,7 +51,7 @@ void SensarRealidad::inicializar(int x) {
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
 // IMU
-Adafruit_BNO055 bno = Adafruit_BNO055(/*Adafruit_BNO055::OPERATION_MODE_GYRONLY*/);
+Adafruit_BNO055 bno = Adafruit_BNO055();
 
 #define toleranciaSwitchIMU 5
 

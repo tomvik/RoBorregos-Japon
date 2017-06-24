@@ -54,17 +54,17 @@ void setup() {
   else
     tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol - 1]);
 
-  char c = 'n';
-  while(true) {
-    mover->vueltaIzq(c);
-    delay(2000);
-  }
+  /*while(true) {
+    String xs = String(sensar->sensarDerechaPared()) + " " + String(sensar->sensarIzquierdaPared());
+    sensar->escribirLCD(xs);
+  }*/
 
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso))
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
 
   sensar->apantallanteLCD("Let's go home...");
   while(true) {
+    sensar->imu();
     mover->goToVisitado(tMapa, cDir, 'i', iCol, iRow, iPiso);
     mover->Stop();
     sensar->apantallanteLCD("      HE","LLEGADO");

@@ -59,7 +59,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   iTamano = iT;
   fRef = fDeseado = eCount1 = cVictima = cParedes = 0;
   real = r;
-  kp = 0.2;
+  kp = 1;
   ki = 0;
   kpA = 0;//4
   iRampa = 17;
@@ -340,36 +340,35 @@ void Movimiento::vueltaDer(char &cDir) {
 }
 
 void Movimiento::ErrorGradosVuelta(float &grados) {
-  grados = real->sensarOrientacion();
-  int iM;
-  grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
-  if(grados > 180) {
-    iM = grados/180;
-    grados = -( 180 - (grados - (iM + 180)));
-  } else if(grados < -180) {
-    grados *= -1;
-    iM = grados/180;
-    grados = ( 180 - (grados - (iM + 180)));
-  }
+	  grados = real->sensarOrientacion();
+    int iM;
+    grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
+    if(grados > 180){
+      iM = grados/180;
+      grados = -( 180 - (grados - (iM + 180)));
+    }else if(grados < -180){
+      grados *= -1;
+      iM = grados/180;
+      grados = ( 180 - (grados - (iM + 180)));
+    }
 }
 
-void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit){
-  /*ITerm = 0;
+void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+  ITerm = 0;
   int iPowDD;
   float error = 10;
   uint8_t iCase;
   unsigned long ahora = millis();
   while (error < -5 || error > 5) {
 	ErrorGradosVuelta(error);
-  Serial.println(error);
-	while(Serial2.available())
+	/*while(Serial2.available())
 	  cVictima = (char)Serial2.read();
-	if(kit && cVictima&0b00000010 && !tMapa[iPiso][iRow][iCol].victima()) {
+	if(cVictima&0b00000010 && !tMapa[iPiso][iRow][iCol].victima()) {
 	  iCase = (cVictima&0b00000001) ? 1 : 2;
 	  real->escribirLCD("Victima");
 	  Stop();
 	  dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase);
-	}
+	}*/
 	if (error < 0) {
 	  iPowDD = 100 + (error * (-1) * kp);
 	  iPowDD = iPowDD > 180 ? 180 : iPowDD;
@@ -385,48 +384,8 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
 	  delay(200);
 	  ahora = millis();
 	}
-  }*/
-  char x = cDir;
-  float error;
-  ErrorGradosVuelta(error);
-  switch(cDir) {
-
   }
-  if (error < 0) {
-    switch(cDir) {
-      case 'n':
-      	x = 'w';
-      	break;
-      case 'e':
-      	x = 'n';
-      	break;
-      case 's':
-      	x = 'e';
-      	break;
-      case 'w':
-      	x = 's';
-      	break;
-    }
-    vueltaDer(x);
-	}else {
-    switch(cDir) {
-      case 'n':
-        x = 'e';
-        break;
-      case 'e':
-        x = 's';
-        break;
-      case 's':
-        x = 'w';
-        break;
-      case 'w':
-        x = 'n';
-        break;
-    }
-	  vueltaIzq(x);
 }
-}
-
 void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
 /*
 	unsigned long now = millis();
@@ -557,7 +516,7 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint
 	}
 	fTemp = fDeseado;
 	fDeseado = fDeseadoT;
-	VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, false);
+	VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
 	fDeseado = fTemp;
   }
   Stop();
@@ -569,7 +528,7 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint
 	myservo.write(pos);                    // tell servo to go to position in variable 'pos'
 	delay(15);                             // waits 15ms for the servo to reach the position
   }
-  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, false);
+  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
   Stop();
   digitalWrite(lVictima, LOW);
   while(Serial2.available())
@@ -737,7 +696,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	cParedes |= 0b00000001;
 
   real->escribirLCD(String(bumperMin)+" "+String(bumperMax)+" "+String(bumperMax - bumperMin));
-  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, true);
+  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
   eCount1 = 0;
   if( !real->color() && real->sensarRampa() < iRampa && real->sensarRampa() > -iRampa && real->sensarEnfrentePared() < 20) {
 	cParedes |= 0b00000010;
@@ -781,8 +740,8 @@ void Movimiento::derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8
 	cDir = 'n';
 	break;
   }
-  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, true);
-  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, true);
+  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
+  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
 }
 //Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
@@ -815,8 +774,8 @@ void Movimiento::izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uin
 	cDir = 's';
 	break;
   }
-  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, true);
-  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso, true);
+  //VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
+  VueltaGyro(tMapa, cDir, iCol, iRow, iPiso);
 }
 //Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
 void Movimiento::hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov){
