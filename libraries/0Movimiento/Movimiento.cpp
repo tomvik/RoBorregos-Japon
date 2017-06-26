@@ -11,8 +11,9 @@ const float kPRECISION_IMU = 5;
 
 double inIzq, outIzq, inDer, outDer, fSet;
 
-PID izqPID(&inIzq, &outIzq, &fSet, 15, 0, 0, DIRECT);
-PID derPID(&inDer, &outDer, &fSet, 15, 0, 0, REVERSE);
+PID izqPID(&inIzq, &outIzq, &fSet, 10, 0, 0, DIRECT);
+PID derPID(&inDer, &outDer, &fSet, 10, 0, 0, REVERSE);
+
 /*
    cDir (dirección)
    n = norteder
@@ -69,14 +70,18 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad 
   pinMode(lVictima,OUTPUT);
   alinear = false;
   kParedAlinear = 10;
-  encoder30 = 1200;
+  encoder30 = 1180;
   SampleTime = 35;
   ITerm = 0;
   vueltasDadas = 0;
   fSetPoint = fSet = 0;
+  izqPID.SetMode(AUTOMATIC);
+  derPID.SetMode(AUTOMATIC);
 }
 
 void Movimiento::velocidad(int PowI, int PowD) {
+  if(PowI > 255) PowI = 255;
+  if(PowD > 255) PowD = 255;
   myMotorLeftF->setSpeed(PowI);
   myMotorRightF->setSpeed(PowD);
   myMotorLeftB->setSpeed(PowI);
@@ -84,19 +89,23 @@ void Movimiento::velocidad(int PowI, int PowD) {
 }
 
 
-void Movimiento::Stop(){
+void Movimiento::Stop() {
+  velocidad(255, 255);
+
+  myMotorRightB->run(BREAK);
+  myMotorLeftB->run(BREAK);
+  myMotorRightF->run(BREAK);
+  myMotorLeftF->run(BREAK);
+
+  delay(50);
+
   myMotorRightB->run(RELEASE);
   myMotorLeftB->run(RELEASE);
   myMotorRightF->run(RELEASE);
   myMotorLeftF->run(RELEASE);
   eCount1 = 0;
 }
-void Movimiento::StopX(){
-  myMotorRightB->run(BREAK);
-  myMotorLeftB->run(BREAK);
-  myMotorRightF->run(BREAK);
-  myMotorLeftF->run(BREAK);
-}
+
 void Movimiento::Front(uint8_t PowD, uint8_t PowI){
   myMotorLeftF->setSpeed(PowI);
   myMotorRightF->setSpeed(PowD);
@@ -213,130 +222,122 @@ void Movimiento::AlineaPA(char cDir){
 void Movimiento::vueltaIzq(char &cDir) {
   real->escribirLCD("Vuelta IZQ");
   vueltasDadas++;
+  int potIzq, potDer, dif;
+  //unsigned long inicio = millis();
   float posInicial, limInf, limSup;
-  posInicial = real->getAngulo();
 
   switch(cDir) {
-    case 'n':
-    	cDir = 'w';
-    	break;
-    case 'e':
-    	cDir = 'n';
-    	break;
-    case 's':
-    	cDir = 'e';
-    	break;
-    case 'w':
-    	cDir = 's';
-    	break;
+    case 'n': cDir = 'w'; break;
+    case 'e': cDir = 'n'; break;
+    case 's': cDir = 'e'; break;
+    case 'w': cDir = 's'; break;
   }
 
-
-
   fSetPoint -= 90;
-  if(fSetPoint < 0)
-    fSetPoint += 360;
+  if(fSetPoint < 0) fSetPoint += 360;
   fSet = fSetPoint;
 
-  real->escribirLCD(String(posInicial), String(fSet));
-
   limInf = fSetPoint - kPRECISION_IMU;
-  if(limInf < 0)
-    limInf += 360;
+  if(limInf < 0) limInf += 360;
 
   limSup = fSetPoint + kPRECISION_IMU;
-  if(limSup >= 360.0)
-    limSup -= 360;
+  if(limSup >= 360.0) limSup -= 360;
 
-  unsigned long inicio = millis();
-  Left(140, 140);
+  posInicial = real->getAngulo();
+  potIzq = potDer = 85;
+  Left(200, 200);
 
   if(limSup > limInf) {
       while(posInicial < limInf || posInicial > limSup) {
-          posInicial = real->getAngulo();
-          if (millis() >= inicio + 10000) {
-              velocidad(160, 160);
-          } else if (millis() >= inicio + 5000) {
-              velocidad(170, 170);
-          }
+        posInicial = real->getAngulo();
+        dif = abs(fSetPoint - posInicial);
+        if(dif > 90) dif = 90;
+        dif *= 1.3;
+        velocidad(potIzq + dif, potDer + dif);
+        /*if (millis() >= inicio + 10000) {
+            velocidad(160, 160);
+        } else if (millis() >= inicio + 5000) {
+            velocidad(170, 170);
+        }*/
       }
   } else {
       while(posInicial < limInf && posInicial > limSup) {
-          posInicial = real->getAngulo();
-          if (millis() >= inicio + 10000) {
-            velocidad(160, 160);
-          } else if (millis() >= inicio + 5000) {
-              velocidad(170, 170);
-          }
+        posInicial = real->getAngulo();
+        dif = abs(fSetPoint - posInicial);
+        if(dif > 90) dif = 90;
+        dif *= 1.3;
+        velocidad(potIzq + dif, potDer + dif);
+        /*x = 85 + abs(fSetPoint - posInicial) * 1.2 / 90;
+        y = 85 + abs(fSetPoint - posInicial) * 1.2 / 90;
+        velocidad(x,y);*/
+        /*if (millis() >= inicio + 10000) {
+          velocidad(160, 160);
+        } else if (millis() >= inicio + 5000) {
+            velocidad(170, 170);
+        }*/
       }
   }
   Stop();
-  velocidad(180, 180);
+  velocidad(iPowI, iPowD);
 }
 
 void Movimiento::vueltaDer(char &cDir) {
   real->escribirLCD("Vuelta DER");
   vueltasDadas++;
+  int potIzq, potDer, dif;
+  //unsigned long inicio = millis();
   float posInicial, limInf, limSup;
-  posInicial = real->getAngulo();
 
   switch(cDir) {
-    case 'n':
-    	cDir = 'e';
-    	break;
-    case 'e':
-    	cDir = 's';
-    	break;
-    case 's':
-    	cDir = 'w';
-    	break;
-    case 'w':
-    	cDir = 'n';
-    	break;
+    case 'n': cDir = 'e'; break;
+    case 'e': cDir = 's'; break;
+    case 's': cDir = 'w'; break;
+    case 'w': cDir = 'n'; break;
   }
 
   fSetPoint += 90;
-  if(fSetPoint >= 360.0)
-    fSetPoint -= 360;
+  if(fSetPoint >= 360) fSetPoint -= 360;
   fSet = fSetPoint;
 
   limInf = fSetPoint - kPRECISION_IMU;
-  if(limInf < 0)
-    limInf += 360;
+  if(limInf < 0) limInf += 360;
 
   limSup = fSetPoint + kPRECISION_IMU;
-  if(limSup >= 360.0)
-    limSup -= 360;
+  if(limSup >= 360.0) limSup -= 360;
 
-  unsigned long inicio = millis();
-  Right(140, 140);
+  posInicial = real->getAngulo();
+  potIzq = potDer = 85;
+  Right(200, 200);
 
   if(limSup > limInf) {
       while(posInicial < limInf || posInicial > limSup) {
-          posInicial = real->getAngulo();
-          real->escribirLCD(String(posInicial), String(fSet));
-          if (millis() >= inicio + 10000) {
-              velocidad(160, 160);
-          } else if (millis() >= inicio + 5000) {
-              velocidad(170, 170);
-          }
+        posInicial = real->getAngulo();
+        dif = abs(fSetPoint - posInicial);
+        if(dif > 90) dif = 90;
+        dif *= 1.3;
+        velocidad(potIzq + dif, potDer + dif);
+        /*if (millis() >= inicio + 10000) {
+            velocidad(160, 160);
+        } else if (millis() >= inicio + 5000) {
+            velocidad(170, 170);
+        }*/
       }
   } else {
       while(posInicial < limInf && posInicial > limSup) {
-          posInicial = real->getAngulo();
-          real->escribirLCD(String(posInicial), String(fSet));
-          if (millis() >= inicio + 10000) {
-            velocidad(160, 160);
-          } else if (millis() >= inicio + 5000) {
-              velocidad(170, 170);
-          }
+        posInicial = real->getAngulo();
+        dif = abs(fSetPoint - posInicial);
+        if(dif > 90) dif = 90;
+        dif *= 1.3;
+        velocidad(potIzq + dif, potDer + dif);
+        /*if (millis() >= inicio + 10000) {
+          velocidad(160, 160);
+        } else if (millis() >= inicio + 5000) {
+            velocidad(170, 170);
+        }*/
       }
   }
-  real->escribirLCD("Aqui estoy: " + String(real->getAngulo()), String(fSet));
-  StopX();
-  delay(5);
   Stop();
-  velocidad(180, 180);
+  velocidad(iPowI, iPowD);
 }
 
 void Movimiento::ErrorGradosVuelta(float &grados) {
@@ -359,7 +360,7 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
   float error = 10;
   //uint8_t iCase;
   unsigned long ahora = millis();
-  while (error < -5 || error > 5) {
+  //while (error < -5 || error > 5) {
 	ErrorGradosVuelta(error);
 	/*while(Serial2.available())
 	  cVictima = (char)Serial2.read();
@@ -370,23 +371,30 @@ void Movimiento::VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, ui
 	  dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase);
 	}*/
 	if (error < 0) {
-	  iPowDD = 100 + (error * (-1) * kp);
-	  iPowDD = iPowDD > 180 ? 180 : iPowDD;
-	  Right(iPowDD, iPowDD);
+    switch(cDir) {
+      case 'n': cDir = 'w'; break;
+      case 'e': cDir = 'n'; break;
+      case 's': cDir = 'e'; break;
+      case 'w': cDir = 's'; break;
+    }
+	  vueltaDer(cDir);
+	} else {
+    switch(cDir) {
+      case 'n': cDir = 'e'; break;
+      case 'e': cDir = 's'; break;
+      case 's': cDir = 'w'; break;
+      case 'w': cDir = 'n'; break;
+    }
+	  vueltaIzq(cDir);
 	}
-	else {
-	  iPowDD = 100 + (error * kp);
-	  iPowDD = iPowDD > 180 ? 180 : iPowDD;
-	  Left(iPowDD, iPowDD);
-	}
-	if(millis()-ahora > 4000) {
+	/*if(millis()-ahora > 4000) {
 	  Front(150, 150);
 	  delay(200);
 	  ahora = millis();
-	}
-  }
+	}*/
+//  }
 }
-void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
+void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq, char cDir) {
 /*
 	unsigned long now = millis();
 
@@ -448,22 +456,24 @@ void Movimiento::potenciasDerecho(int &potenciaDer, int &potenciaIzq) {
 	lastTime = now;
 }*/
 
-float angle = real->getAngulo();
-if(angle > 320) {
-    inIzq = - (360 - angle);
-    inDer = - (360 - angle);
-} else {
+  float angle = real->getAngulo();
+
+  if(cDir == 'n' && angle > 270) {
+    inIzq = angle - 360;
+    inDer = angle - 360;
+  } else {
     inIzq = angle;
     inDer = angle;
-}
+  }
 
-izqPID.Compute();
-derPID.Compute();
-potenciaIzq = iPowI + outIzq;
-potenciaDer = iPowD + outDer;
+  real->escribirLCD(String(angle), String(outIzq) + "    " + String(outDer));
 
+  izqPID.Compute();
+  derPID.Compute();
+  potenciaIzq = iPowI + outIzq;
+  potenciaDer = iPowD + outDer;
 
-
+  delay(20);
 }
 
 void Movimiento::pasaRampa(char cDir){
@@ -487,7 +497,7 @@ void Movimiento::pasaRampa(char cDir){
 			break;
 	}
 	while(real->sensarRampa() < -iRampa || real->sensarRampa() > iRampa){
-		potenciasDerecho(iPowDD, iPowII);
+		potenciasDerecho(iPowDD, iPowII, cDir);
 		Front(iPowDD, iPowII);
 	}
 	cParedes = 0;
@@ -559,7 +569,7 @@ void Movimiento::retroceder(Tile tMapa[3][10][10],  char cDir, uint8_t &iCol, ui
 	break;
   }
   while(eCount1 < encoder30) {
-	potenciasDerecho(iPowDD, iPowII);
+	potenciasDerecho(iPowDD, iPowII, cDir);
 	Back(iPowII, iPowDD);
   }
   eCount1 = 0;
@@ -595,7 +605,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   real->apantallanteLCD("FRONT");
   while(Serial2.available())
 	cVictima = (char)Serial2.read();
-  AlineaPA(cDir);
+  /*AlineaPA(cDir);
   switch(cDir) {
   case 'n':
 	fDeseado = fRef;
@@ -609,36 +619,37 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   case 'w':
 	fDeseado = fRef < 90 ? fRef+270 : fRef-90;
 	break;
-  }
+}*/
 
   eCount1 = 0;
+  Front(iPowDD, iPowII);
   while(eCount1 < (encoder30 / 2) && real->sensarEnfrentePared() > 7) {
-	potenciasDerecho(iPowDD, iPowII);
-	Front(iPowDD, iPowII);
+  	potenciasDerecho(iPowDD, iPowII, cDir);
+    velocidad(iPowII, iPowDD);
 
-	//Calor
-	while(Serial2.available())
-	  cVictima = (char)Serial2.read();
+  	//Calor
+  	/*while(Serial2.available())
+  	  cVictima = (char)Serial2.read();
 
-	if(cVictima&0b00000010 && !tMapa[iPiso][iRow][iCol].victima()) {
-	  int countT = eCount1;
-	  iCase = (cVictima&0b00000001) ? 1 : 2;
-	  real->escribirLCD("Victima");
-	  Stop();
-	  dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase);
-	  eCount1 = countT;
-	}
-	switchCase = real->switches();
-	if(switchCase > 0 && real->sensarEnfrente()) {
-	  acomodaChoque(switchCase);
-	}
+  	if(cVictima&0b00000010 && !tMapa[iPiso][iRow][iCol].victima()) {
+  	  int countT = eCount1;
+  	  iCase = (cVictima&0b00000001) ? 1 : 2;
+  	  real->escribirLCD("Victima");
+  	  Stop();
+  	  dejarKit(tMapa, cDir, iCol, iRow, iPiso, iCase);
+  	  eCount1 = countT;
+  	}*/
+  	/*switchCase = real->switches();
+  	if(switchCase > 0 && real->sensarEnfrente()) {
+  	  acomodaChoque(switchCase);
+  	}*/
 
-	//bumper
-	bumperMin = real->sensarRampaFloat() < bumperMin ? real->sensarRampaFloat() : bumperMin;
-	bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
-	if (bumperMax - bumperMin >= toleranciaBumper)
-	  tMapa[iPiso][iRow][iCol].bumper(true);
-	cVictima = 0;
+  	//bumper
+  	bumperMin = real->sensarRampaFloat() < bumperMin ? real->sensarRampaFloat() : bumperMin;
+  	bumperMax = real->sensarRampaFloat() > bumperMax ? real->sensarRampaFloat() : bumperMax;
+  	if (bumperMax - bumperMin >= toleranciaBumper)
+  	  tMapa[iPiso][iRow][iCol].bumper(true);
+  	cVictima = 0;
   }
 
   switch(cDir) {
@@ -659,7 +670,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
   contadorIzq = contadorDer = 0;
 
   while(eCount1 < encoder30  && real->sensarEnfrentePared() > 7) {
-	potenciasDerecho(iPowDD, iPowII);
+	potenciasDerecho(iPowDD, iPowII, cDir);
 	Front(iPowDD, iPowII);
 
 	//Calor
@@ -686,9 +697,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_
 	  tMapa[iPiso][iRow][iCol].bumper(true);
 	cVictima = 0;
   }
-  /*StopX();
-  delay(5);
-  Stop();*/
+  Stop();
   if(contadorIzq > 4)
 	cParedes |= 0b00000100;
 

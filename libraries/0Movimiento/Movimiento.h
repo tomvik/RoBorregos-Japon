@@ -14,7 +14,6 @@ public:
 	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
-	void StopX();
 	void StopInterrupt();
 	void Front(uint8_t powD, uint8_t powI);
 	void Back(uint8_t powD, uint8_t powI);
@@ -24,7 +23,7 @@ public:
 	void checarBumper();
 	void SepararPared();
 	void AlineaPA(char cDir);
-	void potenciasDerecho(int &potenciaDer, int &potenciaIzq);
+	void potenciasDerecho(int &potenciaDer, int &potenciaIzq, char cDir);
 	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase);
 	void ErrorGradosVuelta(float &error);
 	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
