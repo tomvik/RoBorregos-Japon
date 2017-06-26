@@ -6,12 +6,12 @@
 #include <SensarRealidad.h>
 #include <Tile.h>
 
-//Mapa, direccion, col, row, piso, caso, fdeseado
+//Mapa, direccion, col, row, piso, caso, fdeseado e
 
 class Movimiento{
 public:
 	//////////////////////////////////Constructores////////////////////////////////////
-	Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *row);
+	Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip);
 	//////////////////////////////////Movimientos//////////////////////////////////////
 	void Stop();
 	void StopInterrupt();
@@ -22,34 +22,42 @@ public:
 	void acomodaChoque(uint8_t switchCase);
 	void checarBumper();
 	void SepararPared();
-	void AlineaPA(char cDir);
+	void AlineaPA();
 	void potenciasDerecho(int &potenciaDer, int &potenciaIzq);
-	void dejarKit(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, uint8_t iCase);
+	void dejarKit(Tile tMapa[3][10][10], uint8_t iCase);
 	void ErrorGradosVuelta(float &error);
-	void VueltaGyro(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, bool kit);
-	void pasaRampa(char cDir);
-	void retroceder(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
-	void avanzar(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
-	void derecha(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
-	void izquierda(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	void pasaRampa();
+	void retroceder(Tile tMapa[3][10][10]);
+	void avanzar(Tile tMapa[3][10][10]);
+	void derecha(Tile tMapa[3][10][10]);
+	void izquierda(Tile tMapa[3][10][10]);
 	void encoder();
 	char getParedes();
+	void vueltaIzq(Tile tMapa[3][10][10]);
+	void vueltaDer(Tile tMapa[3][10][10]);
+	void velocidad(int PowI, int PowD);
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
-	void hacerInstrucciones(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, String sMov);
-	bool goToVisitado(Tile tMapa[3][10][10], char &cDir, char cD, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	void hacerInstrucciones(Tile tMapa[3][10][10], String sMov);
+
+	//////////////////////////////////Buscar cuadro////////////////////////////////////
+	bool goToVisitado(Tile tMapa[3][10][10], char cD);
 
 	////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
-	bool decidir(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
-	bool decidir_Prueba(Tile tMapa[3][10][10], char &cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	bool decidir(Tile tMapa[3][10][10]);
+	bool decidir_Prueba(Tile tMapa[3][10][10]);
 private:
-	uint8_t iPowI, iPowD, iTamano, kParedAlinear, iRampa, contadorIzq, contadorDer;
-	int encoder30, eCount1, pos;
-	float kpA, kp, fRef, fDeseado;
+	uint8_t *iCol, *iRow, *iPiso;
+	uint8_t iPowI, iPowD, contadorIzq, contadorDer;
+	volatile int eCount1;
+	int servo_pos, vueltasDadas;
+	float fRef, fDeseado, fSetPoint;
 	SensarMapa mapa;
 	SensarRealidad *real;
 	bool alinear;
-	char cVictima, cParedes;
+	char cVictima, cParedes, *cDir;
+	unsigned long lastTime;
+	double ITerm, lastInput;
 };
 
 #endif

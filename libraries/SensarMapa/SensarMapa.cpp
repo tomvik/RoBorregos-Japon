@@ -1,4 +1,4 @@
-#include "Arduino.h"
+ #include "Arduino.h"
 #include "SensarMapa.h"
 
 //Esta clase usa mucho la clase Tile.h y es usada por la clase Movimiento.h
@@ -18,10 +18,8 @@ d = down = abajo
 
 //Constructores, modificar el tamaño
 SensarMapa::SensarMapa(){ iTamano = 10; iBumper = 8; }
-SensarMapa::SensarMapa(uint8_t iT){ iTamano = iT; iBumper = 8; }
-
 //Regresa TRUE si es que NO hay una pared a donde se quiere checar
-bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
+bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase){
 	switch(cCase){
 		case 'r':		//Derecha
 			switch(cDir){
@@ -71,7 +69,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uin
 	}
 }
 //Regresa TRUE si NO ha sido visitado
-bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
+bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase){
 	switch(cCase){
 		case 'r':				//Derecha
 			switch(cDir){
@@ -120,7 +118,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], char cDir, uint8_t iCol, u
 	}
 }
 //Regresa TRUE si EXISTE la coordenada
-bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso,  char cCase){
+bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase){
 	switch(cCase){
 		case 'r':				//Derecha
 			switch(cDir){
@@ -169,7 +167,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uin
 	}
 }
 //FUNCION RECURSIVA, USA ALGORITMO DEPTH FIRST SEARCH
-void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso){
+void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso){
 	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
 	//hay que poner primero el del rango, es como una "seguridad" para lo demás. Luego no sé si sería mejor poner el de la pared o existe (Cual es falso más seguido?)
 	//Verifica dependiendo hacia dónde está viendo el robot. Así sabe exactamente cuantos movimientos es para hacer cierta instrucción.
@@ -284,7 +282,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa
 }
 //Compara las distancias de un NO VISITADO al inicio con los demás y modifica las variables iNCol e iNRow para indicar a dónde ir.
 //Esta función se puede modificar recibiendo un "caso" para decidir si busca No visitado ó Rampa ó Inicio ó lo que sea.
-bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char cD, uint8_t iCol, uint8_t iRow, uint8_t &iNCol, uint8_t &iNRow, uint8_t &iPiso){
+bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char cD, uint8_t iCol, uint8_t iRow, uint8_t &iNCol, uint8_t &iNRow, uint8_t iPiso){
 	//Lo declaré en un 255 porque es casi imposible que haya uno mayor a eso.
 	uint8_t iC = 255;
 	//Esto es por si ya no hay ningun NO Visitado o un Inicio en el piso actual. Para buscar así la rampa que lo lleve a un piso pasado.
@@ -325,7 +323,7 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[10][10], Tile tMapa[3][10][10], char 
 }
 //Con el resultado de la función anterior, crea las instrucciones de cómo llegar hasta ese punto yendose en reversa.
 //También para simplicidad, todo lo hace viendo a su "norte"
-String SensarMapa::getInstrucciones(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], uint8_t iNCol, uint8_t iNRow, uint8_t &iPiso){
+String SensarMapa::getInstrucciones(uint8_t iMapa[10][10], char cMapa[10][10], Tile tMapa[3][10][10], uint8_t iNCol, uint8_t iNRow, uint8_t iPiso){
 	String sIns = "";
 	sIns += cMapa[iNRow][iNCol];
 	uint8_t iR, iU, iL, iD;

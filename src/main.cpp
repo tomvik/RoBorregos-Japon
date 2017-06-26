@@ -19,7 +19,7 @@ void setup() {
       Serial2.read();
 
   SensarRealidad *sensar = new SensarRealidad;
-  mover = new Movimiento(185, 185, 10, sensar);
+  mover = new Movimiento(180, 180, 10, sensar);
   Mapear mapa(sensar, mover);
   Tile tMapa[3][10][10];
   mover->Stop();
@@ -33,25 +33,26 @@ void setup() {
   tMapa[iPiso][iCol][iRow].inicio(true);
   tMapa[iPiso][iCol][iRow].visitado(true);
 
-  if(sensar->sensarAtras())
+  /*
+    EN LO QUE SE CONECTA EL SENSOR DE ATRAS, PONE PARED
     tMapa[iPiso][iRow + 1][iCol].existe(true);
-  else
+  else*/
     tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 
   if(sensar->sensarEnfrente())
     tMapa[iPiso][iRow - 1][iCol].existe(true);
   else
-    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow - 1][iCol]);
+    tMapa[iPiso][iRow][iCol].arriba(true, &tMapa[iPiso][iRow - 1][iCol]);
 
   if(sensar->sensarDerecha())
     tMapa[iPiso][iRow][iCol + 1].existe(true);
   else
-    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol + 1]);
+    tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol + 1]);
 
   if(sensar->sensarIzquierda())
     tMapa[iPiso][iRow][iCol - 1].existe(true);
   else
-    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol - 1]);
+    tMapa[iPiso][iRow][iCol].izquierda(true, &tMapa[iPiso][iRow][iCol - 1]);
 
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso))
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);

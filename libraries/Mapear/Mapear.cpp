@@ -1,8 +1,5 @@
 #include "Arduino.h"
-#include "Tile.h"
-#include "SensarRealidad.h"
 #include "Mapear.h"
-#include <Movimiento.h>
 
 /*
 cDir Direccion
@@ -91,6 +88,7 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase){
 					return iRow < iTamano-1;
 			}
 	}
+	return false;
 }
 
 //Desplaza los datos HACIA ABAJO
@@ -441,7 +439,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		//tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()){
 			uint8_t iTemp = iPiso, i = 0, j;
-			robot->pasaRampa(cDir);
+			robot->pasaRampa();
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
 			bool bT = false;
 			while(i < iTamano && !bT){ //CAMBIO AQUI DE bT == false a !bT
@@ -480,7 +478,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
-			robot->pasaRampa(cDir);
+			robot->pasaRampa();
 			//Pone la posición en after rampa dependiendo de la direccion
 			iPiso = iPisoMax;
 			iCol = iRow = 4;
@@ -516,7 +514,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	}
-	else{
+	/*else{
 		if(!(robot->getParedes()&0b00000010)){
 			if(!espacio(cDir, iCol, iRow, 'e')){
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
@@ -557,7 +555,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
 			tMapa[iPiso][iRow][iCol].cuadroNegro(true);
 		}
-	}
+	}*/
 	//////////////////////////////PRUEBAS DE LOGICA/////////////////////////////////////////
 	/*char inChar;
 	Serial.println("Sensa Enfrente");
@@ -597,4 +595,44 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);*/
 	/////////////////////////////NORMAL//////////////////////////////////
+	if(mapa->sensarEnfrente()){
+		if(!espacio(cDir, iCol, iRow, 'e')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
+	}
+	//Pared
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+	//Lectura Derecha
+	//Libre
+	if(mapa->sensarDerecha()){
+		if(!espacio(cDir, iCol, iRow, 'd')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
+	}
+	//Pared
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+	//Lectura I<quierda
+	//Libre
+	if(mapa->sensarIzquierda()){
+		if(!espacio(cDir, iCol, iRow, 'i')){
+			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
+		}
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
+	}
+	//Pared
+	else
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
+	//Si es un cuadro negro
+	if(mapa->color()){
+		//Poner pared a los cuatro lados
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
+		tMapa[iPiso][iRow][iCol].cuadroNegro(true);
+	}
 }
