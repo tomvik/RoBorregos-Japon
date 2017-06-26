@@ -29,12 +29,8 @@ void setup() {
   tMapa[iPiso][iCol][iRow].inicio(true);
   tMapa[iPiso][iCol][iRow].visitado(true);
   tMapa[iPiso][iCol][iRow].existe(true);
-  if(sensar->sensarAtras()){
-    tMapa[iPiso][iRow+1][iCol].existe(true);
-  }
-  else{
-    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
-  }
+
+  tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
   if(sensar->sensarEnfrente()){
     tMapa[iPiso][iRow-1][iCol].existe(true);
   }

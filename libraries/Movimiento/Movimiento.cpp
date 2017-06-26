@@ -18,49 +18,18 @@ i = izquierda
 a = atrás
 */
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(3);//al revés
-Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);//al revés
+Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(4);
+Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(2);
-Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(4);//al revés
+Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(3);//al revés
 Servo myservo;
 
-
-#define lVictima 52
-#define lack 18
 #define pin_Servo 9
+#define lVictima 33
 //1 Enfrente derecha
 //2 Atras derecha
 //3 Enfrente izquierda
 //4 Atras izquierda
-Movimiento::Movimiento() {
-	AFMS.begin();
-	myMotorLeftF->setSpeed(iPowI);
-	myMotorLeftF->run(FORWARD);
-	myMotorLeftF->run(RELEASE);
-	myMotorLeftB->setSpeed(iPowI);
-	myMotorLeftB->run(FORWARD);
-	myMotorLeftB->run(RELEASE);
-	myMotorRightF->setSpeed(iPowD);
-	myMotorRightF->run(FORWARD);
-	myMotorRightF->run(RELEASE);
-	myMotorRightB->setSpeed(iPowD);
-	myMotorRightB->run(FORWARD);
-	myMotorRightB->run(RELEASE);
-	iPowI = iPowD = 150;
-	iTamano = 10;
-	fRef = fDeseado = eCount1 = cVictima = cParedes = 0;
-	kp = 0.2;
-	kpA = 4;
-	iRampa = 17;
-	pos = 90;
-	myservo.attach(9);
-	myservo.write(pos);
-	pinMode(lVictima,OUTPUT);
-	alinear = false;
-	kParedAlinear = 12;
-	encoder30 = 1250;
-}
-//Puede que no sea necesaria
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, uint8_t iT, SensarRealidad *r){
 	AFMS.begin();
 	myMotorLeftF->setSpeed(iPowI);
@@ -108,10 +77,7 @@ void Movimiento::Front(uint8_t PowD, uint8_t PowI){
    myMotorRightB->run(FORWARD);
 
    myMotorLeftF->run(FORWARD);
-   myMotorLeftB->run(FORWARD);
-   //while(digitalRead(lack) == 0){
-   //	Stop();
-   //}
+   myMotorLeftB->run(BACKWARD);
 }
 void Movimiento::Back(uint8_t PowD, uint8_t PowI){
    myMotorLeftF->setSpeed(PowI);
@@ -123,10 +89,7 @@ void Movimiento::Back(uint8_t PowD, uint8_t PowI){
    myMotorRightB->run(BACKWARD);
 
    myMotorLeftF->run(BACKWARD);
-   myMotorLeftB->run(BACKWARD);
-   //while(digitalRead(lack) == 0){
-   //	Stop();
-   //}
+   myMotorLeftB->run(FORWARD);
 }
 void Movimiento::Right(uint8_t PowD, uint8_t PowI){
    myMotorLeftF->setSpeed(PowI);
@@ -138,10 +101,7 @@ void Movimiento::Right(uint8_t PowD, uint8_t PowI){
    myMotorRightB->run(BACKWARD);
 
    myMotorLeftF->run(FORWARD);
-   myMotorLeftB->run(FORWARD);
-   //while(digitalRead(lack) == 0){
-   //	Stop();
-   //}
+   myMotorLeftB->run(BACKWARD);
 }
 void Movimiento::Left(uint8_t PowD, uint8_t PowI){
    myMotorLeftF->setSpeed(PowI);
@@ -153,10 +113,7 @@ void Movimiento::Left(uint8_t PowD, uint8_t PowI){
    myMotorRightB->run(FORWARD);
 
    myMotorLeftF->run(BACKWARD);
-   myMotorLeftB->run(BACKWARD);
-   //while(digitalRead(lack) == 0){
-   //	Stop();
-   //}
+   myMotorLeftB->run(FORWARD);
 }
 void Movimiento::SepararPared(){
 	unsigned long ahora = millis();
