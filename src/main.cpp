@@ -53,6 +53,12 @@ void setup() {
   else
     tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow][iCol - 1]);
 
+  while(true) {
+    //mover->vueltaIzq(cDir);
+    mover->Stop();
+    delay(2000);
+  }
+
   while (mover->decidir(tMapa, cDir, iCol, iRow, iPiso))
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
 
