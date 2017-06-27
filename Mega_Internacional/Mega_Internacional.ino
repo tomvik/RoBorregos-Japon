@@ -1,76 +1,146 @@
-#include <Wire.h>
-#include <Adafruit_Sensor.h>
-#include <Adafruit_BNO055.h>
-#include <utility/imumaths.h>
-#include <Tile.h>
-#include <SensarMapa.h>
-#include <Movimiento.h>
-#include <SensarRealidad.h>
+/*///////////Librerias////////////
+#include <Arduino.h>
 #include <Mapear.h>
-#include <Servo.h>
-
+//////////Encoders//////////////
+#define ENCODER_A 4
+#define ENCODER_B 5
+/////////Variables, mapa y sensores//////////
 uint8_t iRow = 4, iCol = 4, iPiso = 0;
-uint8_t *iR = &iRow, *iC = &iCol, *iP = &iPiso;
 char cDir = 'n';
-char *cD = &cDir;
-Movimiento *mover;
+Tile tMapa[3][10][10];
+SensarRealidad sensarr;
+///////////Apuntadores constantes a las variables y sensores//////////
+SensarRealidad * const sensar = &sensarr;
+uint8_t * const iR = &iRow;
+uint8_t * const iC = &iCol;
+uint8_t * const iP = &iPiso;
+char * const cD = &cDir;
+//////////Movimiento y mapeado del robot/////////////////////
+Movimiento robot(180, 180, sensar, cD, iC, iR, iP);
+
+Movimiento * const mover = &robot;
+
+Mapear mapa(sensar, mover);
+//////////////Funciones de encoders//////////////////
+void encoder1() {
+	mover->encoder1();
+}
+
+void encoder2() {
+	mover->encoder2();
+}
+//////////////Setup//////////////
 void setup() {
+  mover->stop();
+  sensar->apantallanteLCD("      El", "    MARIACHI");
+  //Serial
+	Serial.begin(9600);
+	Serial2.begin(115200);
+	while(Serial2.available()) {
+		Serial2.read();
+	}
+  //Interrupciones
+	attachInterrupt(ENCODER_A, encoder1, RISING);
+	attachInterrupt(ENCODER_B, encoder2, RISING);
+  //Inicializamos el mapa  
+	tMapa[iPiso][iCol][iRow].inicio(true);
+	tMapa[iPiso][iCol][iRow].visitado(true);
+	tMapa[iPiso][iCol][iRow].existe(true);
+  //Sensamos alrededor para mapear
+	if(sensar->sensarAtras()) {
+		tMapa[iPiso][iRow + 1][iCol].existe(true);
+	} else {
+		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
+	}
+	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+  //Loop en el cual recorre todo el mapa
+	while (mover->decidir(tMapa)) {
+		mover->stop();
+		mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+	}
+  //Se regresa al inicio
+	sensar->apantallanteLCD("Let's go home");
+	while(!tMapa[iPiso][iCol][iRow].inicio()) {
+		mover->goToVisitado(tMapa, 'i');
+	}
+  //Regresó al incio
+  mover->stop();
+  sensar->apantallanteLCD("      HE","LLEGADO");
+  delay(5000);
+  sensar->apantallanteLCD("    V I V A", "  M E X I C O");
+}
+
+void loop() {
+}*/
+///////////Librerias////////////
+#include <Arduino.h>
+#include <Mapear.h>
+//////////Encoders//////////////
+#define ENCODER_A 4
+#define ENCODER_B 5
+/////////Variables, mapa y mover//////////
+uint8_t iRow = 4, iCol = 4, iPiso = 0;
+char cDir = 'n';
+Tile tMapa[3][10][10];
+Movimiento *mover;
+///////////Apuntadores constantes a las variables/////////
+uint8_t * const iR = &iRow;
+uint8_t * const iC = &iCol;
+uint8_t * const iP = &iPiso;
+char * const cD = &cDir;
+//////////////Funciones de encoders//////////////////
+void encoder1() {
+  mover->encoder1();
+}
+
+void encoder2() {
+  mover->encoder2();
+}
+void setup() {
+  //Serial
   Serial.begin(9600);
   Serial2.begin(115200);
-  while(Serial2.available()){
-      Serial2.read();
+  while(Serial2.available()) {
+    Serial2.read();
   }
-  attachInterrupt(4, encoder1, RISING); 
+  //Interrupciones
+  attachInterrupt(ENCODER_A, encoder1, RISING);
+  attachInterrupt(ENCODER_B, encoder2, RISING);
+  //Resto de los objetos
   SensarRealidad sensarr;
-  SensarRealidad *sensar = &sensarr;
-  sensar->escribirLCD("El", "Mariachi");
-  Movimiento robot(150, 150, sensar, cD, iC, iR, iP);
+  SensarRealidad * const sensar = &sensarr;
+  Movimiento robot(180, 180, sensar, cD, iC, iR, iP);
   mover = &robot;
   Mapear mapa(sensar, mover);
-  
-  Tile tMapa[3][10][10];
-  
+  //El Mariachi 
+  sensar->apantallanteLCD("      El", "    MARIACHI");
+  mover->stop();
+  //Inicializamos el tile actual
   tMapa[iPiso][iCol][iRow].inicio(true);
   tMapa[iPiso][iCol][iRow].visitado(true);
   tMapa[iPiso][iCol][iRow].existe(true);
-
-  tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
-  if(sensar->sensarEnfrente()){
-    tMapa[iPiso][iRow-1][iCol].existe(true);
+  if(sensar->sensarAtras()) {
+    tMapa[iPiso][iRow + 1][iCol].existe(true);
+  } else {
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
   }
-  else{
-    tMapa[iPiso][iRow][iCol].arriba(true, &tMapa[iPiso][iRow-1][iCol]);
-  }
-  if(sensar->sensarDerecha()){
-    tMapa[iPiso][iRow][iCol+1].existe(true);
-  }
-  else{
-    tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol+1]);
-  }
-  if(sensar->sensarIzquierda()){
-    tMapa[iPiso][iRow][iCol-1].existe(true);
-  }
-  else{
-    tMapa[iPiso][iRow][iCol].izquierda(true, &tMapa[iPiso][iRow][iCol-1]);
-  }
-  mover->Stop();
-  //mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
+  mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+  //Loop en el cual recorre todo el mapa
   while (mover->decidir(tMapa)) {
-    mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
+    mover->stop();
+    mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
   }
-  sensar->escribirLCD("Let's go home");
-  while(true){
+  //Se regresa al inicio
+  sensar->apantallanteLCD("Let's go home");
+  while(!tMapa[iPiso][iCol][iRow].inicio()) {
     mover->goToVisitado(tMapa, 'i');
-    mover->Stop();
-    sensar->escribirLCD("Inicio");
   }
+  //Regresó al incio
+  mover->stop();
+  sensar->apantallanteLCD("      HE","LLEGADO");
+  delay(5000);
+  sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
-
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
-
-void encoder1() {
-  mover->encoder();
 }
