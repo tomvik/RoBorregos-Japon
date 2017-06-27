@@ -13,6 +13,7 @@ public:
 	uint8_t sensarEnfrentePared();
 	uint8_t sensarDerechaPared();
 	uint8_t sensarIzquierdaPared();
+	uint8_t sensarAtrasPared();
 	bool color();
 	byte getIMUCalStatus();
 	bool sensarEnfrente();

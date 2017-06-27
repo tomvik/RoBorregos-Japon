@@ -484,7 +484,7 @@ void Mapear::llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t 
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
-		robot->Stop();
+		robot->stop();
 		if(mapa->sensarEnfrente()){
 			if(!espacio(cDir, iCol, iRow, 'e'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');

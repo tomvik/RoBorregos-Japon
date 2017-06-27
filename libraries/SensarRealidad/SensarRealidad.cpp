@@ -115,6 +115,14 @@ bool SensarRealidad::sensarAtras() {
   distancia /= 20;
 	return distancia > 14;
 }
+
+uint8_t SensarRealidad::sensarAtrasPared() {
+  int distancia = 0;
+  for(int j = 0; j < 2; j++)
+      distancia += sensor[2].readRangeSingleMillimeters();
+  distancia /= 20;
+	return distancia;
+}
 uint8_t SensarRealidad::sensarEnfrentePared() {
   int distancia = 0;
   for(int j = 0; j < 2; j++)
