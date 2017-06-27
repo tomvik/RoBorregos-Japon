@@ -41,7 +41,8 @@ public:
 	void escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP);
 
 	//////////////////////////////Mapea//////////////////////////////////////////
-	void llenaMapa(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	void llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+	void llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
 private:
 	uint8_t iTamano, iPisoMax, iRampa;

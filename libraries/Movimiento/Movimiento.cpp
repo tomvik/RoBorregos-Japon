@@ -406,7 +406,7 @@ void Movimiento::pasaRampa() {
 	velocidad(100, 100);
 	delay(800);
 	stop();
-	if(real->sensarEnfrentePared() < kRampaLimit) {
+	if(real->sensarEnfrentePared() < 20) { //Si hay pared enfrente
 		SepararPared();
 	}
 	stop();
@@ -592,8 +592,22 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	eCount1 = eCount2 = 0;
 	if( !real->color() && real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit && real->sensarEnfrentePared() < 20) {
 		cParedes |= 0b00000010;
+<<<<<<< HEAD
 		SepararPared();
 		iCase = 0;
+=======
+    stop();
+		real->escribirLCD("Separaaaaaar", String(real->sensarEnfrentePared()));
+    delay(1000);
+		back();
+		velocidad(80, 80);
+		delay(100);
+		SepararPared();
+		iCase = 0;
+		real->escribirLCD("Acabeaaaaaa");
+    stop();
+    delay(1000);
+>>>>>>> aca288988318efaacc834a53d7da6541a0ac2463
 	}
 }
 
