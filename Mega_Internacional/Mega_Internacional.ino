@@ -56,9 +56,6 @@ void setup() {
   mover->Stop();
   //mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   while (mover->decidir(tMapa)) {
-    mover->Stop();
-    sensar->apantallanteLCD("R " + String(iRow) + " C " + String(iCol), "D " + String(cDir) + " ");
-    delay(2000);
     mapa.llenaMapa(tMapa, cDir, iCol, iRow, iPiso);
   }
   sensar->escribirLCD("Let's go home");
