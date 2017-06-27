@@ -13,7 +13,7 @@ public:
 	//////////////////////////////////Constructores////////////////////////////////////
 	Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip);
 	//////////////////////////////////Movimientos//////////////////////////////////////
-	void velocidad(int powIzq, int powDer);
+	void velocidad(uint8_t powIzq, uint8_t powDer);
 	void stop();
 	void StopInterrupt();
 	void front();
@@ -23,7 +23,7 @@ public:
 	void acomodaChoque(uint8_t switchCase);
 	void checarBumper();
 	void SepararPared();
-	void potenciasDerecho(int &potenciaIzq, int &potenciaDer);
+	void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer);
 	void dejarKit(Tile tMapa[3][10][10], uint8_t iCase);
 	// void ErrorGradosVuelta(float &error);
 	void pasaRampa();
@@ -37,6 +37,7 @@ public:
 	void vueltaIzq(Tile tMapa[3][10][10]);
 	void vueltaDer(Tile tMapa[3][10][10]);
 	void corregirIMU();
+	void alinearAtAd();
 
 	//////////////////////////////////Buscar cuadro////////////////////////////////////
 	void hacerInstrucciones(Tile tMapa[3][10][10], String sMov);

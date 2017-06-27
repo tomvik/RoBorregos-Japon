@@ -1,6 +1,5 @@
 #include "Arduino.h"
 #include "Movimiento.h"
-#include <string.h>
 #include <Servo.h>
 #include <Wire.h>
 #include <Adafruit_MotorShield.h>
@@ -39,8 +38,8 @@ Servo myservo;
 //////////////////////PID FRONT///////////////////////////
 double inIzq, outIzq, inDer, outDer, fSet;
 
-PID izqPID(&inIzq, &outIzq, &fSet, 5, 0, 0, DIRECT);
-PID derPID(&inDer, &outDer, &fSet, 5, 0, 0, REVERSE);
+PID izqPID(&inIzq, &outIzq, &fSet, 6, 0, 0, DIRECT);
+PID derPID(&inDer, &outDer, &fSet, 6, 0, 0, REVERSE);
 
 /*
    cDir (dirección)
@@ -74,17 +73,17 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	derPID.SetMode(AUTOMATIC);
 }
 
-void Movimiento::velocidad(int powIzq, int PowDer) {
+void Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 	if(powIzq < 0) powIzq = 0;
-	if(PowDer < 0) PowDer = 0;
+	if(powDer < 0) powDer = 0;
 	if(powIzq > 255) powIzq = 255;
-	if(PowDer > 255) PowDer = 255;
+	if(powDer > 255) powDer = 255;
 
 	myMotorLeftF->setSpeed(powIzq);
 	myMotorLeftB->setSpeed(powIzq);
 
-	myMotorRightF->setSpeed(PowDer);
-	myMotorRightB->setSpeed(PowDer);
+	myMotorRightF->setSpeed(powDer);
+	myMotorRightB->setSpeed(powDer);
 }
 
 
@@ -169,12 +168,12 @@ void Movimiento::corregirIMU() {
 		float fRef = 0;
 		back();
 		velocidad(80, 80);
-		delay(1000);
+		delay(1500); // TODO: Checar con sensor
 		stop();
 
-		for(int i = 0; i < 10; i++)
+		for(int i = 0; i < 5; i++)
 			fRef += real->sensarOrientacion();
-		fRef /= 10;
+		fRef /= 5;
 
 		fSetPoint = fRef;
 		fSet = fSetPoint;
@@ -314,24 +313,7 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 	velocidad(iPowI, iPowD);
 }
 
-/*
-   R I P
-   void Movimiento::ErrorGradosVuelta(float &grados) {
-          grados = real->sensarOrientacion();
-    int iM;
-    grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
-    if(grados > 180) {
-      iM = grados/180;
-      grados = -( 180 - (grados - (iM + 180)));
-    }else if(grados < -180) {
-      grados *= -1;
-      iM = grados/180;
-      grados = ( 180 - (grados - (iM + 180)));
-    }
-   }
- */
-
-void Movimiento::potenciasDerecho(int &potenciaIzq, int &potenciaDer) {
+void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 /*
    if((now - lastTime) >= kSampleTime) {
         int pDeseadoIzq = 5, pDeseadoDer = 5, potenciaIzq_Act, potenciaDer_Act, iError;
@@ -407,15 +389,13 @@ void Movimiento::potenciasDerecho(int &potenciaIzq, int &potenciaDer) {
 	derPID.Compute();
 	potenciaIzq = iPowI + outIzq;
 	potenciaDer = iPowD + outDer;
-
-	delay(20);
 }
 
 void Movimiento::pasaRampa() {
 	while(Serial2.available())
 		cVictima = (char)Serial2.read();
 	real->escribirLCD("Rampa");
-	int iPowII, iPowDD;
+	uint8_t iPowII, iPowDD;
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
 		potenciasDerecho(iPowII, iPowDD);
 		front();
@@ -464,7 +444,7 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], uint8_t iCase) {
 
 void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 	real->escribirLCD("NEGRO");
-	int iPowDD, iPowII;
+	uint8_t iPowDD, iPowII;
 	switch(*cDir)
 	{
 	case 'n':
@@ -519,15 +499,13 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	real->apantallanteLCD("AVANZAR");
 	cParedes = 0;
 	cuadrosVisitados++;
-	int iPowDD, iPowII;
-	uint8_t switchCase, iCase;
 	float bumperMin = 0.0, bumperMax = 0.0;
+	uint8_t iPowII, iPowDD, switchCase, iCase;
 
 	while(Serial2.available())
 		cVictima = (char)Serial2.read();
 
 	corregirIMU();
-
 	eCount1 = eCount2 = 0;
 	front();
 	velocidad(iPowII, iPowDD);
@@ -614,13 +592,8 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	eCount1 = eCount2 = 0;
 	if( !real->color() && real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit && real->sensarEnfrentePared() < 20) {
 		cParedes |= 0b00000010;
-		real->escribirLCD("Separar");
-		back();
-		velocidad(80, 80);
-		delay(100);
 		SepararPared();
 		iCase = 0;
-		real->escribirLCD("Acabe");
 	}
 }
 
@@ -934,3 +907,19 @@ void Movimiento::encoder2() {
 char Movimiento::getParedes() {
 	return cParedes;
 }
+
+/*
+void Movimiento::ErrorGradosVuelta(float &grados) {
+    int iM;
+		grados = real->sensarOrientacion();
+    grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
+    if(grados > 180) {
+      iM = grados/180;
+      grados = -( 180 - (grados - (iM + 180)));
+    } else if(grados < -180) {
+      grados *= -1;
+      iM = grados/180;
+      grados = ( 180 - (grados - (iM + 180)));
+  }
+}
+ */
