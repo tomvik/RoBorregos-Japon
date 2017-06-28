@@ -6,25 +6,25 @@
 #include <SensarRealidad.h>
 #include <Tile.h>
 
-//Mapa, direccion, col, row, piso, caso, fdeseado
+// Mapa, direccion, col, row, piso, caso, fdeseado
 
 class Movimiento {
   public:
     //////////////////////////////////Constructores////////////////////////////////////
     Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip);
+
     //////////////////////////////////Movimientos//////////////////////////////////////
     void velocidad(uint8_t powIzq, uint8_t powDer);
     void stop();
-    void StopInterrupt();
     void front();
     void back();
     void right();
     void left();
     void acomodaChoque(uint8_t switchCase);
-    void checarBumper();
-    void SepararPared();
+    void separarPared();
     void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer);
     void dejarKit(Tile tMapa[3][10][10], uint8_t iCase);
+
     // void ErrorGradosVuelta(float &error);
     void pasaRampa();
     void retroceder(Tile tMapa[3][10][10]);
@@ -48,16 +48,14 @@ class Movimiento {
     ////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
     bool decidir(Tile tMapa[3][10][10]);
     bool decidir_Prueba(Tile tMapa[3][10][10]);
+
   private:
-    volatile uint16_t eCount1, eCount2;
+    char cVictima, cParedes, *cDir;
     uint8_t *iCol, *iRow, *iPiso;
-    uint8_t iPowI, iPowD, contadorIzq, contadorDer;
-    int servo_pos, vueltasDadas, cuadrosVisitados;
-    float fSetPoint;
-    bool rampa;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU;
+    volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;
-    char cVictima, cParedes, *cDir;
     unsigned long lastTime;
     double iTerm, lastInput;
 };

@@ -70,6 +70,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uin
 			return !tMapa[iPiso][iRow][iCol].derecha();
 		}
 	}
+	return false;
 }
 
 // Regresa TRUE si NO ha sido visitado
@@ -120,6 +121,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[3][10][10], char cDir, uint8_t iCol, u
 			return !(tMapa[iPiso][iRow][iCol+1].visitado());
 		}
 	}
+	return false;
 }
 
 // Regresa TRUE si EXISTE la coordenada
@@ -170,6 +172,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uin
 			return (tMapa[iPiso][iRow][iCol+1].existe());
 		}
 	}
+	return false;
 }
 
 // FUNCION RECURSIVA, USA ALGORITMO DEPTH FIRST SEARCH
