@@ -4,119 +4,119 @@
 #include "Arduino.h"
 
 /*
-*Podria considerarse usar bitset, hace en automatico todo esto...
-*Usar Macros para evitar el if en los Setters
-#define victima(true) dato1|='\xnn'
-#define victima(false) dato1&='\xnn'
-*/
+ * Podria considerarse usar bitset, hace en automatico todo esto...
+ * Usar Macros para evitar el if en los Setters
+ #define victima(true) dato1|='\xnn'
+ #define victima(false) dato1&='\xnn'
+ */
 
-class Tile{
-    public:
-        //Constructor
-        Tile();
-        //Getters
-        /*
-        Con & and comprobamos si es 0 o 1
-         Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
-        Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
-        */
-        bool arriba();
+class Tile {
+public:
+//Constructor
+Tile();
+//Getters
+/*
+   Con & and comprobamos si es 0 o 1
+   Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
+   Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
+ */
+bool arriba();
 
-        bool derecha();
+bool derecha();
 
-        bool abajo();
+bool abajo();
 
-        bool izquierda();
+bool izquierda();
 
-        bool victima();
+bool victima();
 
-        bool cuadroNegro();
+bool cuadroNegro();
 
-        bool checkpoint();
+bool checkpoint();
 
-        bool visitado();
+bool visitado();
 
-        bool inicio();
+bool inicio();
 
-        bool rampaArriba();
+bool rampaArriba();
 
-        bool rampaAbajo();
+bool rampaAbajo();
 
-        bool bumper();
+bool bumper();
 
-        bool existe();
+bool existe();
 
-        uint8_t piso();
+uint8_t piso();
 
-        bool victimaArriba();
+bool victimaArriba();
 
-        bool victimaDerecha();
+bool victimaDerecha();
 
-        bool victimaAbajo();
+bool victimaAbajo();
 
-        bool victimaIzquierda();
+bool victimaIzquierda();
 
-        //bool visualArriba();
+//bool visualArriba();
 
-        //bool visualDerecha();
+//bool visualDerecha();
 
-        //bool visualAbajo();
+//bool visualAbajo();
 
-        //bool visualIzquierda();
-        //Setters
-        /*
-        Nota: Los datos booleanos si true=1
-        Con | or ponemos el 1 que manden, &and ponemos 0
-        */
-        void victima(const bool &b);
+//bool visualIzquierda();
+//Setters
+/*
+   Nota: Los datos booleanos si true=1
+   Con | or ponemos el 1 que manden, &and ponemos 0
+ */
+void victima(const bool &b);
 
-        void cuadroNegro(const bool &b);
+void cuadroNegro(const bool &b);
 
-        void checkpoint(const bool &b);
+void checkpoint(const bool &b);
 
-        void visitado(const bool &b);
+void visitado(const bool &b);
 
-        void inicio(const bool &b);
+void inicio(const bool &b);
 
-        void rampaArriba(const bool &b);
+void rampaArriba(const bool &b);
 
-        void bumper(const bool &b);
+void bumper(const bool &b);
 
-        void arriba(const bool &b, Tile *laDeArriba);
+void arriba(const bool &b, Tile *laDeArriba);
 
-        void abajo(const bool &b, Tile *laDeAabajo);
+void abajo(const bool &b, Tile *laDeAabajo);
 
-        void derecha(const bool &b, Tile *laDeDerecha);
+void derecha(const bool &b, Tile *laDeDerecha);
 
-        void izquierda(const bool &b, Tile *laDeIzquierda);
+void izquierda(const bool &b, Tile *laDeIzquierda);
 
-        void existe(const bool &b);
+void existe(const bool &b);
 
-        void piso(const int &i);
+void piso(const int &i);
 
-        void rampaAbajo(const bool &b);
+void rampaAbajo(const bool &b);
 
-        //void victimaArriba(const bool &b);
+//void victimaArriba(const bool &b);
 
-        //void victimaDerecha(const bool &b);
+//void victimaDerecha(const bool &b);
 
-        //void victimaAbajo(const bool &b);
+//void victimaAbajo(const bool &b);
 
-        //void victimaIzquierda(const bool &b);
+//void victimaIzquierda(const bool &b);
 
-        //void visualArriba(const bool &b);
+//void visualArriba(const bool &b);
 
-        //void visualDerecha(const bool &b);
+//void visualDerecha(const bool &b);
 
-        //void visualAbajo(const bool &b);
+//void visualAbajo(const bool &b);
 
-        //void visualIzquierda(const bool &b);
+//void visualIzquierda(const bool &b);
 
-    private:
-        char dato1, dato2/*, dato3*/;
-            //dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
-            //dato2,  //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper...........//Primeros 3 usados para enumeración de piso
-            //dato3; //vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
+private:
+char dato1, dato2 /*, dato3*/;
+//dato1, //arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
+//dato2,  //0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper...........//Primeros 3 usados para enumeración de piso
+//dato3; //vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
 };
 
 #endif
