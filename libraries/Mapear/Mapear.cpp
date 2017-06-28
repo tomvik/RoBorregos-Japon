@@ -485,7 +485,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, 
 			afterRampa(cDir, iCol, iRow);
 		}
 		robot->stop();
-		if(mapa->sensarEnfrente()) {
+		if(mapa->caminoEnfrente()) {
 			if(!espacio(cDir, iCol, iRow, 'e'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
@@ -495,7 +495,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, 
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 		//Lectura Derecha
 		//Libre
-		if(mapa->sensarDerecha()) {
+		if(mapa->caminoDerecha()) {
 			if(!espacio(cDir, iCol, iRow, 'd'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
@@ -505,7 +505,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, 
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 		//Lectura I<quierda
 		//Libre
-		if(mapa->sensarIzquierda()) {
+		if(mapa->caminoIzquierda()) {
 			if(!espacio(cDir, iCol, iRow, 'i'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
@@ -611,7 +611,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 		robot->stop();
 	}
 	/////////////////////////////NORMAL//////////////////////////////////
-	if(mapa->sensarEnfrente()) {
+	if(mapa->caminoEnfrente()) {
 		if(!espacio(cDir, iCol, iRow, 'e')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 		}
@@ -622,7 +622,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 	//Lectura Derecha
 	//Libre
-	if(mapa->sensarDerecha()) {
+	if(mapa->caminoDerecha()) {
 		if(!espacio(cDir, iCol, iRow, 'd')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 		}
@@ -633,7 +633,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 	//Lectura I<quierda
 	//Libre
-	if(mapa->sensarIzquierda()) {
+	if(mapa->caminoIzquierda()) {
 		if(!espacio(cDir, iCol, iRow, 'i')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 		}

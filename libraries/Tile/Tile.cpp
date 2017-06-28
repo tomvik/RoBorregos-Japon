@@ -1,117 +1,124 @@
-#include "Arduino.h"
-#include "Tile.h"
+#include <Arduino.h>
+#include <Tile.h>
 
 //Constructor
-Tile::Tile(){
+Tile::Tile() {
 	dato1 = dato2 = /*dato3 =*/ 0;
 }
 
+// dato1: arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
+// dato2: 0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper (Primeros 3 usados para enumeración de piso)
+// dato3: vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
 
-//Getters
+
+// Getters
 /*
    Con & and comprobamos si es 0 o 1
    Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
-   Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
+   Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ASCII
  */
 
-//arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
-//0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper
-bool Tile::arriba(){
-	return dato1&'\x80';//0b10000000;
+bool Tile::arriba() {
+	return dato1 & '\x80'; // 0b10000000;
 }
 
-bool Tile::derecha(){
-	return dato1&'\x40';//0b01000000;
+bool Tile::derecha() {
+	return dato1 & '\x40'; // 0b01000000;
 }
 
-bool Tile::abajo(){
-	return dato1&'\x20';//0b00100000;
+bool Tile::abajo() {
+	return dato1 & '\x20'; // 0b00100000;
 }
 
-bool Tile::izquierda(){
-	return dato1&'\x10';//0b00010000;
+bool Tile::izquierda() {
+	return dato1 & '\x10'; // 0b00010000;
 }
 
-bool Tile::victima(){
-	return dato1&'\x8';//0b00001000;
+bool Tile::victima() {
+	return dato1 & '\x8'; // 0b00001000;
 }
 
-bool Tile::cuadroNegro(){
-	return dato1&'\x4';//0b00000100;
+bool Tile::cuadroNegro() {
+	return dato1 & '\x4'; // 0b00000100;
 }
 
-bool Tile::checkpoint(){
-	return dato1&'\x2';//0b00000010;
+bool Tile::checkpoint() {
+	return dato1 & '\x2'; // 0b00000010;
 }
 
-bool Tile::visitado(){
-	return dato1&'\x1';//0b00000001;
+bool Tile::visitado() {
+	return dato1 & '\x1'; // 0b00000001;
 }
 
-bool Tile::inicio(){
-	return dato2&'\x4';//0b00000100;
-}
 
-bool Tile::rampaArriba(){
-	return dato2&'\x2';//0b00000010;
-}
-
-bool Tile::bumper(){
-	return dato2&'\x1';//0b00000001;
-}
-
-bool Tile::existe(){
-	return dato2&'\x8';//0b00001000;
-}
-
-bool Tile::rampaAbajo(){
-	return dato2&'\x10';//0b00010000;
-}
-
-uint8_t Tile::piso(){
-	if(dato2&'\x20') { //X1
-		if(dato2&'\x40') //1X
+uint8_t Tile::piso() {
+	if(dato2 & '\x20') { // X1
+		if(dato2 & '\x40') // 1X
 			return 3;
 		return 2;
 	}
-	if(dato2&'\x40')
+	if(dato2 & '\x40')
 		return 1;
 	return 0;
 }
+
+bool Tile::existe() {
+	return dato2 & '\x8'; // 0b00001000;
+}
+
+bool Tile::rampaAbajo() {
+	return dato2 & '\x10'; // 0b00010000;
+}
+
+bool Tile::inicio() {
+	return dato2 & '\x4'; // 0b00000100;
+}
+
+bool Tile::rampaArriba() {
+	return dato2 & '\x2'; // 0b00000010;
+}
+
+bool Tile::bumper() {
+	return dato2 & '\x1'; // 0b00000001;
+}
+
+
 /*
-   bool Tile::victimaArriba(){
-    return dato3&'\x80';
+   bool Tile::victimaArriba() {
+        return dato3 & '\x80';
    }
 
-   bool Tile::victimaDerecha(){
-    return dato3&'\x40';
+   bool Tile::victimaDerecha() {
+        return dato3 & '\x40';
    }
 
-   bool Tile::victimaAbajo(){
-    return dato3&'\x20';
+   bool Tile::victimaAbajo() {
+        return dato3 & '\x20';
    }
 
-   bool Tile::victimaIzquierda(){
-    return dato3&'\x10';
-   }*/
+   bool Tile::victimaIzquierda() {
+        return dato3 & '\x10';
+   }
 
-/*bool Tile::visualArriba(){
-    return dato3&'\x8';
+   bool Tile::visualArriba() {
+        return dato3 & '\x8';
    }
-   bool Tile::visualDerecha(){
-    return dato3&'\x4';
+   bool Tile::visualDerecha() {
+        return dato3 & '\x4';
    }
-   bool Tile::visualAbajo(){
-    return dato3&'\x2';
+   bool Tile::visualAbajo() {
+        return dato3 & '\x2';
    }
-   bool Tile::visualIzquierda(){
-    return dato3&'\x1';
-   }*/
+   bool Tile::visualIzquierda() {
+        return dato3 & '\x1';
+   }
+ */
+
 
 //Setters
 /*
    Nota: Los datos booleanos si true=1
-   Con | or ponemos el 1 que manden, &and ponemos 0
+   Con | or ponemos el 1 que manden,  & and ponemos 0
  */
 void Tile::victima(const bool &b){
 	dato1 |= (b<<3);
@@ -145,23 +152,23 @@ void Tile::rampaAbajo(const bool &b){
 	dato2 |= (b<<4);
 }
 
-void Tile::piso(const int &i){
+void Tile::piso(const int  & i){
 	switch(i) {
 	case 0:
-		dato2&='\xbf'; //0X
-		dato2&='\xdf'; //X0
+		dato2 &= '\xbf'; // 0X
+		dato2 &= '\xdf'; // X0
 		break;
 	case 1:
-		dato2|='\x40'; //1X
-		dato2&='\xdf'; //X0
+		dato2 |= '\x40'; // 1X
+		dato2 &= '\xdf'; // X0
 		break;
 	case 2:
-		dato2&='\xbf'; //0X
-		dato2|='\x20'; //X1
+		dato2 &= '\xbf'; // 0X
+		dato2 |= '\x20'; // X1
 		break;
 	case 3:
-		dato2|='\x40'; //1X
-		dato2|='\x20'; //X1
+		dato2 |= '\x40'; // 1X
+		dato2 |= '\x20'; // X1
 		break;
 	}
 }
@@ -195,32 +202,34 @@ void Tile::existe(const bool &b){
 	dato2 |= (b<<3);
 }
 
+
 /*
-   void Tile::victimaArriba(const bool &b){
-    dato3 |= (b<<7);
-   }
+void Tile::victimaArriba(const bool &b){
+	dato3 |= (b<<7);
+}
 
-   void Tile::victimaDerecha(const bool &b){
-    dato3 |= (b<<6);
-   }
+void Tile::victimaDerecha(const bool &b){
+	dato3 |= (b<<6);
+}
 
-   void Tile::victimaAbajo(const bool &b){
-    dato3 |= (b<<5);
-   }
+void Tile::victimaAbajo(const bool &b){
+	dato3 |= (b<<5);
+}
 
-   void Tile::victimaIzquierda(const bool &b){
-    dato3 |= (b<<4);
-   }*/
+void Tile::victimaIzquierda(const bool &b){
+	dato3 |= (b<<4);
+}
 
-/*void Tile::visualArriba(const bool &b){
-    dato3 |= (b<<3);
-   }
-   void Tile::visualDerecha(const bool &b){
-    dato3 |= (b<<2);
-   }
-   void Tile::visualAbajo(const bool &b){
-    dato3 |= (b<<1);
-   }
-   void Tile::visualIzquierda(const bool &b){
-    dato3 |= b;
-   }*/
+void Tile::visualArriba(const bool &b){
+	dato3 |= (b<<3);
+}
+void Tile::visualDerecha(const bool &b){
+	dato3 |= (b<<2);
+}
+void Tile::visualAbajo(const bool &b){
+	dato3 |= (b<<1);
+}
+void Tile::visualIzquierda(const bool &b){
+	dato3 |= b;
+}
+*/

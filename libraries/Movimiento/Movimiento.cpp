@@ -140,10 +140,10 @@ void Movimiento::left() {
 
 void Movimiento::SepararPared() {
 	unsigned long ahora = millis();
-	uint8_t iActual = real->sensarEnfrentePared(), iPowDD;
+	uint8_t iActual = real->getDistanciaEnfrente(), iPowDD;
 	real->escribirLCD("SEPARA");
 	while (iActual != kDistanciaEnfrente && ahora+2000 > millis()) {
-		iActual = real->sensarEnfrentePared();
+		iActual = real->getDistanciaEnfrente();
 		if(iActual < kDistanciaEnfrente) { //Muy cerca
 			iPowDD = 80 + (kDistanciaEnfrente-iActual);
 			back();
@@ -164,7 +164,7 @@ void Movimiento::SepararPared() {
 }
 
 void Movimiento::corregirIMU() {
-	if(!(real->sensarAtras()) && (vueltasDadas > 4 || cuadrosVisitados > 8 || rampa)) {
+	if(!(real->caminoAtras()) && (vueltasDadas > 4 || cuadrosVisitados > 8 || rampa)) {
 		real->escribirLCD("corregir IMU");
 		float fRef = 0;
 		back();
@@ -173,7 +173,7 @@ void Movimiento::corregirIMU() {
 		stop();
 
 		for(int i = 0; i < 5; i++)
-			fRef += real->sensarOrientacion();
+			fRef += real->getAngulo();
 		fRef /= 5;
 
 		fSetPoint = fRef;
@@ -181,8 +181,8 @@ void Movimiento::corregirIMU() {
 
 		front();
 		velocidad(80, 80);
-		while(real->sensarAtrasPared() < 4) {
-			real->escribirLCD(String(real->sensarAtrasPared()));
+		while(real->getDistanciaAtras() < 4) {
+			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		stop();
 
@@ -335,7 +335,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		// 7 adelante
 		// 6 atras
 
-		int distanciaIzq = real->sensarIzquierdaPared(), distanciaDer = real->sensarDerechaPared(), iError;
+		int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError;
 		if(distanciaIzq < 18 && distanciaDer < 18) {
 			iError = distanciaDer - distanciaIzq;
 			iTerm += iError;
@@ -403,7 +403,7 @@ void Movimiento::pasaRampa() {
 	velocidad(100, 100);
 	delay(800);
 	stop();
-	if(real->sensarEnfrentePared() < 20) { //Si hay pared enfrente
+	if(real->getDistanciaEnfrente() < 20) { //Si hay pared enfrente
 		SepararPared();
 	}
 	stop();
@@ -507,7 +507,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 
 	velocidad(iPowI, iPowD);
 	front();
-	while(eCount1 + eCount2 < kEncoder15 && real->sensarEnfrentePared() >= kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() >= kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
 		velocidad(iPowII, iPowDD);
 
@@ -524,7 +524,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 		   eCount1 = countT;
 		   }*/
 		/*switchCase = real->switches();
-		   if(switchCase > 0 && real->sensarEnfrente()) {
+		   if(switchCase > 0 && real->caminoEnfrente()) {
 		   acomodaChoque(switchCase);
 		   }*/
 
@@ -553,7 +553,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 
 	contadorIzq = contadorDer = 0;
 
-	while(eCount1 + eCount2 < kEncoder30  && real->sensarEnfrentePared() > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
 		front();
 		velocidad(iPowII, iPowDD);
@@ -569,7 +569,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 			dejarKit(tMapa, iCase);
 		}
 		switchCase = real->switches();
-		if(switchCase > 0 && real->sensarEnfrente()) {
+		if(switchCase > 0 && real->caminoEnfrente()) {
 			acomodaChoque(switchCase);
 		}
 
@@ -588,7 +588,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 		cParedes |= 0b00000001;
 
 	eCount1 = eCount2 = 0;
-	if( !real->color() && real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit && real->sensarEnfrentePared() < 20) {
+	if( !real->color() && real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit && real->getDistanciaEnfrente() < 20) {
 		cParedes |= 0b00000010;
 		SepararPared();
 		iCase = 0;
@@ -736,7 +736,7 @@ bool Movimiento::decidir(Tile tMapa[3][10][10]) {
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder(tMapa);
 	}
-	if(real->sensarEnfrentePared() < 20) {
+	if(real->getDistanciaEnfrente() < 20) {
 		SepararPared();
 	}
 	uint8_t iCase;
@@ -910,7 +910,7 @@ char Movimiento::getParedes() {
 /*
    void Movimiento::ErrorGradosVuelta(float &grados) {
     int iM;
-                grados = real->sensarOrientacion();
+                grados = real->getAngulo();
     grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
     if(grados > 180) {
       iM = grados/180;
