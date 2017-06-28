@@ -47,7 +47,7 @@ class Movimiento {
 
     ////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
     bool decidir(Tile tMapa[3][10][10]);
-    bool decidir_Prueba(Tile tMapa[3][10][10]);
+    // bool decidir_Prueba(Tile tMapa[3][10][10]);
 
   private:
     char cVictima, cParedes, *cDir;

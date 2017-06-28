@@ -8,7 +8,7 @@
 
 //////////////////////Define constants///////////////////////////
 const uint8_t kToleranciaBumper = 10;
-const double kPrecisionImu = 5.0;
+const double kPrecisionImu = 4.85;
 const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
 const double kI_Front_Pared = 0.03875;
@@ -73,7 +73,6 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	PID_IMU_izq.SetMode(AUTOMATIC);
 	PID_IMU_der.SetMode(AUTOMATIC);
 }
-
 
 void Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 	if(powIzq < 0) powIzq = 0;
@@ -170,7 +169,7 @@ void Movimiento::corregirIMU() {
 		double fRef = 0;
 		back();
 		velocidad(80, 80);
-		while(real->getDistanciaAtras() > 3) {
+		while(real->getDistanciaAtras() > 30) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		delay(500); // TODO: Checar con sensor
@@ -183,7 +182,7 @@ void Movimiento::corregirIMU() {
 
 		front();
 		velocidad(80, 80);
-		while(real->getDistanciaAtras() < 4) {
+		while(real->getDistanciaAtras() < 40) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		stop();
@@ -334,11 +333,11 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		// 6 atras
 
 		int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError;
-		if(distanciaIzq < 18 && distanciaDer < 18) {
+		if(distanciaIzq < 180 && distanciaDer < 180) {
 			iError = distanciaDer - distanciaIzq;
 			iTerm += iError;
-			if(iTerm > 30) iTerm = 30;
-			else if(iTerm < -30) iTerm = -30;
+			if(iTerm > 300) iTerm = 300;
+			else if(iTerm < -300) iTerm = -300;
 
 			contadorIzq++;
 			contadorDer++;
@@ -355,24 +354,24 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 				// Alinearse con las dos paredes
 				// TODO
 			}
-		} else if(distanciaIzq < 15) {
+		} else if(distanciaIzq < 180) {
 			contadorIzq++;
 			iError = kParedDeseadoIzq - distanciaIzq;
 
 			// debe ser negativo, creo
 			iTerm -= iError;
-			if(iTerm > 30) iTerm = 30;
-			else if(iTerm < -30) iTerm = -30;
+			if(iTerm > 300) iTerm = 300;
+			else if(iTerm < -300) iTerm = -300;
 
 			outIzqPARED = iError * kP_Front_Pared;
 			outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
-		} else if(distanciaDer < 15) {
+		} else if(distanciaDer < 180) {
 			contadorDer++;
 			iError = kParedDeseadoDer - distanciaDer;
 
 			iTerm += iError;
-			if(iTerm > 30) iTerm = 30;
-			else if(iTerm < -30) iTerm = -30;
+			if(iTerm > 300) iTerm = 300;
+			else if(iTerm < -300) iTerm = -300;
 
 			outIzqPARED = -iError * kP_Front_Pared;
 			outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
@@ -402,7 +401,7 @@ void Movimiento::pasaRampa() {
 	velocidad(100, 100);
 	delay(800);
 	stop();
-	if(real->getDistanciaEnfrente() < 20) { //Si hay pared enfrente
+	if(real->getDistanciaEnfrente() < 200) { //Si hay pared enfrente
 		separarPared();
 	}
 	stop();
@@ -731,13 +730,14 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	return false;
 }
 
+
 //La hice bool para que de una forma estuviera como condición de un loop, pero aún no se me ocurre cómo
 bool Movimiento::decidir(Tile tMapa[3][10][10]) {
 	stop();
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder(tMapa);
 	}
-	if(real->getDistanciaEnfrente() < 20) {
+	if(real->getDistanciaEnfrente() < 200) {
 		separarPared();
 	}
 	uint8_t iCase;
@@ -790,7 +790,7 @@ bool Movimiento::decidir(Tile tMapa[3][10][10]) {
 	}
 }
 
-bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10]) {
+/*bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10]) {
 	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
 	tMapa[*iPiso][*iRow][*iCol].existe(true);
 	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
@@ -894,7 +894,7 @@ bool Movimiento::decidir_Prueba(Tile tMapa[3][10][10]) {
 		//Llama la función recursiva
 		return goToVisitado(tMapa, 'n');
 	}
-}
+}*/
 
 void Movimiento::encoder1() {
 	eCount1++;
