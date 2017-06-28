@@ -13,10 +13,10 @@ Tile tMapa[3][10][10];
 Movimiento *mover;
 
 ///////////Apuntadores constantes a las variables/////////
-uint8_t * const iR = &iRow;
-uint8_t * const iC = &iCol;
-uint8_t * const iP = &iPiso;
-char * const cD = &cDir;
+uint8_t *const iR = &iRow;
+uint8_t *const iC = &iCol;
+uint8_t *const iP = &iPiso;
+char *const cD = &cDir;
 
 //////////////Funciones de encoders//////////////////
 void encoder1() {
@@ -42,7 +42,7 @@ void setup() {
 
 	//Resto de los objetos
 	SensarRealidad sensarr;
-	SensarRealidad * const sensar = &sensarr;
+	SensarRealidad *const sensar = &sensarr;
 	Movimiento robot(185, 185, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);

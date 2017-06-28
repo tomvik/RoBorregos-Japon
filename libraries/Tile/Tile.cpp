@@ -120,39 +120,39 @@ bool Tile::bumper() {
    Nota: Los datos booleanos si true=1
    Con | or ponemos el 1 que manden,  & and ponemos 0
  */
-void Tile::victima(const bool &b){
+void Tile::victima(const bool &b) {
 	dato1 |= (b<<3);
 }
 
-void Tile::cuadroNegro(const bool &b){
+void Tile::cuadroNegro(const bool &b) {
 	dato1 |= (b<<2);
 }
 
-void Tile::checkpoint(const bool &b){
+void Tile::checkpoint(const bool &b) {
 	dato1 |= (b<<1);
 }
 
-void Tile::visitado(const bool &b){
+void Tile::visitado(const bool &b) {
 	dato1 |= b;
 }
 
-void Tile::inicio(const bool &b){
+void Tile::inicio(const bool &b) {
 	dato2 |= (b<<2);
 }
 
-void Tile::rampaArriba(const bool &b){
+void Tile::rampaArriba(const bool &b) {
 	dato2 |= (b<<1);
 }
 
-void Tile::bumper(const bool &b){
+void Tile::bumper(const bool &b) {
 	dato2 |= b;
 }
 
-void Tile::rampaAbajo(const bool &b){
+void Tile::rampaAbajo(const bool &b) {
 	dato2 |= (b<<4);
 }
 
-void Tile::piso(const int  & i){
+void Tile::piso(const int  & i) {
 	switch(i) {
 	case 0:
 		dato2 &= '\xbf'; // 0X
@@ -174,62 +174,62 @@ void Tile::piso(const int  & i){
 }
 
 
-void Tile::arriba(const bool &b, Tile *laDeArriba){
+void Tile::arriba(const bool &b, Tile *laDeArriba) {
 	dato1 |= (b<<7);
 	if(laDeArriba)
 		laDeArriba->dato1 |= (b<<5);
 }
 
-void Tile::derecha(const bool &b, Tile *laDeDerecha){
+void Tile::derecha(const bool &b, Tile *laDeDerecha) {
 	dato1 |= (b<<6);
 	if(laDeDerecha)
 		laDeDerecha->dato1 |= (b<<4);
 }
 
-void Tile::abajo(const bool &b, Tile *laDeAabajo){
+void Tile::abajo(const bool &b, Tile *laDeAabajo) {
 	dato1 |= (b<<5);
 	if(laDeAabajo)
 		laDeAabajo->dato1 |= (b<<7);
 }
 
-void Tile::izquierda(const bool &b, Tile *laDeIzquierda){
+void Tile::izquierda(const bool &b, Tile *laDeIzquierda) {
 	dato1 |= (b<<4);
 	if(laDeIzquierda)
 		laDeIzquierda->dato1 |= (b<<6);
 }
 
-void Tile::existe(const bool &b){
+void Tile::existe(const bool &b) {
 	dato2 |= (b<<3);
 }
 
 
 /*
-void Tile::victimaArriba(const bool &b){
+void Tile::victimaArriba(const bool &b) {
 	dato3 |= (b<<7);
 }
 
-void Tile::victimaDerecha(const bool &b){
+void Tile::victimaDerecha(const bool &b) {
 	dato3 |= (b<<6);
 }
 
-void Tile::victimaAbajo(const bool &b){
+void Tile::victimaAbajo(const bool &b) {
 	dato3 |= (b<<5);
 }
 
-void Tile::victimaIzquierda(const bool &b){
+void Tile::victimaIzquierda(const bool &b) {
 	dato3 |= (b<<4);
 }
 
-void Tile::visualArriba(const bool &b){
+void Tile::visualArriba(const bool &b) {
 	dato3 |= (b<<3);
 }
-void Tile::visualDerecha(const bool &b){
+void Tile::visualDerecha(const bool &b) {
 	dato3 |= (b<<2);
 }
-void Tile::visualAbajo(const bool &b){
+void Tile::visualAbajo(const bool &b) {
 	dato3 |= (b<<1);
 }
-void Tile::visualIzquierda(const bool &b){
+void Tile::visualIzquierda(const bool &b) {
 	dato3 |= b;
 }
 */
