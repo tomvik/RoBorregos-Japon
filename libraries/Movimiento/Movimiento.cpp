@@ -11,16 +11,16 @@ const uint8_t kToleranciaBumper = 10;
 const float kPrecisionImu = 5.0;
 const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
-const float kI_Front_Pared = 1;
-const float kP_Front_Pared = 3.9;
-const int kEncoder30 = 2225;
+const float kI_Front_Pared = 0.3875;
+const float kP_Front_Pared = 3.875;
+const int kEncoder30 = 2200;
 const int kEncoder15 = kEncoder30 / 2;
-const uint8_t kSampleTime = 50;
+const uint8_t kSampleTime = 35;
 const float kP_Vueltas = 1.3;
-const int kDistanciaEnfrente = 5;
+const int kDistanciaEnfrente = 6;
 const int kMapearPared = 4;
-const int kParedDeseadoIzq = 10; // 105 mm
-const int kParedDeseadoDer = 10; // 105 mm
+const int kParedDeseadoIzq = 9; // 105 mm
+const int kParedDeseadoDer = 9; // 105 mm
 
 //////////////////////Define pins and motors//////////////////////////
 #define lVictima 33
@@ -39,8 +39,8 @@ Servo myservo;
 //////////////////////PID FRONT///////////////////////////
 double inIzqIMU, outIzqIMU, inDerIMU, outDerIMU, fSetIMU, outIzqPARED, outDerPARED;
 
-PID PID_IMU_izq(&inIzqIMU, &outIzqIMU, &fSetIMU, 1.1, 0, 0, DIRECT);
-PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetIMU, 1.1, 0, 0, REVERSE);
+PID PID_IMU_izq(&inIzqIMU, &outIzqIMU, &fSetIMU, 1.15, 0, 0, DIRECT);
+PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetIMU, 1.15, 0, 0, REVERSE);
 
 /*
    cDir (dirección)
@@ -339,19 +339,19 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		if(distanciaIzq < 18 && distanciaDer < 18) {
 			iError = distanciaDer - distanciaIzq;
 			iTerm += iError;
-			if(iTerm > 50) iTerm = 50;
-			else if(iTerm < -50) iTerm = -50;
+			if(iTerm > 30) iTerm = 30;
+			else if(iTerm < -30) iTerm = -30;
 
 			contadorIzq++;
 			contadorDer++;
 
-			if(iError <= -2) {
+			if(iError <= -1) {
 				// Se tiene que mover a la izquierda
-				outIzqPARED = -iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+				outIzqPARED = -iError * kP_Front_Pared;
 				outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
-			} else if(iError >= 2) {
+			} else if(iError >= 1) {
 				// Se tiene que mover a la derecha
-				outIzqPARED = iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+				outIzqPARED = iError * kP_Front_Pared;
 				outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
 			} else {
 				// Alinearse con las dos paredes
@@ -363,20 +363,20 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 
 			// debe ser negativo, creo
 			iTerm -= iError;
-			if(iTerm > 50) iTerm = 50;
-			else if(iTerm < -50) iTerm = -50;
+			if(iTerm > 30) iTerm = 30;
+			else if(iTerm < -30) iTerm = -30;
 
-			outIzqPARED = iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+			outIzqPARED = iError * kP_Front_Pared;
 			outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
 		} else if(distanciaDer < 15) {
 			contadorDer++;
 			iError = kParedDeseadoDer - distanciaDer;
 
 			iTerm += iError;
-			if(iTerm > 50) iTerm = 50;
-			else if(iTerm < -50) iTerm = -50;
+			if(iTerm > 30) iTerm = 30;
+			else if(iTerm < -30) iTerm = -30;
 
-			outIzqPARED = -iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+			outIzqPARED = -iError * kP_Front_Pared;
 			outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
 		} else {
 			iTerm = 0;

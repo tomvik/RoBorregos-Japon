@@ -63,7 +63,7 @@ void setup() {
   }
   //Regresó al incio
   mover->stop();
-  sensar->apantallanteLCD("       HE","     LLEGADO");
+  sensar->apantallanteLCD("      HE","    LLEGADO");
   delay(3500);
   sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
