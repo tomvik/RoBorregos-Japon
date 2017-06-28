@@ -11,15 +11,16 @@ const uint8_t kToleranciaBumper = 10;
 const float kPrecisionImu = 5.0;
 const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
-const float kI_Front_Pared = 0;
-const uint8_t kP_Front_Pared = 10;
-const float kP_Front_Angle = 0;
-const int kEncoder30 = 2400;
+const float kI_Front_Pared = 1;
+const float kP_Front_Pared = 3.9;
+const int kEncoder30 = 2225;
 const int kEncoder15 = kEncoder30 / 2;
-const uint8_t kSampleTime = 35;
+const uint8_t kSampleTime = 50;
 const float kP_Vueltas = 1.3;
-const int kDistanciaEnfrente = 6;
+const int kDistanciaEnfrente = 5;
 const int kMapearPared = 4;
+const int kParedDeseadoIzq = 10; // 105 mm
+const int kParedDeseadoDer = 10; // 105 mm
 
 //////////////////////Define pins and motors//////////////////////////
 #define lVictima 33
@@ -36,10 +37,10 @@ Servo myservo;
 //4 Atras izquierda
 
 //////////////////////PID FRONT///////////////////////////
-double inIzq, outIzq, inDer, outDer, fSet;
+double inIzqIMU, outIzqIMU, inDerIMU, outDerIMU, fSetIMU, outIzqPARED, outDerPARED;
 
-PID izqPID(&inIzq, &outIzq, &fSet, 6, 0, 0, DIRECT);
-PID derPID(&inDer, &outDer, &fSet, 6, 0, 0, REVERSE);
+PID PID_IMU_izq(&inIzqIMU, &outIzqIMU, &fSetIMU, 1.1, 0, 0, DIRECT);
+PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetIMU, 1.1, 0, 0, REVERSE);
 
 /*
    cDir (dirección)
@@ -64,13 +65,13 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	myservo.attach(pin_Servo);
 	myservo.write(servo_pos);
 	//////////////////Inicializamos variables en 0////////////////////////////////
-	eCount1 = eCount2 = cVictima = cParedes = ITerm = vueltasDadas = fSetPoint = fSet = cuadrosVisitados = rampa = 0;
+	eCount1 = eCount2 = cVictima = cParedes = iTerm = vueltasDadas = fSetPoint = fSetIMU = cuadrosVisitados = rampa = 0;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
 	real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c;
 	pinMode(lVictima,OUTPUT);
 	//////////////////////////Inicializamos del PID de irse derecho
-	izqPID.SetMode(AUTOMATIC);
-	derPID.SetMode(AUTOMATIC);
+	PID_IMU_izq.SetMode(AUTOMATIC);
+	PID_IMU_der.SetMode(AUTOMATIC);
 }
 
 void Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
@@ -159,7 +160,7 @@ void Movimiento::SepararPared() {
 		velocidad(80, 80);
 		delay(500);
 	}
-	eCount1 = eCount2 = 0;
+	stop();
 }
 
 void Movimiento::corregirIMU() {
@@ -176,7 +177,7 @@ void Movimiento::corregirIMU() {
 		fRef /= 5;
 
 		fSetPoint = fRef;
-		fSet = fSetPoint;
+		fSetIMU = fSetPoint;
 
 		front();
 		velocidad(80, 80);
@@ -201,7 +202,7 @@ void Movimiento::vueltaIzq(Tile tMapa[3][10][10]) {
 
 	fSetPoint -= 90;
 	if(fSetPoint < 0) fSetPoint += 360;
-	fSet = fSetPoint;
+	fSetIMU = fSetPoint;
 
 	limInf = fSetPoint - kPrecisionImu;
 	if(limInf < 0) limInf += 360;
@@ -218,7 +219,7 @@ void Movimiento::vueltaIzq(Tile tMapa[3][10][10]) {
 		while(posInicial < limInf || posInicial > limSup) {
 			posInicial = real->getAngulo();
 			if(posInicial < 90 && fSetPoint > 270)
-				dif = abs(fSetPoint + 360 - posInicial);
+				dif = abs(fSetPoint - 360 - posInicial);
 			else
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
@@ -234,7 +235,7 @@ void Movimiento::vueltaIzq(Tile tMapa[3][10][10]) {
 		while(posInicial < limInf && posInicial > limSup) {
 			posInicial = real->getAngulo();
 			if(posInicial < 90 && fSetPoint > 270)
-				dif = abs(fSetPoint + 360 - posInicial);
+				dif = abs(fSetPoint - 360 - posInicial);
 			else
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
@@ -263,7 +264,7 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 
 	fSetPoint += 90;
 	if(fSetPoint >= 360) fSetPoint -= 360;
-	fSet = fSetPoint;
+	fSetIMU = fSetPoint;
 
 	limInf = fSetPoint - kPrecisionImu;
 	if(limInf < 0) limInf += 360;
@@ -280,7 +281,7 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 		while(posInicial < limInf || posInicial > limSup) {
 			posInicial = real->getAngulo();
 			if(posInicial > 270 && fSetPoint < 90)
-				dif = abs(fSetPoint - 360 - posInicial);
+				dif = abs(fSetPoint + 360 - posInicial);
 			else
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
@@ -296,7 +297,7 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 		while(posInicial < limInf && posInicial > limSup) {
 			posInicial = real->getAngulo();
 			if(posInicial > 270 && fSetPoint < 90)
-				dif = abs(fSetPoint - 360 - posInicial);
+				dif = abs(fSetPoint + 360 - posInicial);
 			else
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
@@ -314,81 +315,77 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 }
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
-/*
-   if((now - lastTime) >= kSampleTime) {
-        int pDeseadoIzq = 5, pDeseadoDer = 5, potenciaIzq_Act, potenciaDer_Act, iError;
+	unsigned long now = millis();
+	if((now - lastTime) >= kSampleTime) {
+		float angle = real->getAngulo();
+		if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
+			inIzqIMU = angle - 360;
+			inDerIMU = angle - 360;
+		} else if((*cDir) == 'n' && angle < 90 && fSetPoint > 270) {
+			inIzqIMU = angle + 360;
+			inDerIMU = angle + 360;
+		} else {
+			inIzqIMU = angle;
+			inDerIMU = angle;
+		}
+		PID_IMU_izq.Compute();
+		PID_IMU_der.Compute();
 
-        int distanciaIzq = real->sensarIzquierdaPared(), distanciaDer = real->sensarDerechaPared();
-        float error;
+		//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetIMU), String(outDerIMU) + "    " + String(outIzqIMU));
+		// 7 adelante
+		// 6 atras
 
-        if(distanciaIzq < 15 && distanciaDer < 15) {
-          iError = distanciaDer - distanciaIzq;
-    ITerm += iError;
-    if(ITerm > 50) ITerm = 50;
-    else if(ITerm < -50) ITerm = -50;
-          contadorIzq++;
-          contadorDer++;
-          if(iError <= -2) {
-                // Se tiene que mover a la izquierda
-                potenciaIzq_Act = iPowI - iError * kP_Front_Pared - (ITerm * kI_Front_Pared);
-                potenciaDer_Act = iPowD + iError * kP_Front_Pared + (ITerm * kI_Front_Pared);
-          } else if(iError >= 2) {
-                // Se tiene que mover a la derecha
-                potenciaIzq_Act = iPowI + iError * kP_Front_Pared + (ITerm * kI_Front_Pared);
-                potenciaDer_Act = iPowD - iError * kP_Front_Pared - (ITerm * kI_Front_Pared);
-          } else {
-                // Alinearse con las dos paredes
-                // TODO
-          }
-        } else if(distanciaIzq < 15) {
-          contadorIzq++;
-          iError = pDeseadoIzq - distanciaIzq;
-    ITerm += iError;
-    if(ITerm > 50) ITerm= 50;
-    else if(ITerm < -50) ITerm= -50;
-          potenciaDer_Act = iPowD - iError * kP_Front_Pared - (ITerm * kI_Front_Pared);
-          potenciaIzq_Act = iPowI + iError * kP_Front_Pared + (ITerm * kI_Front_Pared);
-        } else if(distanciaDer < 15) {
-          contadorDer++;
-          iError = pDeseadoDer - distanciaDer;
-    ITerm += iError;
-    if(ITerm > 50) ITerm= 50;
-    else if(ITerm < -50) ITerm= -50;
-          potenciaDer_Act = iPowD + iError * kP_Front_Pared + (ITerm * kI_Front_Pared);
-          potenciaIzq_Act = iPowI - iError * kP_Front_Pared - (ITerm * kI_Front_Pared);
-        } else{
-    ITerm = 0;
-          potenciaDer_Act = potenciaIzq_Act = 200;
-        }
+		int distanciaIzq = real->sensarIzquierdaPared(), distanciaDer = real->sensarDerechaPared(), iError;
+		if(distanciaIzq < 18 && distanciaDer < 18) {
+			iError = distanciaDer - distanciaIzq;
+			iTerm += iError;
+			if(iTerm > 50) iTerm = 50;
+			else if(iTerm < -50) iTerm = -50;
 
-        potenciaDer = iPowD + (error * kP_Front_Angle) + potenciaDer_Act;
-        potenciaIzq = iPowI - (error * kP_Front_Angle) + potenciaIzq_Act;
-        potenciaDer/=2;
-        potenciaIzq/=2;
-        potenciaIzq = potenciaIzq > 250 ? 250 : (potenciaIzq < 0 ? 0 : potenciaIzq);
-        potenciaDer = potenciaDer > 250 ? 250 : (potenciaDer < 0 ? 0 : potenciaDer);
-        lastTime = now;
-   }*/
+			contadorIzq++;
+			contadorDer++;
 
-	float angle = real->getAngulo();
+			if(iError <= -2) {
+				// Se tiene que mover a la izquierda
+				outIzqPARED = -iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+				outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
+			} else if(iError >= 2) {
+				// Se tiene que mover a la derecha
+				outIzqPARED = iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+				outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
+			} else {
+				// Alinearse con las dos paredes
+				// TODO
+			}
+		} else if(distanciaIzq < 15) {
+			contadorIzq++;
+			iError = kParedDeseadoIzq - distanciaIzq;
 
-	if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
-		inIzq = angle - 360;
-		inDer = angle - 360;
-	} else if((*cDir) == 'n' && angle < 90 && fSetPoint > 270) {
-		inIzq = angle + 360;
-		inDer = angle + 360;
-	} else {
-		inIzq = angle;
-		inDer = angle;
+			// debe ser negativo, creo
+			iTerm -= iError;
+			if(iTerm > 50) iTerm = 50;
+			else if(iTerm < -50) iTerm = -50;
+
+			outIzqPARED = iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+			outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
+		} else if(distanciaDer < 15) {
+			contadorDer++;
+			iError = kParedDeseadoDer - distanciaDer;
+
+			iTerm += iError;
+			if(iTerm > 50) iTerm = 50;
+			else if(iTerm < -50) iTerm = -50;
+
+			outIzqPARED = -iError * kP_Front_Pared - iTerm * kI_Front_Pared;
+			outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
+		} else {
+			iTerm = 0;
+		}
+		potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
+		potenciaDer = iPowD + outDerIMU + outDerPARED;
+		real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
+		lastTime = now;
 	}
-
-	real->escribirLCD(String(angle) + " " + String(inIzq) + " " + String(fSet), String(outIzq) + "    " + String(outDer));
-
-	izqPID.Compute();
-	derPID.Compute();
-	potenciaIzq = iPowI + outIzq;
-	potenciaDer = iPowD + outDer;
 }
 
 void Movimiento::pasaRampa() {
@@ -507,9 +504,10 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 
 	corregirIMU();
 	eCount1 = eCount2 = 0;
+
+	velocidad(iPowI, iPowD);
 	front();
-	velocidad(iPowII, iPowDD);
-	while(eCount1 + eCount2 < kEncoder15 && real->sensarEnfrentePared() > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder15 && real->sensarEnfrentePared() >= kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
 		velocidad(iPowII, iPowDD);
 
@@ -592,22 +590,9 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	eCount1 = eCount2 = 0;
 	if( !real->color() && real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit && real->sensarEnfrentePared() < 20) {
 		cParedes |= 0b00000010;
-<<<<<<< HEAD
 		SepararPared();
 		iCase = 0;
-=======
-    stop();
-		real->escribirLCD("Separaaaaaar", String(real->sensarEnfrentePared()));
-    delay(1000);
-		back();
-		velocidad(80, 80);
-		delay(100);
-		SepararPared();
-		iCase = 0;
-		real->escribirLCD("Acabeaaaaaa");
-    stop();
-    delay(1000);
->>>>>>> aca288988318efaacc834a53d7da6541a0ac2463
+		stop();
 	}
 }
 
@@ -923,9 +908,9 @@ char Movimiento::getParedes() {
 }
 
 /*
-void Movimiento::ErrorGradosVuelta(float &grados) {
+   void Movimiento::ErrorGradosVuelta(float &grados) {
     int iM;
-		grados = real->sensarOrientacion();
+                grados = real->sensarOrientacion();
     grados = (grados >= 360) ? 0 - fDeseado : grados - fDeseado;
     if(grados > 180) {
       iM = grados/180;
@@ -934,6 +919,6 @@ void Movimiento::ErrorGradosVuelta(float &grados) {
       grados *= -1;
       iM = grados/180;
       grados = ( 180 - (grados - (iM + 180)));
-  }
-}
+   }
+   }
  */

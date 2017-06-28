@@ -59,7 +59,7 @@ private:
 	SensarRealidad *real;
 	char cVictima, cParedes, *cDir;
 	unsigned long lastTime;
-	double ITerm, lastInput;
+	double iTerm, lastInput;
 };
 
 #endif

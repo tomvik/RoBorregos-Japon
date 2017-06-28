@@ -12,7 +12,7 @@
 // enfrente, derecha, atras, izquerda
 const uint8_t kCantVL53 = 4;
 VL53L0X sensor[4];
-const uint8_t kXSHUT[4] = {25, 23, 29, 27};
+const uint8_t kXSHUT[4] = {23, 29, 25, 27};
 
 void SensarRealidad::inicializar(int x) {
 	for (int i = 0; i < kCantVL53; i++)

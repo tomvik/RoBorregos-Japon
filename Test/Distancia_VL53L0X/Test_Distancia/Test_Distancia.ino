@@ -4,10 +4,10 @@
 const int kCANTIDAD_SENSORES = 4;
 const int kXSHUT[kCANTIDAD_SENSORES] = {23, 25, 27, 29};
 
-// 29 no conectado
-// 27 derecha
-// 25 en frente
-// 23 izquierda
+// 23 adelante
+// 25 atras
+// 27 izquierda
+// 29 derecha
 
 VL53L0X sensor[kCANTIDAD_SENSORES];
 
