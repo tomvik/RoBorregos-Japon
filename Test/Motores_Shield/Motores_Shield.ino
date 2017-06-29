@@ -4,13 +4,13 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *alfa = AFMS.getMotor(1);// DERECHA ATRAS
-Adafruit_DCMotor *beta = AFMS.getMotor(2);
-Adafruit_DCMotor *ce = AFMS.getMotor(3);
-Adafruit_DCMotor *de = AFMS.getMotor(4);
+Adafruit_DCMotor *alfa = AFMS.getMotor(1);// izquierda adelante
+Adafruit_DCMotor *beta = AFMS.getMotor(2); // atras derecha
+Adafruit_DCMotor *ce = AFMS.getMotor(3); // atr4as izquierda
+Adafruit_DCMotor *de = AFMS.getMotor(4); //derecha adelente
 
 
-#define ENCODER_A 4
+#define ENCODER_A 5
 volatile int o = 0;
 void x() {
 	o++;

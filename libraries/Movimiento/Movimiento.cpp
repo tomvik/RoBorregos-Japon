@@ -11,24 +11,24 @@ const uint8_t kToleranciaBumper = 10;
 const double kPrecisionImu = 4.85;
 const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
-const double kI_Front_Pared = 0.03875;
-const double kP_Front_Pared = 0.3875;
-const int kEncoder30 = 2200;
+const double kI_Front_Pared = 0.06;
+const double kP_Front_Pared = 0.25;
+const int kEncoder30 = 2125;
 const int kEncoder15 = kEncoder30 / 2;
 const uint8_t kSampleTime = 35;
 const double kP_Vueltas = 1.3;
-const int kDistanciaEnfrente = 65;
+const int kDistanciaEnfrente = 60;
 const int kMapearPared = 5;
-const int kParedDeseadoIzq = 100; // 105 mm
-const int kParedDeseadoDer = 100; // 105 mm
+const int kParedDeseadoIzq = 95; // 105 mm
+const int kParedDeseadoDer = 95; // 105 mm
 
 //////////////////////Define pins and motors//////////////////////////
 #define lVictima 33
 #define pin_Servo 9
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(4);
-Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(1);
-Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(2);
+Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(2);
+Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(3);//al revés
 Servo myservo;
 //1 Enfrente derecha
@@ -142,24 +142,25 @@ void Movimiento::separarPared() {
 	unsigned long ahora = millis();
 	uint8_t iActual = real->getDistanciaEnfrente(), iPowDD;
 	real->escribirLCD("SEPARA");
-	while (iActual != kDistanciaEnfrente && ahora+2000 > millis()) {
+	while ((iActual < kDistanciaEnfrente - 15 || iActual > kDistanciaEnfrente + 15 ) && ahora+2000 > millis()) {
 		iActual = real->getDistanciaEnfrente();
 		if(iActual < kDistanciaEnfrente) { //Muy cerca
-			iPowDD = 80 + (kDistanciaEnfrente-iActual);
+			iPowDD = 150;
 			back();
 			velocidad(iPowDD, iPowDD);
 		}
+
 		else if(iActual > kDistanciaEnfrente) { //Muy lejos
-			iPowDD = 80 + (iActual-kDistanciaEnfrente);
+			iPowDD = 150;
 			front();
 			velocidad(iPowDD, iPowDD);
 		}
 	}
-	if(ahora+2000 <= millis()) {
+	/*if(ahora+2000 <= millis()) {
 		back();
 		velocidad(80, 80);
 		delay(500);
-	}
+	}*/
 	stop();
 }
 
@@ -169,7 +170,7 @@ void Movimiento::corregirIMU() {
 		double fRef = 0;
 		back();
 		velocidad(80, 80);
-		while(real->getDistanciaAtras() > 30) {
+		while(real->getDistanciaAtras() > 50) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		delay(500); // TODO: Checar con sensor
@@ -182,7 +183,7 @@ void Movimiento::corregirIMU() {
 
 		front();
 		velocidad(80, 80);
-		while(real->getDistanciaAtras() < 40) {
+		while(real->getDistanciaAtras() < 50) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		stop();
@@ -336,8 +337,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		if(distanciaIzq < 180 && distanciaDer < 180) {
 			iError = distanciaDer - distanciaIzq;
 			iTerm += iError;
-			if(iTerm > 300) iTerm = 300;
-			else if(iTerm < -300) iTerm = -300;
+			if(iTerm > 150) iTerm = 150;
+			else if(iTerm < -150) iTerm = -150;
 
 			contadorIzq++;
 			contadorDer++;
@@ -360,8 +361,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 
 			// debe ser negativo, creo
 			iTerm -= iError;
-			if(iTerm > 300) iTerm = 300;
-			else if(iTerm < -300) iTerm = -300;
+			if(iTerm > 150) iTerm = 150;
+			else if(iTerm < -150) iTerm = -150;
 
 			outIzqPARED = iError * kP_Front_Pared;
 			outDerPARED = -iError * kP_Front_Pared + iTerm * kI_Front_Pared;
@@ -370,8 +371,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 			iError = kParedDeseadoDer - distanciaDer;
 
 			iTerm += iError;
-			if(iTerm > 300) iTerm = 300;
-			else if(iTerm < -300) iTerm = -300;
+			if(iTerm > 150) iTerm = 150;
+			else if(iTerm < -150) iTerm = -150;
 
 			outIzqPARED = -iError * kP_Front_Pared;
 			outDerPARED = iError * kP_Front_Pared + iTerm * kI_Front_Pared;
@@ -380,7 +381,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		}
 		potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
 		potenciaDer = iPowD + outDerIMU + outDerPARED;
-		real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
+		real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
+		// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
 		lastTime = now;
 	}
 }
@@ -505,7 +507,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 
 	velocidad(iPowI, iPowD);
 	front();
-	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() >= kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() >= kDistanciaEnfrente + 20) {
 		potenciasDerecho(iPowII, iPowDD);
 		velocidad(iPowII, iPowDD);
 
@@ -551,7 +553,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 
 	contadorIzq = contadorDer = 0;
 
-	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente + 20) {
 		potenciasDerecho(iPowII, iPowDD);
 		front();
 		velocidad(iPowII, iPowDD);
