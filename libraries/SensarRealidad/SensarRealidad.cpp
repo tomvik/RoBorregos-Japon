@@ -9,8 +9,8 @@
 #include <LiquidCrystal_I2C.h>
 
 // VL53L0X
-// enfrente, derecha, atras, izquerda
 const uint8_t kCantVL53 = 4;
+
 VL53L0X sensor[kCantVL53];
 const uint8_t kXSHUT[kCantVL53] = {29, 27, 23, 25};
 const int kMEDIDA_PARED_MM = 150;

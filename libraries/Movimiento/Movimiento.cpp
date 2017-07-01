@@ -313,6 +313,10 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 }
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
+  /*
+    TODO
+    te falta resetear la iTerm después de dar una vuelta, ya que el error acumulado hasta ese entonces ya no es valido
+  */
 	unsigned long now = millis();
 	if((now - lastTime) >= kSampleTime) {
 		double angle = real->getAngulo();

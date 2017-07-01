@@ -39,7 +39,6 @@ void setup() {
 	//Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;

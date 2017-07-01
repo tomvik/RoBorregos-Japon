@@ -1,14 +1,15 @@
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
-#define S0 2
-#define S1 3
-#define S2 4
-#define S3 5
-#define sensorOut 6
 
-#define MlxR 0x1C
-#define MlxL 0x4C
+#define sensorOut 2
+#define S0 3
+#define S1 4
+#define S2 5
+#define S3 6
+
+#define MlxL 0x1C
+#define MlxR 0x4C
 
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR);
 Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
@@ -25,7 +26,8 @@ bool sensorR() {
 	for (uint8_t i = 0; i < 3; i++)
 		frequency += pulseIn(sensorOut, LOW);
 	frequency /= 3;
-	return (frequency >= 120);
+  //Serial.println(frequency);
+	return (frequency >= 100);
 }
 //0 = nada
 //1 = derecha
@@ -41,7 +43,8 @@ uint8_t sensarTemperatura() {
 }
 
 void setup() {
-	Serial.begin(115200);
+	Serial3.begin(115200);
+  Serial2.begin(9600);
 	mlxRight.begin();
 	mlxLeft.begin();
 	pinMode(S0, OUTPUT);
@@ -57,13 +60,16 @@ void setup() {
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
 //0, 0, 0, 0,  color, izq, victima, der
 void loop() {
+  Serial2.println("TOMA");
 	cSend = 0;
 	utemp = sensarTemperatura();
 	switch(utemp) {
 	case 1:
+    //Serial.println("DER");
 		cSend|=0b00000011;
 		break;
 	case 2:
+    //Serial.println("Izq");
 		cSend|=0b00000110;
 		break;
 	case 3:
@@ -71,5 +77,6 @@ void loop() {
 		break;
 	}
 	cSend |= (sensorR() == 1) ? 0b00001000 : 0b00000000;
-	Serial.print(cSend);
+	Serial3.print(cSend);
+  delay(5);
 }
