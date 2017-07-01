@@ -104,41 +104,29 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 		sensor[i].setAddress((uint8_t)(kINICIO_I2C + i));
 		delay(200);
 		sensor[i].setTimeout(200);
-		/*delay(200);
-		   sensor[i].startContinuous(5);
-		   delay(200);*/
+		delay(200);
+		   sensor[i].startContinuous();
+		   delay(200);
 	}
 }
 
 int SensarRealidad::getDistanciaEnfrente() {
-	int distancia = 0;
-	for(int j = 0; j < 3; j++)
-		distancia += sensor[0].readRangeSingleMillimeters();
-	distancia /= 3;
-	return distancia > 20 ? distancia - 20 : 0;
+ 	int distancia = sensor[0].readRangeContinuousMillimeters();
+ 	return distancia > 20 ? distancia - 20 : 0;
 }
 
 int SensarRealidad::getDistanciaDerecha() {
-	int distancia = 0;
-	for(int j = 0; j < 3; j++)
-		distancia += sensor[1].readRangeSingleMillimeters();
-	distancia /= 3;
+	int distancia = sensor[1].readRangeContinuousMillimeters();
 	return distancia > 50 ? distancia - 50 : 0;
 }
 
 int SensarRealidad::getDistanciaAtras() {
-	int distancia = 0;
-	for(int j = 0; j < 3; j++)
-		distancia += sensor[2].readRangeSingleMillimeters();
-	distancia /= 3;
-	return distancia > 35 ? distancia - 35 : 0;
+ 	int distancia = sensor[2].readRangeContinuousMillimeters();
+	return distancia > 35 ? distancia - 30 : 0;
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
-	int distancia = 0;
-	for(int j = 0; j < 3; j++)
-		distancia += sensor[3].readRangeSingleMillimeters();
-	distancia /= 3;
+ 	int distancia = sensor[3].readRangeContinuousMillimeters();
 	return distancia > 55 ? distancia - 55 : 0;
 }
 
