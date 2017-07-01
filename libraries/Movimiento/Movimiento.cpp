@@ -466,18 +466,20 @@ void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 }
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
-	real->escribirLCD("AUCH");
-	int encoderTemp1 = eCount1;
-	int encoderTemp2 = eCount2;
+	real->escribirLCD("LIMIT");
 	stop();
+	uint16_t encoderTemp1 = eCount1;
+	uint16_t encoderTemp2 = eCount2;
 	switch(switchCase) {
 	case 1:
-		back();
-		velocidad(255, 0);
+		/*back();
+		velocidad(100, 100);
 		delay(400);
+		stop();
+		while
 		velocidad(0, 255);
 		delay(400);
-		break;
+		break;*/
 	case 2:
 		back();
 		velocidad(0, 255);
@@ -486,6 +488,7 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 		delay(400);
 		break;
 	}
+	stop();
 	encoderTemp1 -= eCount1;
 	encoderTemp2 -= eCount2;
 	eCount1 = encoderTemp1;

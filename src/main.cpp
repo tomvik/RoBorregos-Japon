@@ -62,6 +62,13 @@ void setup() {
 	}
 	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
 
+	while(true) {
+		mover->acomodaChoque(1);
+		delay(2000);
+		mover->acomodaChoque(2);
+		delay(2000);
+	}
+
 	//Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();

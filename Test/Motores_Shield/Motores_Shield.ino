@@ -4,10 +4,10 @@
 #include "utility/Adafruit_MS_PWMServoDriver.h"
 
 Adafruit_MotorShield AFMS = Adafruit_MotorShield();
-Adafruit_DCMotor *alfa = AFMS.getMotor(1);// izquierda adelante
-Adafruit_DCMotor *beta = AFMS.getMotor(2); // atras derecha
-Adafruit_DCMotor *ce = AFMS.getMotor(3); // atr4as izquierda
-Adafruit_DCMotor *de = AFMS.getMotor(4); //derecha adelente
+Adafruit_DCMotor *alfa = AFMS.getMotor(1);// derecha adelante
+Adafruit_DCMotor *beta = AFMS.getMotor(2); // izquierda atras
+Adafruit_DCMotor *ce = AFMS.getMotor(3); // izquierda adelante
+Adafruit_DCMotor *de = AFMS.getMotor(4); // derecha atras
 
 
 #define ENCODER_A 5
@@ -26,13 +26,13 @@ void setup() {
 	beta->setSpeed(155);
 	ce->setSpeed(155);
 	de->setSpeed(155);
-	alfa->run(FORWARD);// derecha atras
+	alfa->run(BACKWARD);
 	delay(2000);
-	beta->run(FORWARD); //IZQ ADEL
+	beta->run(BACKWARD);
 	delay(2000);
-	ce->run(BACKWARD); //izq atraz
+	ce->run(BACKWARD);
 	delay(2000);
-	de->run(FORWARD);// DERECHA ADE
+	de->run(FORWARD);
 	attachInterrupt(ENCODER_A, x, RISING);
 }
 
