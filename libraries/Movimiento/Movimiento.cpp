@@ -13,11 +13,11 @@ const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
 const double kI_Front_Pared = 0.06;
 const double kP_Front_Pared = 0.25;
-const int kEncoder30 = 2120;
+const int kEncoder30 = 2100;
 const int kEncoder15 = kEncoder30 / 2;
 const uint8_t kSampleTime = 35;
 const double kP_Vueltas = 1.4;
-const int kDistanciaEnfrente = 40;
+const int kDistanciaEnfrente = 50;
 const int kMapearPared = 5;
 const int kParedDeseadoIzq = 56; // 105 mm
 const int kParedDeseadoDer = 56; // 105 mm
@@ -89,8 +89,8 @@ void Movimiento::stop() {
 	// velocidad(255, 255);
 
 	myMotorLeftF->run(BREAK);
-	//myMotorLeftB->run(BREAK);
-	//myMotorRightF->run(BREAK);
+	myMotorLeftB->run(BREAK);
+	myMotorRightF->run(BREAK);
 	myMotorRightB->run(BREAK);
 
 	delay(35);
