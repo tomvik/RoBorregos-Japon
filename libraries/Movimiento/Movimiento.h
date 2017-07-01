@@ -74,6 +74,7 @@ class Movimiento {
     char getParedes();
 
   private:
+    int iTerm, lastInput;
     char cVictima, cParedes, *cDir;
     uint8_t *iCol, *iRow, *iPiso;
     uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU;
@@ -81,7 +82,6 @@ class Movimiento {
     SensarMapa mapa;
     SensarRealidad *real;
     unsigned long lastTime;
-    double iTerm, lastInput;
 };
 
 #endif

@@ -43,7 +43,7 @@ void setup() {
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(185, 185, sensar, cD, iC, iR, iP);
+	Movimiento robot(200, 200, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);
 
@@ -62,12 +62,13 @@ void setup() {
 	}
 	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
 
-	while(true) {
+	/*while(true) {
+		sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
 		mover->acomodaChoque(1);
 		delay(2000);
-		mover->acomodaChoque(2);
-		delay(2000);
-	}
+		mover->acomodaChoque(2);*/
+		/*delay(100);
+	}*/
 
 	//Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {

@@ -12,8 +12,10 @@
 const uint8_t kCantVL53 = 4;
 
 VL53L0X sensor[kCantVL53];
-const uint8_t kXSHUT[kCantVL53] = {29, 27, 23, 25};
+const uint8_t kXSHUT[kCantVL53] = {27, 25, 23, 29};
 const int kMEDIDA_PARED_MM = 150;
+const int kDistanciaMinimaVertical = 40;
+const int kDistanciaMinimaLados = 60;
 
 // LCD
 #define I2C_ADDR  0x3F
@@ -25,8 +27,8 @@ Adafruit_BNO055 bno = Adafruit_BNO055();
 #define toleranciaSwitchIMU 5
 
 // SWITCH
-#define switchIzquierda 53
-#define switchDerecha 35
+#define switchIzquierda 43
+#define switchDerecha 41
 
 // COLOR
 #define colorIn 2
@@ -112,28 +114,32 @@ int SensarRealidad::getDistanciaEnfrente() {
 	int distancia = 0;
 	for(int j = 0; j < 3; j++)
 		distancia += sensor[0].readRangeSingleMillimeters();
-	return distancia / 3;
+	distancia /= 3;
+	return distancia > 20 ? distancia - 20 : 0;
 }
 
 int SensarRealidad::getDistanciaDerecha() {
 	int distancia = 0;
 	for(int j = 0; j < 3; j++)
 		distancia += sensor[1].readRangeSingleMillimeters();
-	return distancia / 3;
+	distancia /= 3;
+	return distancia > 50 ? distancia - 50 : 0;
 }
 
 int SensarRealidad::getDistanciaAtras() {
 	int distancia = 0;
 	for(int j = 0; j < 3; j++)
 		distancia += sensor[2].readRangeSingleMillimeters();
-	return distancia / 3;
+	distancia /= 3;
+	return distancia > 35 ? distancia - 35 : 0;
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
 	int distancia = 0;
 	for(int j = 0; j < 3; j++)
 		distancia += sensor[3].readRangeSingleMillimeters();
-	return distancia / 3;
+	distancia /= 3;
+	return distancia > 55 ? distancia - 55 : 0;
 }
 
 bool SensarRealidad::caminoEnfrente() {
