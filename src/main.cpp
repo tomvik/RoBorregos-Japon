@@ -43,13 +43,19 @@ void setup() {
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(200, 200, sensar, cD, iC, iR, iP);
+	Movimiento robot(195, 195, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);
 
 	//El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 	mover->stop();
+
+	/*while(true) {
+		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
+		mover->avanzar(tMapa);
+		delay(10000);
+	}*/
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iCol][iRow].inicio(true);
@@ -61,14 +67,6 @@ void setup() {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
 	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
-
-	/*while(true) {
-		sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
-		mover->acomodaChoque(1);
-		delay(2000);
-		mover->acomodaChoque(2);*/
-		/*delay(100);
-	}*/
 
 	//Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {

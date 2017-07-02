@@ -81,7 +81,6 @@ class Movimiento {
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;
-    unsigned long lastTime;
 };
 
 #endif
