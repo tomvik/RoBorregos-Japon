@@ -39,6 +39,7 @@ void setup() {
 	//Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
+
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
@@ -49,6 +50,12 @@ void setup() {
 	//El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 	mover->stop();
+
+	/*while(true) {
+		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
+		mover->avanzar(tMapa);
+		delay(10000);
+	}*/
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iCol][iRow].inicio(true);
