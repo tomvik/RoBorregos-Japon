@@ -43,7 +43,7 @@ void setup() {
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(185, 185, sensar, cD, iC, iR, iP);
+	Movimiento robot(180, 180, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);
 
