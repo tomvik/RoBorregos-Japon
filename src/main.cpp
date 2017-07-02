@@ -71,7 +71,7 @@ void setup() {
 	//Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();
-		mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
 	}
 
 	//Se regresa al inicio

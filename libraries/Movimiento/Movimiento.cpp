@@ -25,9 +25,11 @@ const int kEncoder30 = 2400;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.4;
 const int kDistanciaEnfrente = 65;
-const int kMapearPared = 5;
+const int kMapearPared = 7;
 const int kParedDeseadoIzq = 55; // 105 mm
 const int kParedDeseadoDer = 55; // 105 mm
+
+const uint8_t kVelocidadBaseMenor = 100;
 
 //////////////////////Define pins and motors//////////////////////////
 #define pin_Servo 10
@@ -145,20 +147,20 @@ void Movimiento::left() {
 }
 
 void Movimiento::separarPared() {
-	unsigned long ahora = millis();
-	uint8_t iActual = real->getDistanciaEnfrente(), iPowDD = 130;
+	unsigned long inicio = millis();
+	uint8_t potIzq, potDer;
+	potIzq = potDer = kVelocidadBaseMenor;
+	int iActual = real->getDistanciaEnfrente();
 	real->escribirLCD("SEPARA");
-	while ((iActual < kDistanciaEnfrente - 8 || iActual > kDistanciaEnfrente + 8 ) && ahora+2000 > millis()) {
-		iActual = real->getDistanciaEnfrente();
+	while ((iActual < kDistanciaEnfrente - 7 || iActual > kDistanciaEnfrente + 7 ) && inicio + 2000 > millis()) {
 		if(iActual < kDistanciaEnfrente) { //Muy cerca
 			back();
-			velocidad(iPowDD, iPowDD);
-		}
-
-		else if(iActual > kDistanciaEnfrente) { //Muy lejos
+			velocidad(potIzq, potDer);
+		} else if(iActual > kDistanciaEnfrente) { //Muy lejos
 			front();
-			velocidad(iPowDD, iPowDD);
+			velocidad(potIzq, potDer);
 		}
+		iActual = real->getDistanciaEnfrente();
 	}
 	stop();
 }
@@ -210,7 +212,7 @@ void Movimiento::vueltaIzq(Tile tMapa[3][10][10]) {
 	if(limSup >= 360.0) limSup -= 360;
 
 	posInicial = real->getAngulo();
-	potIzq = potDer = 100;
+	potIzq = potDer = kVelocidadBaseMenor;
 	left();
 	velocidad(225, 225);
 
@@ -272,7 +274,7 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 	if(limSup >= 360.0) limSup -= 360;
 
 	posInicial = real->getAngulo();
-	potIzq = potDer = 100;
+	potIzq = potDer = kVelocidadBaseMenor;
 	right();
 	velocidad(225, 225);
 
@@ -386,7 +388,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	potenciaDer = iPowD + outDerIMU + outDerPARED;
 	lastInput = iError;
 	// real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
-	real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
+	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
 }
 
 void Movimiento::pasaRampa() {
@@ -443,9 +445,8 @@ void Movimiento::dejarKit(Tile tMapa[3][10][10], uint8_t iCase) {
 
 void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 	real->escribirLCD("CUADRO NEGRO");
-	uint8_t iPowDD, iPowII;
-	switch(*cDir)
-	{
+	uint8_t iPowII = iPowI, iPowDD = iPowD;
+	switch(*cDir) {
 	case 'n':
 		(*iRow)++;
 		break;
@@ -459,12 +460,13 @@ void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 		(*iCol)++;
 		break;
 	}
+	stop();
+	back();
 	while(eCount1 + eCount2 < kEncoder30) {
-		potenciasDerecho(iPowII, iPowDD);
-		back();
+		potenciasDerecho(iPowDD, iPowII);
 		velocidad(iPowII, iPowDD);
 	}
-	eCount1 = eCount2 = 0;
+	separarPared();
 }
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
@@ -554,6 +556,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	contadorIzq = contadorDer = 0;
 
 	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
+		real->escribirLCD(String(contadorDer) + "     " +  String(contadorIzq));
 		potenciasDerecho(iPowII, iPowDD);
 		front();
 		velocidad(iPowII, iPowDD);
@@ -580,7 +583,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 			tMapa[*iPiso][*iRow][*iCol].bumper(true);
 		cVictima = 0;
 	}
-	stop();
+	// stop();
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
 
@@ -592,7 +595,6 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 		cParedes |= 0b00000010;
 		separarPared();
 		iCase = 0;
-		stop();
 	}
 }
 
