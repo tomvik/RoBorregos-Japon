@@ -7,7 +7,11 @@
 #define ENCODER_B 5
 
 /////////Variables, mapa y mover//////////
+<<<<<<< HEAD
 uint8_t iRow = 4, iCol = 4, iPiso = 0;
+=======
+uint8_t iRow = 8, iCol = 9, iPiso = 0;
+>>>>>>> hotfix
 char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
@@ -96,6 +100,7 @@ void setup() {
   //Interrupciones
   attachInterrupt(ENCODER_A, encoder1, RISING);
   attachInterrupt(ENCODER_B, encoder2, RISING);
+<<<<<<< HEAD
 
   //Resto de los objetos
   SensarRealidad sensarr;
@@ -146,6 +151,64 @@ void setup() {
     mover->goToVisitado(tMapa, 'i');
     Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
     muestra(tMapa, cMapa, iPiso);
+=======
+
+  //Resto de los objetos
+  SensarRealidad sensarr;
+  SensarRealidad *const sensar = &sensarr;
+  Movimiento robot(180, 180, sensar, cD, iC, iR, iP);
+  mover = &robot;
+  Mapear mapa(sensar, mover);
+
+  //Mapa de caracteres y lo inicializamos
+  char cMapa[21][21];
+  for(int i = 0; i < 21; i++) {
+    for(int j = 0; j < 21; j++)
+      cMapa[i][j] = 'x';
+  }
+  //El Mariachi
+  sensar->apantallanteLCD("      El", "    MARIACHI");
+  mover->stop();
+
+  //Inicializamos el tile actual
+	tMapa[iPiso][iRow][iCol].inicio(true);
+  tMapa[iPiso][iRow][iCol].visitado(true);
+  tMapa[iPiso][iRow][iCol].existe(true);
+	Serial.println("Primero ");
+	Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
+  muestra(tMapa, cMapa, iPiso);
+	delay(1000);
+  if(sensar->caminoAtras()) {
+    tMapa[iPiso][iRow + 1][iCol].existe(true);
+  } else {
+    tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
+  }
+  mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+  //MOSTRAR DÓNDE Y HACIA DÓNDE ESTÁ
+  Serial.println("Primer sensado");
+  Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
+  muestra(tMapa, cMapa, iPiso);
+  Serial.println("A COMENZAR EL LOOP");
+  mover->stop();
+
+  //Loop en el cual recorre todo el mapa
+  while (mover->decidir(tMapa)) {
+    mover->stop();
+    mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+    Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
+    muestra(tMapa, cMapa, iPiso);
+  }
+  Serial.println("SALI");
+  delay(5000);
+
+  //Se regresa al inicio
+  sensar->apantallanteLCD("Let's go home");
+	unsigned int i = 0;
+	while(!tMapa[iPiso][iRow][iCol].inicio()) {
+		mover->goToVisitado(tMapa, 'i');
+		sensar->apantallanteLCD("ATORADO " + String(iCol) + " " + String(iRow), "ATORADO " + String(i++));
+		muestra(tMapa, cMapa, iPiso);
+>>>>>>> hotfix
   }
   Serial.print("Columna = "); Serial.print(iCol); Serial.print(" Row = "); Serial.print(iRow); Serial.print(" Piso = "); Serial.print(iPiso); Serial.print(" Direccion = "); Serial.println(cDir);
   muestra(tMapa, cMapa, iPiso);
