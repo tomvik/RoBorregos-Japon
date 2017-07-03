@@ -43,7 +43,7 @@ void setup() {
 	//Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(180, 180, sensar, cD, iC, iR, iP);
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);
 
@@ -71,19 +71,20 @@ void setup() {
 	//Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();
-		mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
 	}
 
 	//Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
 	while(!tMapa[iPiso][iCol][iRow].inicio()) {
 		mover->goToVisitado(tMapa, 'i');
+		sensar->apantallanteLCD("ATORADO", "ATORADO");
 	}
 
 	//Regresó al incio
 	mover->stop();
 	sensar->apantallanteLCD("      HE","    LLEGADO");
-	delay(3500);
+	delay(3000);
 	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
 

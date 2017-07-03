@@ -35,7 +35,7 @@ class SensarRealidad {
     //Calibra al IMU
     void calibracionIMU();
     //Regresa el Angulo en el eje X
-    double getAngulo();
+    bool getAngulo(double &angle);
     //Regresa el Angulo en el eje Y
     double sensarRampa();
     //Regresa si está muy inclinado
@@ -48,6 +48,8 @@ class SensarRealidad {
     static void escribirEEPROM(int dir, int value);
     //Lee de la EEPROM
     static int leerEEPROM(int dir);
+  private:
+    double lastAngle;
 };
 
 #endif
