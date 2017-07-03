@@ -436,8 +436,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 // Llena el mapa dependiendo de los valores que mande la clase SensarMapa. Y en dado caso, desplaza los datos.
 // Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
 void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
-	if(mapa->sensarRampa() > iRampa || mapa->sensarRampa() < -iRampa) {
-		// tMapa[iPiso][iRow][iCol].bumper(false);
+	if(mapa->sensarRampa() > abs(iRampa)) {
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
 			uint8_t iTemp = iPiso, i = 0, j;
 			robot->pasaRampa();
