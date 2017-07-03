@@ -7,7 +7,7 @@
 #define ENCODER_B 5
 
 /////////Variables, mapa y mover//////////
-uint8_t iRow = 8, iCol = 9, iPiso = 0;
+uint8_t iRow = 4, iCol = 4, iPiso = 0;
 char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
