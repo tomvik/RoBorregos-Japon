@@ -433,6 +433,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	}
 	potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
 	potenciaDer = iPowD + outDerIMU + outDerPARED;
+	if(potenciaIzq < kVelocidadBaseMenor) potenciaIzq = kVelocidadBaseMenor;
+	if(potenciaDer < kVelocidadBaseMenor) potenciaDer = kVelocidadBaseMenor;
 	lastInput = iError;
 	// real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
 	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
