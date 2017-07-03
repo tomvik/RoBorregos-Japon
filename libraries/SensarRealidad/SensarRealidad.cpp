@@ -22,7 +22,7 @@ const int kDistanciaMinimaLados = 60;
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
 // IMU
-Adafruit_BNO055 bno = Adafruit_BNO055();
+Adafruit_BNO055 bno = Adafruit_BNO055(Adafruit_BNO055::OPERATION_MODE_NDOF_FMC_OFF);
 
 #define toleranciaSwitchIMU 5
 
@@ -47,7 +47,7 @@ SensarRealidad::SensarRealidad() {
 		lcd.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
 	bno.setExtCrystalUse(true);
 	Serial.println("A CALIBRAR");
-	//while(getIMUCalibrationStatus() <= 0);
+	while(getIMUCalibrationStatus() <= 0) ;
 	Serial.println("TERMINE");
 	//Todos los pines declarados
 
@@ -59,6 +59,7 @@ SensarRealidad::SensarRealidad() {
 	lcd.backlight();
 	Wire.begin();
 	inicializarSensoresDistancia(4);
+	lastAngle = 0.0;
 }
 
 void SensarRealidad::escribirLCD(String sE1, String sE2) {
@@ -105,14 +106,14 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 		delay(200);
 		sensor[i].setTimeout(200);
 		delay(200);
-		   sensor[i].startContinuous();
-		   delay(200);
+		sensor[i].startContinuous();
+		delay(200);
 	}
 }
 
 int SensarRealidad::getDistanciaEnfrente() {
- 	int distancia = sensor[0].readRangeContinuousMillimeters();
- 	return distancia > 20 ? distancia - 20 : 0;
+	int distancia = sensor[0].readRangeContinuousMillimeters();
+	return distancia > 20 ? distancia - 20 : 0;
 }
 
 int SensarRealidad::getDistanciaDerecha() {
@@ -121,12 +122,12 @@ int SensarRealidad::getDistanciaDerecha() {
 }
 
 int SensarRealidad::getDistanciaAtras() {
- 	int distancia = sensor[2].readRangeContinuousMillimeters();
+	int distancia = sensor[2].readRangeContinuousMillimeters();
 	return distancia > 35 ? distancia - 30 : 0;
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
- 	int distancia = sensor[3].readRangeContinuousMillimeters();
+	int distancia = sensor[3].readRangeContinuousMillimeters();
 	return distancia > 55 ? distancia - 55 : 0;
 }
 
@@ -181,10 +182,19 @@ void SensarRealidad::calibracionIMU() {
 	delay(100);
 }
 
-double SensarRealidad::getAngulo() {
+bool SensarRealidad::getAngulo(double &angle) {
+	double temp = lastAngle;
 	sensors_event_t event;
 	bno.getEvent(&event);
-	return event.orientation.x;
+	angle = event.orientation.x;
+
+	if(angle < 20 && lastAngle > 340) {
+		temp -= 360;
+	} else if(lastAngle < 20 && angle > 340) {
+		temp += 360;
+	}
+	lastAngle = angle;
+	return !(abs(temp - angle) > 10);
 }
 
 double SensarRealidad::sensarRampa() {
