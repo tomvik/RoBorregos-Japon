@@ -769,11 +769,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	        }
 	        Serial.println();
 	   }
-<<<<<<< HEAD
 	delay(5000);
-=======
-	   delay(5000);
->>>>>>> hotfix
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
