@@ -753,7 +753,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	//LA FUNCION RECURSIVA
 	mapa.llenaMapa(iMapa, cMapa, tMapa, *cDir, *iCol, *iRow, *iPiso);
 	///////////////Imprime el mapa//////////////////////////////
-	/*for (uint8_t i = 0; i < kMapSize; ++i) {
+	for (uint8_t i = 0; i < kMapSize; ++i) {
 	        for(uint8_t j=0; j<kMapSize; j++) {
 	                Serial.print(iMapa[i][j]); Serial.print(" ");
 	        }
@@ -767,7 +767,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	        }
 	        Serial.println();
 	   }
-	   delay(5000);*/
+	   delay(5000);
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña

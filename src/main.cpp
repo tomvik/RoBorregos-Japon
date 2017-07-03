@@ -7,7 +7,7 @@
 #define ENCODER_B 5
 
 /////////Variables, mapa y mover//////////
-uint8_t iRow = 4, iCol = 4, iPiso = 0;
+uint8_t iRow = 8, iCol = 9, iPiso = 0;
 char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
@@ -58,9 +58,9 @@ void setup() {
 	}*/
 
 	//Inicializamos el tile actual
-	tMapa[iPiso][iCol][iRow].inicio(true);
-	tMapa[iPiso][iCol][iRow].visitado(true);
-	tMapa[iPiso][iCol][iRow].existe(true);
+	tMapa[iPiso][iRow][iCol].inicio(true);
+	tMapa[iPiso][iRow][iCol].visitado(true);
+	tMapa[iPiso][iRow][iCol].existe(true);
 	if(sensar->caminoAtras()) {
 		tMapa[iPiso][iRow + 1][iCol].existe(true);
 	} else {
@@ -76,9 +76,10 @@ void setup() {
 
 	//Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
-	while(!tMapa[iPiso][iCol][iRow].inicio()) {
+	unsigned int i = 0;
+	while(!tMapa[iPiso][iRow][iCol].inicio()) {
 		mover->goToVisitado(tMapa, 'i');
-		sensar->apantallanteLCD("ATORADO", "ATORADO");
+		sensar->apantallanteLCD("ATORADO " + String(iCol) + " " + String(iRow), "ATORADO " + String(i++));
 	}
 
 	//Regresó al incio

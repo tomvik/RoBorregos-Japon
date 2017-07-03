@@ -42,7 +42,7 @@ class Mapear {
     void llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
   private:
-    uint8_t iTamano, iPisoMax, iRampa;
+    uint8_t iPisoMax, iRampa;
     SensarRealidad *mapa;
     Movimiento *robot;
 };
