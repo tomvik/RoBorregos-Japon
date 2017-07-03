@@ -37,10 +37,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(Adafruit_BNO055::OPERATION_MODE_NDOF_FMC_O
    s0 3
    s1 4
    s2 5
-   s3 6
-
-   nano serial 3
-   master serial 2*/
+   s3 6 */
 
 SensarRealidad::SensarRealidad() {
 	if(!bno.begin())

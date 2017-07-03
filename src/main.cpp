@@ -1,24 +1,24 @@
-///////////Librerias////////////
+/////////// Librerias ///////////
 #include <Arduino.h>
 #include <Mapear.h>
 
-//////////Encoders//////////////
+/////////// Encoders ///////////
 #define ENCODER_A 4
 #define ENCODER_B 5
 
-/////////Variables, mapa y mover//////////
+/////////// Variables, mapa y mover ///////////
 uint8_t iRow = 4, iCol = 4, iPiso = 0;
 char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
 
-///////////Apuntadores constantes a las variables/////////
+/////////// Apuntadores constantes a las variables ///////////
 uint8_t *const iR = &iRow;
 uint8_t *const iC = &iCol;
 uint8_t *const iP = &iPiso;
 char *const cD = &cDir;
 
-//////////////Funciones de encoders//////////////////
+/////////// Funciones de encoders ///////////
 void encoder1() {
 	mover->encoder1();
 }
@@ -36,18 +36,18 @@ void setup() {
 		Serial2.read();
 	}
 
-	//Interrupciones
+	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
 
-	//Resto de los objetos
+	// Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
 	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover);
 
-	//El Mariachi
+	// El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 	mover->stop();
 
@@ -68,13 +68,13 @@ void setup() {
 	}
 	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
 
-	//Loop en el cual recorre todo el mapa
+	// Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();
 		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
 	}
 
-	//Se regresa al inicio
+	// Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
 	unsigned int i = 0;
 	while(!tMapa[iPiso][iRow][iCol].inicio()) {
@@ -82,10 +82,10 @@ void setup() {
 		sensar->apantallanteLCD("ATORADO " + String(iCol) + " " + String(iRow), "ATORADO " + String(i++));
 	}
 
-	//Regresó al incio
+	// Regresó al incio
 	mover->stop();
 	sensar->apantallanteLCD("      HE","    LLEGADO");
-	delay(3000);
+	delay(2000);
 	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
 

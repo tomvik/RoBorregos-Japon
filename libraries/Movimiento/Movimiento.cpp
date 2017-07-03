@@ -25,11 +25,13 @@ const int kEncoder30 = 2400;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.4;
 const int kDistanciaEnfrente = 65;
+const int kDistanciaAtras = 55;
 const int kMapearPared = 8;
 const int kParedDeseadoIzq = 55; // 105 mm
 const int kParedDeseadoDer = 55; // 105 mm
 
 const uint8_t kVelocidadBaseMenor = 100;
+
 
 //////////////////////Define pins and motors//////////////////////////
 #define pin_Servo 10
@@ -68,7 +70,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	iPowD = iPowd;
 	AFMS.begin();
 	velocidad(iPowI, iPowD);
-	stop();
+	corre
 	myservo.attach(pin_Servo);
 	myservo.write(90);
 	//////////////////Inicializamos variables en 0////////////////////////////////
@@ -170,9 +172,9 @@ void Movimiento::alinearParedAtras() {
 	potIzq = potDer = kVelocidadBaseMenor;
 	int iActual = real->getDistanciaAtras();
 	real->escribirLCD("Alinear atras");
-	while ((iActual < kDistanciaEnfrente - 6 || iActual > kDistanciaEnfrente + 6 ) && inicio + 2000 > millis()) {
+	while ((iActual < kDistanciaAtras - 6 || iActual > kDistanciaAtras + 6 ) && inicio + 2000 > millis()) {
 		velocidad(potIzq, potDer);
-		if(iActual < kDistanciaEnfrente) { //Muy cerca
+		if(iActual < kDistanciaAtras) { //Muy cerca
 			front();
 		} else { //Muy lejos
 			back();
@@ -311,8 +313,6 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 
 	real->getAngulo(posInicial);
 	potIzq = potDer = kVelocidadBaseMenor;
-	real->escribirLCD(String(posInicial) + " a " + String(fSetPoint));
-	delay(1000);
 	right();
 	velocidad(225, 225);
 
@@ -351,7 +351,6 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 			   }*/
 		}
 	}
-	real->escribirLCD("Vengo de" + String(posInicial), "Voy a" + String(fSetPoint));
 	stop();
 	if(real->getDistanciaAtras() < 200) {
 		alinearParedAtras();
@@ -436,6 +435,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	if(potenciaIzq < kVelocidadBaseMenor) potenciaIzq = kVelocidadBaseMenor;
 	if(potenciaDer < kVelocidadBaseMenor) potenciaDer = kVelocidadBaseMenor;
 	lastInput = iError;
+
 	// real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
 	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
 }
@@ -560,7 +560,6 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	front();
 	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
-		real->escribirLCD(String(iPowDD) + "  " + String(iPowII));
 		velocidad(iPowII, iPowDD);
 
 		//Calor
@@ -605,7 +604,6 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 	front();
 	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
-		real->escribirLCD(String(iPowDD) + "  " + String(iPowII));
 		velocidad(iPowII, iPowDD);
 
 		//Calor
@@ -755,7 +753,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	//LA FUNCION RECURSIVA
 	mapa.llenaMapa(iMapa, cMapa, tMapa, *cDir, *iCol, *iRow, *iPiso);
 	///////////////Imprime el mapa//////////////////////////////
-	for (uint8_t i = 0; i < kMapSize; ++i) {
+	/*for (uint8_t i = 0; i < kMapSize; ++i) {
 	        for(uint8_t j=0; j<kMapSize; j++) {
 	                Serial.print(iMapa[i][j]); Serial.print(" ");
 	        }
@@ -769,7 +767,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 	        }
 	        Serial.println();
 	   }
-	delay(5000);
+		 delay(5000);*/
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
@@ -784,8 +782,7 @@ bool Movimiento::goToVisitado(Tile tMapa[3][10][10], char cD) {
 
 //La hice bool para que de una forma estuviera como condición de un loop, pero aún no se me ocurre cómo
 bool Movimiento::decidir(Tile tMapa[3][10][10]) {
-
-	stop();
+	// stop();
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder(tMapa);
 	}
