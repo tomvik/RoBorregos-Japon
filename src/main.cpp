@@ -43,12 +43,14 @@ void setup() {
 	// Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
-	mover = &robot;
-	Mapear mapa(sensar, mover);
 
 	// El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
+
+	// Resto de los objetos
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
+	mover = &robot;
+	Mapear mapa(sensar, mover);
 	mover->stop();
 
 	/*while(true) {
