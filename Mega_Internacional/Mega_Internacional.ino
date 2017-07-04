@@ -50,7 +50,8 @@ void setup() {
 	// El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 	mover->stop();
-
+  
+  //Espacio para pruebas
 	/*while(true) {
 		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
 		mover->avanzar(tMapa);
@@ -79,7 +80,6 @@ void setup() {
 	unsigned int i = 0;
 	while(!tMapa[iPiso][iRow][iCol].inicio()) {
 		mover->goToVisitado(tMapa, 'i');
-		sensar->apantallanteLCD("ATORADO " + String(iCol) + " " + String(iRow), "ATORADO " + String(i++));
 	}
 
 	// Regresó al incio

@@ -2,7 +2,7 @@
 #include <VL53L0X.h>
 
 const int kCANTIDAD_SENSORES = 4;
-const int kXSHUT[kCANTIDAD_SENSORES] = {23, 25, 27, 29};
+const int kXSHUT[kCANTIDAD_SENSORES] = {25, 23, 27, 29};
 
 // 23 ATRAS 37
 // 25 DERECHA 51
