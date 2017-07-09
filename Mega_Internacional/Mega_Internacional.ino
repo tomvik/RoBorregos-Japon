@@ -43,50 +43,57 @@ void setup() {
 	// Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
-	mover = &robot;
-	Mapear mapa(sensar, mover);
 
 	// El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
+
+	// Resto de los objetos
+	Movimiento robot(140, 140, sensar, cD, iC, iR, iP);
+	mover = &robot;
+	Mapear mapa(sensar, mover);
 	mover->stop();
   
   //Espacio para pruebas
 	/*while(true) {
 		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
 		mover->avanzar(tMapa);
-		delay(10000);
 	}*/
-
-	//Inicializamos el tile actual
-	tMapa[iPiso][iRow][iCol].inicio(true);
-	tMapa[iPiso][iRow][iCol].visitado(true);
-	tMapa[iPiso][iRow][iCol].existe(true);
-	if(sensar->caminoAtras()) {
-		tMapa[iPiso][iRow + 1][iCol].existe(true);
-	} else {
-		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
-	}
-	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
-
-	// Loop en el cual recorre todo el mapa
-	while (mover->decidir(tMapa)) {
-		mover->stop();
-		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
-	}
-
-	// Se regresa al inicio
-	sensar->apantallanteLCD("Let's go home");
-	unsigned int i = 0;
-	while(!tMapa[iPiso][iRow][iCol].inicio()) {
-		mover->goToVisitado(tMapa, 'i');
-	}
-
-	// Regresó al incio
-	mover->stop();
-	sensar->apantallanteLCD("      HE","    LLEGADO");
-	delay(2000);
-	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
+ Tile tTemp;
+  while(true){
+    iRow = 4, iCol = 4, iPiso = 0;
+  	//Inicializamos el tile actual
+  	tMapa[iPiso][iRow][iCol].inicio(true);
+  	tMapa[iPiso][iRow][iCol].visitado(true);
+  	tMapa[iPiso][iRow][iCol].existe(true);
+  	if(sensar->caminoAtras()) {
+  		tMapa[iPiso][iRow + 1][iCol].existe(true);
+  	} else {
+  		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
+  	}
+  	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+  
+  	// Loop en el cual recorre todo el mapa
+  	while (mover->decidir(tMapa)) {
+  		mover->stop();
+  		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
+  	}
+  
+  	// Se regresa al inicio
+  	sensar->apantallanteLCD("Let's go home");
+  	while(!tMapa[iPiso][iRow][iCol].inicio())
+  		mover->goToVisitado(tMapa, 'i');
+  
+  	// Regresó al incio
+  	mover->stop();
+  	sensar->apantallanteLCD("      HE","    LLEGADO");
+  	delay(1500);
+  	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
+    for(int i = 0; i < 10; i++){
+      for(int j = 0; j < 10; j++){
+        tMapa[0][i][j] = tTemp;
+      }
+    }
+  }
 }
 
 void loop() {

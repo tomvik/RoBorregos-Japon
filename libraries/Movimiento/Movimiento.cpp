@@ -189,10 +189,10 @@ void Movimiento::corregirIMU() {
 		double fRef = 0, angle;
 		back();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(real->getDistanciaAtras() > 20) {
+		while(real->getDistanciaAtras() > 10) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
-		delay(500); // TODO: Checar con sensor
+		delay(600); // TODO: Checar con sensor
 		stop();
 		delay(100);
 
@@ -384,7 +384,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
-	if(distanciaIzq < 150 && distanciaDer < 150) {
+	if(distanciaIzq < 125 && distanciaDer < 125) {
 		contadorIzq++;
 		contadorDer++;
 
@@ -403,7 +403,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
 		outDerPARED *= -1;
 
-	} else if(distanciaIzq < 150) {
+	} else if(distanciaIzq < 125) {
 		contadorIzq++;
 		iError = kParedDeseadoIzq - distanciaIzq;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -418,7 +418,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 
 		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
 		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else if(distanciaDer < 150) {
+	} else if(distanciaDer < 125) {
 		contadorDer++;
 		iError = kParedDeseadoDer - distanciaDer;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -433,7 +433,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		outIzqPARED = -iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
 		outDerPARED = iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
 	} else {
-		iTerm = 0;
+		outIzqPARED = outDerPARED = iTerm = 0;
 	}
 	potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
 	potenciaDer = iPowD + outDerIMU + outDerPARED;
@@ -441,7 +441,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	if(potenciaDer < kVelocidadBaseMenor) potenciaDer = kVelocidadBaseMenor;
 	lastInput = iError;
 
-	// real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
+	real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
 	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
 }
 
@@ -549,7 +549,6 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 }
 
 void Movimiento::avanzar(Tile tMapa[3][10][10]) {
-	real->escribirLCD("AVANZAR");
 	cParedes = 0;
 	resetIMU++;
 	double bumperMin = 0.0, bumperMax = 0.0;

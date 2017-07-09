@@ -83,28 +83,27 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 	for (int i = 0; i < kCantVL53; i++)
 		digitalWrite(kXSHUT[i], LOW);
 
-	delay(1000);
+	delay(100);
 
 	for (int i = 0; i < kCantVL53; i++) {
 		//We put it in '1', so it's enabled.
 		//*IMPORTANT NOTE* we cannot send a HIGH signal, because we would burn it. So, what we do is put a really high impedance on it. Because by default, that pin is connected to HIGH.
 		pinMode(kXSHUT[i], INPUT);
 		//Must wait this time for it to actually be enabled
-		delay(200);
+		delay(100);
 
 		//Initialize the sensor
 		sensor[i].init(true);
 
 		//Wait for it to be initialized
-		delay(200);
+		delay(150);
 		//Set a new address
 		//*IMPORTANT NOTE* we have to check that the addresses doesn't match with those of other sensors
 		sensor[i].setAddress((uint8_t)(kINICIO_I2C + i));
-		delay(200);
+		delay(150);
 		sensor[i].setTimeout(200);
-		delay(200);
+		delay(150);
 		sensor[i].startContinuous();
-		delay(200);
 	}
 }
 

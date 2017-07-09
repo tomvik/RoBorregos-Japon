@@ -43,18 +43,19 @@ void setup() {
 	// Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
-	mover = &robot;
-	Mapear mapa(sensar, mover);
 
 	// El Mariachi
 	sensar->apantallanteLCD("      El", "    MARIACHI");
+
+	// Resto de los objetos
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
+	mover = &robot;
+	Mapear mapa(sensar, mover);
 	mover->stop();
 
 	/*while(true) {
 		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
 		mover->avanzar(tMapa);
-		delay(10000);
 	}*/
 
 	//Inicializamos el tile actual
@@ -76,16 +77,13 @@ void setup() {
 
 	// Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
-	unsigned int i = 0;
-	while(!tMapa[iPiso][iRow][iCol].inicio()) {
+	while(!tMapa[iPiso][iRow][iCol].inicio())
 		mover->goToVisitado(tMapa, 'i');
-		sensar->apantallanteLCD("ATORADO " + String(iCol) + " " + String(iRow), "ATORADO " + String(i++));
-	}
 
 	// Regresó al incio
 	mover->stop();
 	sensar->apantallanteLCD("      HE","    LLEGADO");
-	delay(2000);
+	delay(1500);
 	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
 
