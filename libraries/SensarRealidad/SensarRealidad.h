@@ -44,6 +44,8 @@ class SensarRealidad {
     uint8_t switches();
     //Regresa true si es negro
     bool color();
+    // Tests
+    void test();
     //Escribe en la EEPROM
     static void escribirEEPROM(int dir, int value);
     //Lee de la EEPROM

@@ -53,10 +53,8 @@ void setup() {
 	Mapear mapa(sensar, mover);
 	mover->stop();
 
-	/*while(true) {
-		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
-		mover->avanzar(tMapa);
-	}*/
+	if(digitalRead(2))
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
