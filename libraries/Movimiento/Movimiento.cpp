@@ -640,7 +640,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 		cParedes |= 0b00000001;
 
 	eCount1 = eCount2 = 0;
-	if(!real->color() && real->sensarRampa() < abs(kRampaLimit)) {
+	if(real->color() != 1  && real->sensarRampa() < abs(kRampaLimit)) {
 		if(real->getDistanciaEnfrente() < 200) {
 			cParedes |= 0b00000010;
 			alinearParedEnfrente();

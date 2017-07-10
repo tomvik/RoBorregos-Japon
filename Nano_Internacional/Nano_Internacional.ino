@@ -17,17 +17,20 @@ Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
 unsigned long tiempoYa, tiempoAntes;
 uint8_t utemp;
 char cSend;
+//2 es checkpoint
 //1 es negro
 //0 es blanco
-bool sensorR() {
-	int frequency = 0;
+uint8_t sensorR() {
+	int frequency = 0, iR;
 	digitalWrite(S2, HIGH);
 	digitalWrite(S3, HIGH);
 	for (uint8_t i = 0; i < 3; i++)
 		frequency += pulseIn(sensorOut, LOW);
 	frequency /= 3;
   //Serial.println(frequency);
-	return (frequency >= 100);
+  iR = (frequency >= 100) ? 1 : 0;
+  iR = (frequency <= 40) ? 2 : 0;
+  return iR;
 }
 //0 = nada
 //1 = derecha
@@ -44,6 +47,7 @@ uint8_t sensarTemperatura() {
 
 void setup() {
 	Serial3.begin(115200);
+  //Serial.begin(9600);
   Serial2.begin(9600);
 	mlxRight.begin();
 	mlxLeft.begin();
@@ -56,11 +60,11 @@ void setup() {
 	digitalWrite(S0, HIGH);
 	digitalWrite(S1, LOW);
 }
-//Color ////// 0 si es blanco, 1 si es negro
+//Color ////// 0 si es blanco, 1 si es negro, 2 si es checkpoint
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
-//0, 0, 0, 0,  color, izq, victima, der
+//0, 0, 0, checkpoint,  color, izq, victima, der
 void loop() {
-  Serial2.println("TOMA");
+  //Serial2.println("TOMA");
 	cSend = 0;
 	utemp = sensarTemperatura();
 	switch(utemp) {
@@ -76,7 +80,14 @@ void loop() {
 		cSend|=0b00000111;
 		break;
 	}
-	cSend |= (sensorR() == 1) ? 0b00001000 : 0b00000000;
+ switch(sensorR()){
+  case 1:
+    cSend |= 0b00001000;
+    break;
+  case 2:
+    cSend |= 0b00010000;
+    break;
+ }
 	Serial3.print(cSend);
-  delay(5);
+  delay(10);
 }

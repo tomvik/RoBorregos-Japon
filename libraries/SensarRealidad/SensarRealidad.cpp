@@ -27,7 +27,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(Adafruit_BNO055::OPERATION_MODE_NDOF_FMC_O
 #define toleranciaSwitchIMU 5
 
 // SWITCH
-#define switchIzquierda 43
+#define switchIzquierda 39
 #define switchDerecha 41
 
 // COLOR
@@ -214,12 +214,14 @@ uint8_t SensarRealidad::switches() {
 	return 0;
 }
 
-//1 = negro 0 = blanco
-bool SensarRealidad::color() {
-	char cc = 0;
+//2 = checkpoint 1 = negro 0 = blanco
+uint8_t SensarRealidad::color() {
+	char cc = 0, iR;
 	while(Serial2.available())
 		cc = (char) Serial2.read();
-	return(cc & 0b00001000);
+  iR = (cc & 0b00001000) ? 1 : 0;
+  iR = (cc & 0b00010000) ? 2 : 0;
+  return iR;
 }
 
 void escribirEEPROM(int dir, int val) {
