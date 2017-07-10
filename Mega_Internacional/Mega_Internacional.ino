@@ -58,25 +58,19 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(140, 140, sensar, cD, iC, iR, iP);
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
 	mover->stop();
-  
-  //Espacio para pruebas
-	while(true) {
-		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
-		sensar->escribirLCD(String(sensar->switches()));
-    delay(50);
-		//mover->avanzar(tMapa);
-	}
-  Tile tTemp;
-  iRow = 4, iCol = 4, iPiso = 0;
-  //Inicializamos el tile actual
-  tMapa[iPiso][iRow][iCol].inicio(true);
-  tMapa[iPiso][iRow][iCol].visitado(true);
-  tMapa[iPiso][iRow][iCol].existe(true);
-  if(sensar->caminoAtras()) {
+
+	if(digitalRead(2) == HIGH)
+		sensar->test();
+
+	//Inicializamos el tile actual
+	tMapa[iPiso][iRow][iCol].inicio(true);
+	tMapa[iPiso][iRow][iCol].visitado(true);
+	tMapa[iPiso][iRow][iCol].existe(true);
+	if(sensar->caminoAtras()) {
 		tMapa[iPiso][iRow + 1][iCol].existe(true);
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
