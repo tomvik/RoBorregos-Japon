@@ -12,11 +12,21 @@ char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
 
+///////////Variables para checkpoint//////////
+uint8_t iRowL = iRow, iColL = iCol, iPisoL = iPiso;
+char cDirL = cDir;
+Tile tBueno[3][10][10];
+
 /////////// Apuntadores constantes a las variables ///////////
 uint8_t *const iR = &iRow;
 uint8_t *const iC = &iCol;
 uint8_t *const iP = &iPiso;
 char *const cD = &cDir;
+
+uint8_t *const iRL = &iRowL;
+uint8_t *const iCL = &iColL;
+uint8_t *const iPL = &iPisoL;
+char *const cDL = &cDirL;
 
 /////////// Funciones de encoders ///////////
 void encoder1() {
@@ -50,10 +60,10 @@ void setup() {
 	// Resto de los objetos
 	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
 	mover = &robot;
-	Mapear mapa(sensar, mover);
+	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
 	mover->stop();
 
-	if(digitalRead(2))
+	if(digitalRead(3) == HIGH)
 		sensar->test();
 
 	//Inicializamos el tile actual
@@ -65,12 +75,12 @@ void setup() {
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
-	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
 	// Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();
-		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
+		mapa.llenaMapaVariable(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 
 	// Se regresa al inicio

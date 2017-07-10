@@ -689,6 +689,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 }
 
 void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("    CHECK", "   POINT");
 	delay(1000);
 	for(int i = 0; i <= iPisoMax; i++){

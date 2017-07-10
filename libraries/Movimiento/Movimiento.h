@@ -11,12 +11,12 @@
 class Movimiento {
   public:
     /// Constructor por parámetros
-    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip);
+    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10]);
 
     //////////////////////////////////Movimientos//////////////////////////////////////
 
     /// Ajusta la velocidad
-    void velocidad(uint8_t powIzq, uint8_t powDer);
+    bool velocidad(uint8_t powIzq, uint8_t powDer);
 
     /// Para los motores
     void stop();
@@ -36,23 +36,23 @@ class Movimiento {
     /// Calcula la velocidad para avanzar derecho
     void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer);
     /// Deja kit y mapea que hay una victima
-    void dejarKit(Tile tMapa[3][10][10], uint8_t iCase);
+    void dejarKit(uint8_t iCase);
 
     ///  void ErrorGradosVuelta(float &error);
     /// Pasa la rampa
     void pasaRampa();
     /// Retrocede cuando hay un tile negro
-    void retroceder(Tile tMapa[3][10][10]);
+    void retroceder();
     /// Avanza un cuadro
-    void avanzar(Tile tMapa[3][10][10]);
+    void avanzar();
     /// Da vuelta a la derecha de 90
-    void derecha(Tile tMapa[3][10][10]);
+    void derecha();
     /// Da vuelta a la izquierda de 90
-    void izquierda(Tile tMapa[3][10][10]);
+    void izquierda();
     /// Controla la veloicad para dar la vuelta a la izquierda
-    void vueltaIzq(Tile tMapa[3][10][10]);
+    void vueltaIzq();
     /// Controla la velocidad para dar la vuelta a la derecha
-    void vueltaDer(Tile tMapa[3][10][10]);
+    void vueltaDer();
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
@@ -61,26 +61,37 @@ class Movimiento {
     void encoder1();
     /// Encoder 2
     void encoder2();
+    // Boton 1
+    void boton1();
 
     /// Hace las instrucciones para llegar al cuadro deseado
-    void hacerInstrucciones(Tile tMapa[3][10][10], String sMov);
+    void hacerInstrucciones(String sMov);
 
     /////////////////////////Buscar cuadro////////////////////////////////////
-    bool goToVisitado(Tile tMapa[3][10][10], char cD);
+    bool goToVisitado(char cD);
 
     ////////////////Decide qué hacer con la prioridad d, e, i, a, busca////////////////
-    bool decidir(Tile tMapa[3][10][10]);
-    // bool decidir_Prueba(Tile tMapa[3][10][10]);
+    bool decidir();
+    // bool decidir_Prueba();
+
+    ////////////////////Pasa el mapa a el chido////////////////////////////
+    void checkpoint();
+    ////////////////////LACK////////////////////////////////
+    void lack();
 
     /////////////Getter//////////
     //Regresa cuales paredes se mapeó
     char getParedes();
+    //Regresa si hubo un lack
+    bool getLack();
 
   private:
+  	Tile (*tBueno)[10][10], (*tMapa)[10][10];
     int iTerm, lastInput;
-    char cVictima, cParedes, *cDir;
-    uint8_t *iCol, *iRow, *iPiso;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU;
+    bool bBoton1, bLack;
+    char cVictima, cParedes, *cDir, *cDirLast;
+    uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;

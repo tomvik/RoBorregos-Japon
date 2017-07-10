@@ -216,12 +216,38 @@ uint8_t SensarRealidad::switches() {
 
 //2 = checkpoint 1 = negro 0 = blanco
 uint8_t SensarRealidad::color() {
-	char cc = 0, iR;
+	char cc = 0;
+  uint8_t iR = 0;
 	while(Serial2.available())
 		cc = (char) Serial2.read();
-  iR = (cc & 0b00001000) ? 1 : 0;
-  iR = (cc & 0b00010000) ? 2 : 0;
+  if(cc&0b00001000)
+    iR = 1;
+  else if(cc&0b00010000)
+    iR = 2;
   return iR;
+}
+
+void SensarRealidad::test() {
+	double angles;
+	escribirLCD("   DISTANCIAS");
+	delay(500);
+	while(digitalRead(3) == LOW)
+		escribirLCD(String(getDistanciaDerecha()) + "    " + String(getDistanciaAtras()) + "    " + String(getDistanciaIzquierda()), "      " + String(getDistanciaEnfrente()));
+
+	escribirLCD("      IMU");
+	delay(500);
+	while(digitalRead(3) == LOW) {
+		getAngulo(angles);
+		escribirLCD("      " + String(angles), "      " + String(sensarRampa()));
+	}
+
+	escribirLCD("     COLOR");
+	delay(500);
+	while(digitalRead(3) == LOW) {
+		escribirLCD(String(color()));
+	}
+
+	// IMU RAMPA
 }
 
 void escribirEEPROM(int dir, int val) {
