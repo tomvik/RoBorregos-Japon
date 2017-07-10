@@ -222,6 +222,27 @@ bool SensarRealidad::color() {
 	return(cc & 0b00001000);
 }
 
+void SensarRealidad::test() {
+	double angles;
+	escribirLCD("   DISTANCIAS");
+	delay(500);
+	while(digitalRead(2) == LOW)
+		escribirLCD(String(getDistanciaDerecha()) + "    " + String(getDistanciaAtras()) + "    " + String(getDistanciaIzquierda()), "      " + String(getDistanciaEnfrente()));
+
+	escribirLCD("      IMU");
+	delay(500);
+	while(digitalRead(2) == LOW) {
+		getAngulo(angles);
+		escribirLCD(String(angles));
+	}
+
+	escribirLCD("     COLOR");
+	delay(500);
+	while(digitalRead(2) == LOW) {
+		escribirLCD(String(color()));
+	}
+}
+
 void escribirEEPROM(int dir, int val) {
 	byte lowByte = ((val >> 0) & 0xFF);
 	byte highByte = ((val >> 8) & 0xFF);

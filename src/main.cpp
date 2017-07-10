@@ -53,7 +53,7 @@ void setup() {
 	Mapear mapa(sensar, mover);
 	mover->stop();
 
-	if(digitalRead(2))
+	if(digitalRead(2) == HIGH)
 		sensar->test();
 
 	//Inicializamos el tile actual
