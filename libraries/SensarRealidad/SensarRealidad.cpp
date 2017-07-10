@@ -27,7 +27,7 @@ Adafruit_BNO055 bno = Adafruit_BNO055(Adafruit_BNO055::OPERATION_MODE_NDOF_FMC_O
 #define toleranciaSwitchIMU 5
 
 // SWITCH
-#define switchIzquierda 43
+#define switchIzquierda 39
 #define switchDerecha 41
 
 // COLOR
@@ -233,7 +233,7 @@ void SensarRealidad::test() {
 	delay(500);
 	while(digitalRead(2) == LOW) {
 		getAngulo(angles);
-		escribirLCD(String(angles));
+		escribirLCD("      " + String(angles), "      " + String(sensarRampa()));
 	}
 
 	escribirLCD("     COLOR");
@@ -241,6 +241,8 @@ void SensarRealidad::test() {
 	while(digitalRead(2) == LOW) {
 		escribirLCD(String(color()));
 	}
+
+	// IMU RAMPA
 }
 
 void escribirEEPROM(int dir, int val) {
