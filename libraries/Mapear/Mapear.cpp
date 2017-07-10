@@ -22,13 +22,14 @@ const uint8_t kRampaLimit = 17;
 
 // Constructores
 Mapear::Mapear() {
-	iPisoMax = 0;
+	iPisoMax = iColor = 0;
 }
 
-Mapear::Mapear(SensarRealidad *ma, Movimiento *ro) {
+Mapear::Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP) {
 	mapa = ma;
 	robot = ro;
-	iPisoMax = 0;
+	iPisoMax = iColor = 0;
+	iPisoLast = iP, iColLast = iC, iRowLast = iR, cDirLast = cD;
 }
 
 void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow) {
@@ -414,7 +415,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 
 // Llena el mapa dependiendo de los valores que mande la clase SensarMapa. Y en dado caso, desplaza los datos.
 // Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
-void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
 			uint8_t iTemp = iPiso, i = 0, j;
@@ -526,20 +527,25 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, 
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 		// Si es un cuadro negro
-		if(mapa->color()) {
-			// Poner pared a los cuatro lados
+		iColor = mapa->color();
+		if(iColor == 1) {
 			mapa->apantallanteLCD("NEGRO");
 			delay(200);
+			// Poner pared a los cuatro lados
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
 			tMapa[iPiso][iRow][iCol].cuadroNegro(true);
 		}
+		else if(iColor == 2){
+			//TODO
+			checkpoint(tMapa, tBueno, cDir, iCol, iRow, iPiso);
+		}
 	}
 }
 
-void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
 		// tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
@@ -624,7 +630,8 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	// Si es un cuadro negro
-	if(mapa->color()) {
+	iColor = mapa->color();
+	if(iColor == 1) {
 		mapa->apantallanteLCD("NEGRO");
 		delay(200);
 		// Poner pared a los cuatro lados
@@ -633,6 +640,10 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
 		tMapa[iPiso][iRow][iCol].cuadroNegro(true);
+	}
+	else if(iColor == 2){
+		//TODO
+		checkpoint(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 	////////////////////////////// PRUEBAS DE LOGICA/////////////////////////////////////////
 	/*char inChar;
@@ -675,4 +686,20 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, ui
 
 	mapa->escribirLCD(String(tMapa[iPiso][iRow][iCol].arriba()) + " " + String(tMapa[iPiso][iRow][iCol].derecha()) + " " + String(tMapa[iPiso][iRow][iCol].abajo()) + " " + String(tMapa[iPiso][iRow][iCol].izquierda()));
 	// delay(500);
+}
+
+void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+	mapa->apantallanteLCD("    CHECK", "   POINT");
+	delay(1000);
+	for(int i = 0; i <= iPisoMax; i++){
+		for(int j = 0; j < kSize; j++){
+			for(int z = 0; z < kSize; z++){
+				tBueno[i][j][z] = tMapa[i][j][z];
+			}
+		}
+	}
+	(*iPisoLast) = iPiso;
+	(*iColLast) = iCol;
+	(*iRowLast) = iRow;
+	(*cDirLast) = cDir;
 }

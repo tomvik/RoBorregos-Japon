@@ -42,8 +42,8 @@ class SensarRealidad {
     uint8_t switchesIMU(double fDeseado, double grados);
     //Regresa si chocó
     uint8_t switches();
-    //Regresa true si es negro
-    bool color();
+    //Regresa 0 si es blanco, 1 si es negro, 2 si es checkpoint
+    uint8_t color();
     // Tests
     void test();
     //Escribe en la EEPROM

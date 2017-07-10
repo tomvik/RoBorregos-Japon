@@ -208,7 +208,7 @@ void Movimiento::corregirIMU() {
 		while(real->getDistanciaAtras() < 20) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
-		stop();
+		//stop();
 
 		resetIMU = 0;
 		real->escribirLCD(String(fSetPoint));
@@ -281,10 +281,13 @@ void Movimiento::vueltaIzq(Tile tMapa[3][10][10]) {
 			   }*/
 		}
 	}
-	stop();
-	if(real->getDistanciaAtras() < 200) {
-		alinearParedAtras();
-	}
+	//stop();
+	if(real->getDistanciaEnfrente() < 200) {
+    alinearParedEnfrente();
+  }
+  else if(real->getDistanciaAtras() < 200) {
+    alinearParedAtras();
+  }
 }
 
 void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
@@ -350,10 +353,13 @@ void Movimiento::vueltaDer(Tile tMapa[3][10][10]) {
 			   }*/
 		}
 	}
-	stop();
-	if(real->getDistanciaAtras() < 200) {
-		alinearParedAtras();
-	}
+	//stop();
+	if(real->getDistanciaEnfrente() < 200) {
+    alinearParedEnfrente();
+  }
+  else if(real->getDistanciaAtras() < 200) {
+    alinearParedAtras();
+  }
 }
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
@@ -506,7 +512,7 @@ void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 		(*iCol)++;
 		break;
 	}
-	stop();
+	//stop();
 	back();
 	while(eCount1 + eCount2 < kEncoder30) {
 		potenciasDerecho(iPowDD, iPowII);
@@ -516,7 +522,7 @@ void Movimiento::retroceder(Tile tMapa[3][10][10]) {
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
 	real->escribirLCD("LIMIT");
-	stop();
+	//stop();
 	uint16_t encoderTemp1 = eCount1;
 	uint16_t encoderTemp2 = eCount2;
 	switch(switchCase) {
@@ -535,7 +541,7 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 		delay(400);
 		break;
 	}
-	stop();
+	//stop();
 	encoderTemp1 -= eCount1;
 	encoderTemp2 -= eCount2;
 	eCount1 = encoderTemp1;
@@ -634,7 +640,7 @@ void Movimiento::avanzar(Tile tMapa[3][10][10]) {
 		cParedes |= 0b00000001;
 
 	eCount1 = eCount2 = 0;
-	if(!real->color() && real->sensarRampa() < abs(kRampaLimit)) {
+	if(real->color() != 1  && real->sensarRampa() < abs(kRampaLimit)) {
 		if(real->getDistanciaEnfrente() < 200) {
 			cParedes |= 0b00000010;
 			alinearParedEnfrente();
@@ -784,12 +790,12 @@ bool Movimiento::decidir(Tile tMapa[3][10][10]) {
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder(tMapa);
 	}
-	if(real->getDistanciaEnfrente() < 200) {
+	/*if(real->getDistanciaEnfrente() < 200) {
 		alinearParedEnfrente();
 	}
-	if(real->getDistanciaAtras() < 200) {
+	else if(real->getDistanciaAtras() < 200) {
 		alinearParedAtras();
-	}
+	}*/
 	uint8_t iCase;
 	while(Serial2.available())
 		cVictima = (char)Serial2.read();

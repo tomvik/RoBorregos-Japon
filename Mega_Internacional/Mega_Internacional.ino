@@ -12,11 +12,21 @@ char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
 
+///////////Variables para checkpoint//////////
+uint8_t iRowL = iRow, iColL = iCol, iPisoL = iPiso;
+char cDirL = cDir;
+Tile tBueno[3][10][10];
+
 /////////// Apuntadores constantes a las variables ///////////
 uint8_t *const iR = &iRow;
 uint8_t *const iC = &iCol;
 uint8_t *const iP = &iPiso;
 char *const cD = &cDir;
+
+uint8_t *const iRL = &iRowL;
+uint8_t *const iCL = &iColL;
+uint8_t *const iPL = &iPisoL;
+char *const cDL = &cDirL;
 
 /////////// Funciones de encoders ///////////
 void encoder1() {
@@ -48,31 +58,35 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
+	Movimiento robot(140, 140, sensar, cD, iC, iR, iP);
 	mover = &robot;
-	Mapear mapa(sensar, mover);
+	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
 	mover->stop();
-
-	/*while(true) {
+  
+  //Espacio para pruebas
+	while(true) {
 		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
-		mover->avanzar(tMapa);
-	}*/
-
-	//Inicializamos el tile actual
-	tMapa[iPiso][iRow][iCol].inicio(true);
-	tMapa[iPiso][iRow][iCol].visitado(true);
-	tMapa[iPiso][iRow][iCol].existe(true);
-	if(sensar->caminoAtras()) {
+		sensar->escribirLCD(String(sensar->switches()));
+    delay(50);
+		//mover->avanzar(tMapa);
+	}
+  Tile tTemp;
+  iRow = 4, iCol = 4, iPiso = 0;
+  //Inicializamos el tile actual
+  tMapa[iPiso][iRow][iCol].inicio(true);
+  tMapa[iPiso][iRow][iCol].visitado(true);
+  tMapa[iPiso][iRow][iCol].existe(true);
+  if(sensar->caminoAtras()) {
 		tMapa[iPiso][iRow + 1][iCol].existe(true);
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
-	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
+	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
 	// Loop en el cual recorre todo el mapa
 	while (mover->decidir(tMapa)) {
 		mover->stop();
-		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
+		mapa.llenaMapaVariable(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 
 	// Se regresa al inicio
