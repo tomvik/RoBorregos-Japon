@@ -2,7 +2,8 @@
 #include <Arduino.h>
 #include <Mapear.h>
 
-/////////// Encoders ///////////
+/////////// Encoders e interrupciones///////////
+#define BOTON_A 3
 #define ENCODER_A 4
 #define ENCODER_B 5
 
@@ -49,6 +50,8 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
+  //attachInterrupt(BOTON_A, boton1, HIGH);
+  pinMode(BOTON_A, INPUT);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -65,9 +68,8 @@ void setup() {
   
   //Espacio para pruebas
 	while(true) {
+    sensar->escribirLCD(String(digitalRead(BOTON_A)));
 		// sensar->escribirLCD(String(sensar->getDistanciaDerecha()) + "    " + String(sensar->getDistanciaAtras()) + "    " + String(sensar->getDistanciaIzquierda()), "      " + String(sensar->getDistanciaEnfrente()));
-		sensar->escribirLCD(String(sensar->switches()));
-    delay(50);
 		//mover->avanzar(tMapa);
 	}
   Tile tTemp;
