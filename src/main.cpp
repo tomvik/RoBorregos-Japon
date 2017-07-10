@@ -63,7 +63,7 @@ void setup() {
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
 	mover->stop();
 
-	if(digitalRead(2) == HIGH)
+	if(digitalRead(3) == HIGH)
 		sensar->test();
 
 	//Inicializamos el tile actual

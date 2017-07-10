@@ -228,19 +228,19 @@ void SensarRealidad::test() {
 	double angles;
 	escribirLCD("   DISTANCIAS");
 	delay(500);
-	while(digitalRead(2) == LOW)
+	while(digitalRead(3) == LOW)
 		escribirLCD(String(getDistanciaDerecha()) + "    " + String(getDistanciaAtras()) + "    " + String(getDistanciaIzquierda()), "      " + String(getDistanciaEnfrente()));
 
 	escribirLCD("      IMU");
 	delay(500);
-	while(digitalRead(2) == LOW) {
+	while(digitalRead(3) == LOW) {
 		getAngulo(angles);
 		escribirLCD("      " + String(angles), "      " + String(sensarRampa()));
 	}
 
 	escribirLCD("     COLOR");
 	delay(500);
-	while(digitalRead(2) == LOW) {
+	while(digitalRead(3) == LOW) {
 		escribirLCD(String(color()));
 	}
 
