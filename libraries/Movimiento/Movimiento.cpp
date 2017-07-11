@@ -68,7 +68,8 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	 //////////////////Inicializamos variables en 0////////////////////////////////
   eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
   //////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
-  real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM;
+  real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM, iPisoMax = iPM, iPisoMaxLast = iPML;
+
   ////////////////////////Inicializamos los motores y Servo/////////////////////////
 	iPowI = iPowi;
 	iPowD = iPowd;
