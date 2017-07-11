@@ -22,14 +22,14 @@ const uint8_t kRampaLimit = 17;
 
 // Constructores
 Mapear::Mapear() {
-	iPisoMax = iColor = 0;
+	iColor = 0;
 }
 
-Mapear::Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP) {
+Mapear::Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP, uint8_t *iPM, uint8_t *iPML) {
 	mapa = ma;
 	robot = ro;
-	iPisoMax = iColor = 0;
-	iPisoLast = iP, iColLast = iC, iRowLast = iR, cDirLast = cD;
+	iColor = 0;
+	iPisoLast = iP, iColLast = iC, iRowLast = iR, cDirLast = cD, iPisoMax = iPM, iPisoMaxLast = iPML;
 }
 
 void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow) {
@@ -439,20 +439,20 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], ch
 		}
 		else{
 			// Modifica el piso maximo
-			iPisoMax++;
+			(*iPisoMax)++;
 			if(mapa->sensarRampa() > kRampaLimit) {
 				tMapa[iPiso][iRow][iCol].rampaArriba(true);
-				tMapa[iPisoMax][4][4].rampaAbajo(true);
+				tMapa[(*iPisoMax)][4][4].rampaAbajo(true);
 			}
 			else{
 				tMapa[iPiso][iRow][iCol].rampaAbajo(true);
-				tMapa[iPisoMax][4][4].rampaArriba(true);
+				tMapa[(*iPisoMax)][4][4].rampaArriba(true);
 			}
 			// Pone a qué piso conectan
-			tMapa[iPisoMax][4][4].piso(iPiso);
-			tMapa[iPisoMax][4][4].existe(true);
-			tMapa[iPisoMax][4][4].visitado(true);
-			tMapa[iPiso][iRow][iCol].piso(iPisoMax);
+			tMapa[(*iPisoMax)][4][4].piso(iPiso);
+			tMapa[(*iPisoMax)][4][4].existe(true);
+			tMapa[(*iPisoMax)][4][4].visitado(true);
+			tMapa[iPiso][iRow][iCol].piso((*iPisoMax));
 			tMapa[iPiso][iRow][iCol].visitado(true);
 			// Poner como camino cerrado del piso actual
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
@@ -460,7 +460,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], ch
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 			robot->pasaRampa();
 			// Pone la posición en after rampa dependiendo de la direccion
-			iPiso = iPisoMax;
+			iPiso = (*iPisoMax);
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
@@ -570,20 +570,20 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 		}
 		else{
 			// Modifica el piso maximo
-			iPisoMax++;
+			(*iPisoMax)++;
 			if(mapa->sensarRampa() > kRampaLimit) {
 				tMapa[iPiso][iRow][iCol].rampaArriba(true);
-				tMapa[iPisoMax][4][4].rampaAbajo(true);
+				tMapa[(*iPisoMax)][4][4].rampaAbajo(true);
 			}
 			if(mapa->sensarRampa() < -kRampaLimit) {
 				tMapa[iPiso][iRow][iCol].rampaAbajo(true);
-				tMapa[iPisoMax][4][4].rampaArriba(true);
+				tMapa[(*iPisoMax)][4][4].rampaArriba(true);
 			}
 			// Pone a qué piso conectan
-			tMapa[iPisoMax][4][4].piso(iPiso);
-			tMapa[iPisoMax][4][4].existe(true);
-			tMapa[iPisoMax][4][4].visitado(true);
-			tMapa[iPiso][iRow][iCol].piso(iPisoMax);
+			tMapa[(*iPisoMax)][4][4].piso(iPiso);
+			tMapa[(*iPisoMax)][4][4].existe(true);
+			tMapa[(*iPisoMax)][4][4].visitado(true);
+			tMapa[iPiso][iRow][iCol].piso((*iPisoMax));
 			tMapa[iPiso][iRow][iCol].visitado(true);
 			// Poner como camino cerrado del piso actual
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
@@ -591,7 +591,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 			robot->pasaRampa();
 			// Pone la posición en after rampa dependiendo de la direccion
-			iPiso = iPisoMax;
+			iPiso = (*iPisoMax);
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
@@ -684,15 +684,15 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 	   else
 	        escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);*/
 
-	mapa->escribirLCD(String(tMapa[iPiso][iRow][iCol].arriba()) + " " + String(tMapa[iPiso][iRow][iCol].derecha()) + " " + String(tMapa[iPiso][iRow][iCol].abajo()) + " " + String(tMapa[iPiso][iRow][iCol].izquierda()));
+	//mapa->escribirLCD(String(tMapa[iPiso][iRow][iCol].arriba()) + " " + String(tMapa[iPiso][iRow][iCol].derecha()) + " " + String(tMapa[iPiso][iRow][iCol].abajo()) + " " + String(tMapa[iPiso][iRow][iCol].izquierda()));
 	// delay(500);
 }
 
 void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
 	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("    CHECK", "   POINT");
-	delay(1000);
-	for(int i = 0; i <= iPisoMax; i++){
+	delay(2000);
+	for(int i = 0; i <= 2; i++){
 		for(int j = 0; j < kSize; j++){
 			for(int z = 0; z < kSize; z++){
 				tBueno[i][j][z] = tMapa[i][j][z];
@@ -703,4 +703,5 @@ void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir
 	(*iColLast) = iCol;
 	(*iRowLast) = iRow;
 	(*cDirLast) = cDir;
+	(*iPisoMaxLast) = (*iPisoMax);
 }

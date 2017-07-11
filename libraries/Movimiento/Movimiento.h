@@ -11,7 +11,7 @@
 class Movimiento {
   public:
     /// Constructor por parámetros
-    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10]);
+    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10], uint8_t *iPM, uint8_t *iPML);
 
     //////////////////////////////////Movimientos//////////////////////////////////////
 
@@ -84,13 +84,15 @@ class Movimiento {
     char getParedes();
     //Regresa si hubo un lack
     bool getLack();
+    //Muestr mapa
+    void muestra(bool t);
 
   private:
   	Tile (*tBueno)[10][10], (*tMapa)[10][10];
     int iTerm, lastInput;
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
-    uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast;
+    uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
     uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
