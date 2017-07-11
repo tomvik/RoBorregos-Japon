@@ -68,7 +68,7 @@ Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c,
 	 //////////////////Inicializamos variables en 0////////////////////////////////
   eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
   //////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
-  real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM, iPisoMax = iPM, iPisoMaxLast = iPML;
+  real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM;
   ////////////////////////Inicializamos los motores y Servo/////////////////////////
 	iPowI = iPowi;
 	iPowD = iPowd;
@@ -93,9 +93,14 @@ bool Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 	myMotorRightF->setSpeed(powDer);
 	myMotorRightB->setSpeed(powDer);
   if(bBoton1){
-    bLack = true;
     stop();
     real->escribirLCD("     Perdon", "     Perdon");
+    delay(2000);
+    bBoton1 = false;
+    //TODO
+    lack();
+    delay(100);
+    bBoton1 = false;
     return false;
   }
   return true;
@@ -197,8 +202,7 @@ void Movimiento::corregirIMU() {
 		real->escribirLCD("corregir IMU");
 		double fRef = 0, angle;
 		back();
-		if(!velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor))
-      return;
+		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(real->getDistanciaAtras() > 10) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
@@ -214,8 +218,7 @@ void Movimiento::corregirIMU() {
 		fSetPoint = fRef;
 
 		front();
-		if(!velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor))
-      return;
+		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(real->getDistanciaAtras() < 20) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
@@ -601,7 +604,7 @@ void Movimiento::avanzar() {
 
 		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
 			iCase = (cVictima&0b00000001) ? 1 : 2;
-			dejarKit( iCase);
+			dejarKit(iCase);
 			front();
 		}
 		switchCase = real->switches();
@@ -671,11 +674,9 @@ void Movimiento::avanzar() {
 
 	eCount1 = eCount2 = 0;
   iColor = real->color();
-  if(real->getDistanciaEnfrente() < 200){
-    cParedes |= 0b00000010;
-  }
 	if(iColor != 1  && real->sensarRampa() < abs(kRampaLimit)) {
 		if(real->getDistanciaEnfrente() < 200) {
+			cParedes |= 0b00000010;
 			alinearParedEnfrente();
 		}
 		else if(real->getDistanciaAtras() < 200) {
@@ -771,9 +772,6 @@ void Movimiento::hacerInstrucciones(String sMov) {
       stop();
       checkpoint();
     }
-    if(bLack){
-      return;
-    }
 	}
 	//stop();
 }
@@ -818,9 +816,6 @@ bool Movimiento::goToVisitado(char cD) {
 	if(mapa.comparaMapa(iMapa, tMapa, cD, *iCol, *iRow, iNCol, iNRow, *iPiso)) { //Hace las instrucciones que recibe de la función en forma de string
 		hacerInstrucciones(mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, *iPiso));
 		*iCol = iNCol, *iRow = iNRow;
-    if(bLack){
-      lack();
-    }
 		return true;
 	}
 	return false;
@@ -857,18 +852,12 @@ bool Movimiento::decidir() {
 		derecha();
 		avanzar();
 		stop();
-    if(bLack){
-      lack();
-    }
 		return true;
 	}
 	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
 	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
 		avanzar();
 		stop();
-    if(bLack){
-      lack();
-    }
 		return true;
 	}
 	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
@@ -876,9 +865,6 @@ bool Movimiento::decidir() {
 		izquierda();
 		avanzar();
 		stop();
-    if(bLack){
-      lack();
-    }
 		return true;
 	}
 	//Si no hay pared atrás y no está visitado, muevete hacia allá
@@ -888,9 +874,6 @@ bool Movimiento::decidir() {
 		derecha();
 		avanzar();
 		stop();
-    if(bLack){
-      lack();
-    }
 		return true;
 	}
 	//Aquí es cuando entra a lo recursivo
@@ -1025,6 +1008,7 @@ char Movimiento::getParedes() {
 void Movimiento::checkpoint(){
   stop();
   real->apantallanteLCD("    CHECKkk", "   POINT");
+  delay(2000);
   for(int i = 0; i <= 2; i++){
     for(int j = 0; j < kMapSize; j++){
       for(int z = 0; z < kMapSize; z++){
@@ -1036,13 +1020,10 @@ void Movimiento::checkpoint(){
   (*iColLast) = (*iCol);
   (*iRowLast) = (*iRow);
   (*cDirLast) = (*cDir);
-  (*iPisoMaxLast) = (*iPisoMax);
 }
 
 void Movimiento::lack(){
-  double angle;
   stop();
-  bBoton1 = false;
   for(int i = 0; i <= 2; i++){
     for(int j = 0; j < kMapSize; j++){
       for(int z = 0; z < kMapSize; z++){
@@ -1050,139 +1031,22 @@ void Movimiento::lack(){
       }
     }
   }
-  real->apantallanteLCD("    WAIT", "   BYT");
-  while(!bBoton1){
-    real->getAngulo(angle);
-    fSetPoint = angle;
-  }
-  bBoton1 = false;
   (*iPiso) = (*iPisoLast);
   (*iCol) = (*iColLast);
   (*iRow) = (*iRowLast);
   (*cDir) = (*cDirLast);
-  (*iPisoMax) = (*iPisoMaxLast);
-  real->apantallanteLCD("    BYE", "   BYT");
-  while(Serial2.available())
-    cVictima = (char)Serial2.read();
-  cVictima = 0;
-  bLack = true;
+  real->apantallanteLCD("    WAIT", "   BYT");
+  while(!bBoton1){
+    delay(10);
+  }
   bBoton1 = false;
+  real->apantallanteLCD("    BYE", "   BYT");
+  delay(1000);
+  bLack = true;
 }
 
 bool Movimiento::getLack(){
   return bLack;
-}
-
-//////////////Funcion de impresión de mapa//////////////
-void Movimiento::muestra(bool t){
-  char cMapa[21][21];
-  for(int j = 0; j < 21; j++){
-    for(int z = 0; z < 21; z++){
-      cMapa[j][z] = 'x';
-    }
-  }
-  if(t){
-      int iRowC = 1;
-    for(int iRowT = 0; iRowT < 10; iRowT++) {
-      int iColC = 1;
-      for(int iColT = 0; iColT < 10; iColT++) {
-        if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
-          cMapa[iRowC][iColC] = 'i';
-        }
-        else if(tMapa[(*iPiso)][iRowT][iColT].visitado()) {
-          cMapa[iRowC][iColC] = 'v';
-        }
-        else if(tMapa[(*iPiso)][iRowT][iColT].existe()) {
-          cMapa[iRowC][iColC] = 'n';
-        }
-        else{
-          cMapa[iRowC][iColC] = 'x';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].arriba()) {
-          cMapa[iRowC-1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC-1][iColC] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].derecha()) {
-          cMapa[iRowC][iColC+1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC+1] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].abajo()) {
-          cMapa[iRowC+1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC+1][iColC] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].izquierda()) {
-          cMapa[iRowC][iColC-1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC-1] = '.';
-        }
-        iColC+=2;
-      }
-      iRowC+=2;
-    }
-  }
-  else{
-      int iRowC = 1;
-    for(int iRowT = 0; iRowT < 10; iRowT++) {
-      int iColC = 1;
-      for(int iColT = 0; iColT < 10; iColT++) {
-        if(tBueno[(*iPiso)][iRowT][iColT].inicio()) {
-          cMapa[iRowC][iColC] = 'i';
-        }
-        else if(tBueno[(*iPiso)][iRowT][iColT].visitado()) {
-          cMapa[iRowC][iColC] = 'v';
-        }
-        else if(tBueno[(*iPiso)][iRowT][iColT].existe()) {
-          cMapa[iRowC][iColC] = 'n';
-        }
-        else{
-          cMapa[iRowC][iColC] = 'x';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].arriba()) {
-          cMapa[iRowC-1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC-1][iColC] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].derecha()) {
-          cMapa[iRowC][iColC+1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC+1] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].abajo()) {
-          cMapa[iRowC+1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC+1][iColC] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].izquierda()) {
-          cMapa[iRowC][iColC-1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC-1] = '.';
-        }
-        iColC+=2;
-      }
-      iRowC+=2;
-    }
-  }
-  
-  for(int i = 0; i < 21; i++) {
-    for(int j = 0; j < 21; j++) {
-      Serial.print(cMapa[i][j]);
-      Serial.print(" ");
-    }
-    Serial.println(" ");
-  }
-  Serial.println(" ");
-  delay(200);
 }
 
 
