@@ -7,16 +7,14 @@
 #define ENCODER_A 4
 #define ENCODER_B 5
 
-long iii = 0;
-
 /////////// Variables, mapa y mover ///////////
-uint8_t iRow = 4, iCol = 4, iPiso = 0;
+uint8_t iRow = 4, iCol = 4, iPiso = 0, iPisoMax = 0;
 char cDir = 'n';
 Tile tMapa[3][10][10];
 Movimiento *mover;
 
 ///////////Variables para checkpoint//////////
-uint8_t iRowL = iRow, iColL = iCol, iPisoL = iPiso;
+uint8_t iRowL = iRow, iColL = iCol, iPisoL = iPiso, iPisoMaxLast = 0;
 char cDirL = cDir;
 Tile tBueno[3][10][10];
 
@@ -24,14 +22,16 @@ Tile tBueno[3][10][10];
 uint8_t *const iR = &iRow;
 uint8_t *const iC = &iCol;
 uint8_t *const iP = &iPiso;
+uint8_t *const iPM = &iPisoMax;
 char *const cD = &cDir;
 
 uint8_t *const iRL = &iRowL;
 uint8_t *const iCL = &iColL;
 uint8_t *const iPL = &iPisoL;
+uint8_t *const iPML = &iPisoMaxLast;
 char *const cDL = &cDirL;
 
-/////////// Funciones de encoders ///////////
+/////////// Funciones de encoders y boton ///////////
 void encoder1() {
 	mover->encoder1();
 }
@@ -66,9 +66,9 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa);
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
 	mover = &robot;
-	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
+	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
   
 	//if(digitalRead(BOTON_A))

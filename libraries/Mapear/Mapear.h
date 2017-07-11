@@ -15,7 +15,7 @@ class Mapear {
     // Constructor default
     Mapear();
     // Constructor con SensarRealidad y Movimiento y last pos
-    Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP);
+    Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP, uint8_t *iPM, uint8_t *iPML);
     // Verifica si hay espacio en la matriz
     bool espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase);
     //Mapea que hay rampa y todo lo necesario
@@ -42,9 +42,9 @@ class Mapear {
     void checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
   private:
-  	uint8_t *iPisoLast, *iColLast, *iRowLast;
+  	uint8_t *iPisoLast, *iColLast, *iRowLast, *iPisoMax, *iPisoMaxLast;
   	char *cDirLast;
-    uint8_t iPisoMax, iColor;
+    uint8_t iColor;
     SensarRealidad *mapa;
     Movimiento *robot;
 };
