@@ -21,15 +21,18 @@ char cSend;
 //1 es negro
 //0 es blanco
 uint8_t sensorR() {
-	int frequency = 0, iR;
+	int frequency = 0; 
+	uint8_t iR = 0;
 	digitalWrite(S2, HIGH);
 	digitalWrite(S3, HIGH);
 	for (uint8_t i = 0; i < 3; i++)
 		frequency += pulseIn(sensorOut, LOW);
 	frequency /= 3;
   //Serial.println(frequency);
-  iR = (frequency >= 100) ? 1 : 0;
-  iR = (frequency <= 40) ? 2 : 0;
+  if(frequency >= 100)
+    iR = 1;
+  else if(frequency <= 40)
+    iR = 2;
   return iR;
 }
 //0 = nada
@@ -82,9 +85,11 @@ void loop() {
 	}
  switch(sensorR()){
   case 1:
+    //Serial.println("NEGRO");
     cSend |= 0b00001000;
     break;
   case 2:
+    //Serial.println("CHECK");
     cSend |= 0b00010000;
     break;
  }

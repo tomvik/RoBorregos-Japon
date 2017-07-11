@@ -2,9 +2,12 @@
 #include <Arduino.h>
 #include <Mapear.h>
 
-/////////// Encoders ///////////
+/////////// Encoders e interrupciones///////////
+#define BOTON_A 1
 #define ENCODER_A 4
 #define ENCODER_B 5
+
+long iii = 0;
 
 /////////// Variables, mapa y mover ///////////
 uint8_t iRow = 4, iCol = 4, iPiso = 0;
@@ -34,7 +37,11 @@ void encoder1() {
 }
 
 void encoder2() {
-	mover->encoder2();
+  mover->encoder2();
+}
+
+void boton1() {
+  mover->boton1();
 }
 
 
@@ -49,6 +56,7 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
+  attachInterrupt(BOTON_A, boton1, RISING);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -58,18 +66,19 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP);
+	Movimiento robot(175, 175, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa);
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL);
 	mover->stop();
 
-	if(digitalRead(3) == HIGH)
-		sensar->test();
+	//if(digitalRead(BOTON_A))
+	//	sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
 	tMapa[iPiso][iRow][iCol].visitado(true);
 	tMapa[iPiso][iRow][iCol].existe(true);
+  tMapa[iPiso][iRow][iCol].checkpoint(true);
 	if(sensar->caminoAtras()) {
 		tMapa[iPiso][iRow + 1][iCol].existe(true);
 	} else {
@@ -78,15 +87,18 @@ void setup() {
 	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
 	// Loop en el cual recorre todo el mapa
-	while (mover->decidir(tMapa)) {
+	while (mover->decidir()) {
 		mover->stop();
-		mapa.llenaMapaVariable(tMapa, tBueno, cDir, iCol, iRow, iPiso);
+    if(mover->getLack())
+      mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
+    else
+		  mapa.llenaMapaVariable(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 
 	// Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
 	while(!tMapa[iPiso][iRow][iCol].inicio())
-		mover->goToVisitado(tMapa, 'i');
+		mover->goToVisitado('i');
 
 	// Regresó al incio
 	mover->stop();

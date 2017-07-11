@@ -215,12 +215,15 @@ uint8_t SensarRealidad::switches() {
 }
 
 //2 = checkpoint 1 = negro 0 = blanco
-uint8_t SensarRealidad::color() {rmk
-	char cc = 0, iR;
+uint8_t SensarRealidad::color() {
+	char cc = 0;
+  uint8_t iR = 0;
 	while(Serial2.available())
 		cc = (char) Serial2.read();
-  iR = (cc & 0b00001000) ? 1 : 0;
-  iR = (cc & 0b00010000) ? 2 : 0;
+  if(cc&0b00001000)
+    iR = 1;
+  else if(cc&0b00010000)
+    iR = 2;
   return iR;
 }
 
