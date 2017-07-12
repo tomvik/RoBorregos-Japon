@@ -1050,6 +1050,119 @@ bool Movimiento::getLack(){
   return bLack;
 }
 
+//////////////Funcion de impresión de mapa//////////////
+void Movimiento::muestra(bool t){
+  char cMapa[21][21];
+  for(int j = 0; j < 21; j++){
+    for(int z = 0; z < 21; z++){
+      cMapa[j][z] = 'x';
+    }
+  }
+  if(t){
+      int iRowC = 1;
+    for(int iRowT = 0; iRowT < 10; iRowT++) {
+      int iColC = 1;
+      for(int iColT = 0; iColT < 10; iColT++) {
+        if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
+          cMapa[iRowC][iColC] = 'i';
+        }
+        else if(tMapa[(*iPiso)][iRowT][iColT].visitado()) {
+          cMapa[iRowC][iColC] = 'v';
+        }
+        else if(tMapa[(*iPiso)][iRowT][iColT].existe()) {
+          cMapa[iRowC][iColC] = 'n';
+        }
+        else{
+          cMapa[iRowC][iColC] = 'x';
+        }
+        if(tMapa[(*iPiso)][iRowT][iColT].arriba()) {
+          cMapa[iRowC-1][iColC] = 'w';
+        }
+        else{
+          cMapa[iRowC-1][iColC] = '.';
+        }
+        if(tMapa[(*iPiso)][iRowT][iColT].derecha()) {
+          cMapa[iRowC][iColC+1] = 'w';
+        }
+        else{
+          cMapa[iRowC][iColC+1] = '.';
+        }
+        if(tMapa[(*iPiso)][iRowT][iColT].abajo()) {
+          cMapa[iRowC+1][iColC] = 'w';
+        }
+        else{
+          cMapa[iRowC+1][iColC] = '.';
+        }
+        if(tMapa[(*iPiso)][iRowT][iColT].izquierda()) {
+          cMapa[iRowC][iColC-1] = 'w';
+        }
+        else{
+          cMapa[iRowC][iColC-1] = '.';
+        }
+        iColC+=2;
+      }
+      iRowC+=2;
+    }
+  }
+  else{
+      int iRowC = 1;
+    for(int iRowT = 0; iRowT < 10; iRowT++) {
+      int iColC = 1;
+      for(int iColT = 0; iColT < 10; iColT++) {
+        if(tBueno[(*iPiso)][iRowT][iColT].inicio()) {
+          cMapa[iRowC][iColC] = 'i';
+        }
+        else if(tBueno[(*iPiso)][iRowT][iColT].visitado()) {
+          cMapa[iRowC][iColC] = 'v';
+        }
+        else if(tBueno[(*iPiso)][iRowT][iColT].existe()) {
+          cMapa[iRowC][iColC] = 'n';
+        }
+        else{
+          cMapa[iRowC][iColC] = 'x';
+        }
+        if(tBueno[(*iPiso)][iRowT][iColT].arriba()) {
+          cMapa[iRowC-1][iColC] = 'w';
+        }
+        else{
+          cMapa[iRowC-1][iColC] = '.';
+        }
+        if(tBueno[(*iPiso)][iRowT][iColT].derecha()) {
+          cMapa[iRowC][iColC+1] = 'w';
+        }
+        else{
+          cMapa[iRowC][iColC+1] = '.';
+        }
+        if(tBueno[(*iPiso)][iRowT][iColT].abajo()) {
+          cMapa[iRowC+1][iColC] = 'w';
+        }
+        else{
+          cMapa[iRowC+1][iColC] = '.';
+        }
+        if(tBueno[(*iPiso)][iRowT][iColT].izquierda()) {
+          cMapa[iRowC][iColC-1] = 'w';
+        }
+        else{
+          cMapa[iRowC][iColC-1] = '.';
+        }
+        iColC+=2;
+      }
+      iRowC+=2;
+    }
+  }
+
+  for(int i = 0; i < 21; i++) {
+    for(int j = 0; j < 21; j++) {
+      Serial.print(cMapa[i][j]);
+      Serial.print(" ");
+    }
+    Serial.println(" ");
+  }
+  Serial.println(" ");
+  delay(200);
+}
+
+
 
 /*
    void Movimiento::ErrorGradosVuelta(double &grados) {
