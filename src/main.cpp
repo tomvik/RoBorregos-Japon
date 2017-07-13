@@ -3,7 +3,7 @@
 #include <Mapear.h>
 
 /////////// Encoders e interrupciones///////////
-#define BOTON_A 1
+#define BOTON_A 3
 #define ENCODER_A 4
 #define ENCODER_B 5
 
@@ -71,8 +71,8 @@ void setup() {
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
 
-	//if(digitalRead(BOTON_A))
-	//	sensar->test();
+	if(digitalRead(BOTON_A))
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
@@ -84,6 +84,14 @@ void setup() {
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
+
+	while(true) {
+		mover->dejarKit(1);
+		delay(3000);
+		mover->dejarKit(2);
+		delay(3000);
+	}
+
 	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
 	// Loop en el cual recorre todo el mapa
