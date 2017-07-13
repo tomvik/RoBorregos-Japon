@@ -496,7 +496,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(110);
 			delay(500);
-			myservo.write(0);
+			myservo.write(10);
 			break;
 		case 2:
 			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
@@ -504,7 +504,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(70);
 			delay(500);
-			myservo.write(180);
+			myservo.write(170);
 			break;
 		}
 		delay(1000);
