@@ -56,7 +56,7 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-  attachInterrupt(BOTON_A, boton1, RISING);
+  // attachInterrupt(BOTON_A, boton1, RISING);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -85,12 +85,6 @@ void setup() {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
 
-	while(true) {
-		mover->dejarKit(1);
-		delay(3000);
-		mover->dejarKit(2);
-		delay(3000);
-	}
 
 	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 

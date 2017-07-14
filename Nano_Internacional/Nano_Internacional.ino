@@ -21,7 +21,7 @@ char cSend;
 //1 es negro
 //0 es blanco
 uint8_t sensorR() {
-	int frequency = 0; 
+	int frequency = 0;
 	uint8_t iR = 0;
 	digitalWrite(S2, HIGH);
 	digitalWrite(S3, HIGH);
@@ -67,7 +67,7 @@ void setup() {
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
 //0, 0, 0, checkpoint,  color, izq, victima, der
 void loop() {
-  //Serial2.println("TOMA");
+  Serial2.println("TOMA");
 	cSend = 0;
 	utemp = sensarTemperatura();
 	switch(utemp) {
