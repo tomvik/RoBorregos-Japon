@@ -23,12 +23,12 @@ const double kD_Una_Pared = 2;
 
 const int kEncoder30 = 2400;
 const int kEncoder15 = kEncoder30 / 2;
-const double kP_Vueltas = 1.4;
+const double kP_Vueltas = 1.111;
 const int kDistanciaEnfrente = 65;
 const int kDistanciaAtras = 55;
 const int kMapearPared = 8;
-const int kParedDeseadoIzq = 55; // 105 mm
-const int kParedDeseadoDer = 55; // 105 mm
+const int kParedDeseadoIzq = 52; // 105 mm
+const int kParedDeseadoDer = 52; // 105 mm
 
 const uint8_t kVelocidadBaseMenor = 100;
 
@@ -65,12 +65,12 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
    a = atrás
  */
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10], uint8_t *iPM, uint8_t *iPML) {
-	 //////////////////Inicializamos variables en 0////////////////////////////////
-  eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
-  //////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
-  real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM, iPisoMax = iPM, iPisoMaxLast = iPML;
+	//////////////////Inicializamos variables en 0////////////////////////////////
+	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
+	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
+	real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM, iPisoMax = iPM, iPisoMaxLast = iPML;
 
-  ////////////////////////Inicializamos los motores y Servo/////////////////////////
+	////////////////////////Inicializamos los motores y Servo/////////////////////////
 	iPowI = iPowi;
 	iPowD = iPowd;
 	AFMS.begin();
@@ -93,18 +93,18 @@ bool Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 
 	myMotorRightF->setSpeed(powDer);
 	myMotorRightB->setSpeed(powDer);
-  if(bBoton1){
-    stop();
-    real->escribirLCD("     Perdon", "     Perdon");
-    delay(2000);
-    bBoton1 = false;
-    //TODO
-    lack();
-    delay(100);
-    bBoton1 = false;
-    return false;
-  }
-  return true;
+	if(bBoton1) {
+		stop();
+		real->escribirLCD("     Perdon", "     Perdon");
+		delay(1000);
+		bBoton1 = false;
+		//TODO
+		lack();
+		delay(100);
+		bBoton1 = false;
+		return false;
+	}
+	return true;
 }
 
 
@@ -166,9 +166,9 @@ void Movimiento::alinearParedEnfrente() {
 	potIzq = potDer = kVelocidadBaseMenor;
 	int iActual = real->getDistanciaEnfrente();
 	real->escribirLCD("Alinear enfrente");
-	while ((iActual < kDistanciaEnfrente - 6 || iActual > kDistanciaEnfrente + 6 ) && inicio + 2000 > millis()) {
+	while ((iActual < kDistanciaEnfrente - 6 || iActual > kDistanciaEnfrente + 6 ) && inicio + 1500 > millis()) {
 		if(!velocidad(potIzq, potDer))
-      return;
+			return;
 		if(iActual < kDistanciaEnfrente) { //Muy cerca
 			back();
 		} else { //Muy lejos
@@ -185,9 +185,9 @@ void Movimiento::alinearParedAtras() {
 	potIzq = potDer = kVelocidadBaseMenor;
 	int iActual = real->getDistanciaAtras();
 	real->escribirLCD("Alinear atras");
-	while ((iActual < kDistanciaAtras - 6 || iActual > kDistanciaAtras + 6 ) && inicio + 2000 > millis()) {
+	while ((iActual < kDistanciaAtras - 6 || iActual > kDistanciaAtras + 6 ) && inicio + 1500 > millis()) {
 		if(!velocidad(potIzq, potDer))
-      return;
+			return;
 		if(iActual < kDistanciaAtras) { //Muy cerca
 			front();
 		} else { //Muy lejos
@@ -202,9 +202,10 @@ void Movimiento::corregirIMU() {
 	if(!(real->caminoAtras()) && (resetIMU > 10)) {
 		real->escribirLCD("corregir IMU");
 		double fRef = 0, angle;
+    unsigned long inicio = millis();
 		back();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(real->getDistanciaAtras() > 10) {
+		while(real->getDistanciaAtras() > 20 && inicio + 1500 > millis()) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		delay(600); // TODO: Checar con sensor
@@ -218,9 +219,10 @@ void Movimiento::corregirIMU() {
 		fRef /= 5;
 		fSetPoint = fRef;
 
+    inicio = millis();
 		front();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(real->getDistanciaAtras() < 20) {
+		while(real->getDistanciaAtras() < 20 && inicio + 1500 > millis()) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		//stop();
@@ -256,7 +258,7 @@ void Movimiento::vueltaIzq() {
 	real->getAngulo(posInicial);
 	potIzq = potDer = kVelocidadBaseMenor;
 	left();
-	velocidad(225, 225);
+	velocidad(200, 200);
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
@@ -268,8 +270,8 @@ void Movimiento::vueltaIzq() {
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
 			dif *= kP_Vueltas;
-      if(!velocidad(potIzq + dif, potDer + dif))
-        return;
+			if(!velocidad(potIzq + dif, potDer + dif))
+				return;
 			/*if (millis() >= inicio + 10000) {
 			    velocidad(160, 160);
 			   } else if (millis() >= inicio + 5000) {
@@ -285,9 +287,9 @@ void Movimiento::vueltaIzq() {
 			else
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
-			 dif *= kP_Vueltas;
+			dif *= kP_Vueltas;
 			if(!velocidad(potIzq + dif, potDer + dif))
-        return;
+				return;
 			/*x = 85 + abs(fSetPoint - posInicial) * 1.2 / 90;
 			   y = 85 + abs(fSetPoint - posInicial) * 1.2 / 90;
 			   velocidad(x,y);*/
@@ -300,11 +302,11 @@ void Movimiento::vueltaIzq() {
 	}
 	//stop();
 	if(real->getDistanciaEnfrente() < 200) {
-    alinearParedEnfrente();
-  }
-  else if(real->getDistanciaAtras() < 200) {
-    alinearParedAtras();
-  }
+		alinearParedEnfrente();
+	}
+	else if(real->getDistanciaAtras() < 200) {
+		alinearParedAtras();
+	}
 }
 
 void Movimiento::vueltaDer() {
@@ -333,7 +335,7 @@ void Movimiento::vueltaDer() {
 	real->getAngulo(posInicial);
 	potIzq = potDer = kVelocidadBaseMenor;
 	right();
-	velocidad(225, 225);
+	velocidad(200, 200);
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
@@ -345,8 +347,8 @@ void Movimiento::vueltaDer() {
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
 			dif *= kP_Vueltas;
-      if(!velocidad(potIzq + dif, potDer + dif))
-        return;
+			if(!velocidad(potIzq + dif, potDer + dif))
+				return;
 			/*if (millis() >= inicio + 10000) {
 			    velocidad(160, 160);
 			   } else if (millis() >= inicio + 5000) {
@@ -363,8 +365,8 @@ void Movimiento::vueltaDer() {
 				dif = abs(fSetPoint - posInicial);
 			if(dif > 90) dif = 90;
 			dif *= kP_Vueltas;
-      if(!velocidad(potIzq + dif, potDer + dif))
-        return;
+			if(!velocidad(potIzq + dif, potDer + dif))
+				return;
 			/*if (millis() >= inicio + 10000) {
 			   velocidad(160, 160);
 			   } else if (millis() >= inicio + 5000) {
@@ -374,17 +376,38 @@ void Movimiento::vueltaDer() {
 	}
 	//stop();
 	if(real->getDistanciaEnfrente() < 200) {
-    alinearParedEnfrente();
-  }
-  else if(real->getDistanciaAtras() < 200) {
-    alinearParedAtras();
-  }
+		alinearParedEnfrente();
+	}
+	else if(real->getDistanciaAtras() < 200) {
+		alinearParedAtras();
+	}
 }
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	double angle;
+
 	if(!real->getAngulo(angle)) {
 		fSetPoint = angle;
+	} else {
+		if(angle < 20 && fSetPoint > 340) {
+			if(angle - fSetPoint + 360 > 20) {
+				acomodaChoque(2);
+			}
+			else if(angle - fSetPoint + 360 < -20) {
+				acomodaChoque(1);
+			}
+		} else if(fSetPoint < 20 && angle > 340) {
+			if(angle - fSetPoint - 360 > 20) {
+				acomodaChoque(2);
+			}
+			else if(angle - fSetPoint - 360 < -20) {
+				acomodaChoque(1);
+			}
+		} else if(angle - fSetPoint > 20) {
+			acomodaChoque(2);
+		} else if(angle - fSetPoint < -20) {
+			acomodaChoque(1);
+		}
 	}
 
 	if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
@@ -473,8 +496,8 @@ void Movimiento::pasaRampa() {
 	front();
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
 		potenciasDerecho(iPowII, iPowDD);
-    if(!velocidad(iPowII, iPowDD))
-      return;
+		if(!velocidad(iPowII, iPowDD))
+			return;
 	}
 	cParedes = 0;
 	velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
@@ -497,7 +520,6 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			myservo.write(110);
 			delay(500);
 			myservo.write(20);
-      delay(500);
 			break;
 		case 2:
 			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
@@ -506,7 +528,6 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			myservo.write(70);
 			delay(500);
 			myservo.write(160);
-      delay(500);
 			break;
 		}
 		delay(1000);
@@ -537,9 +558,10 @@ void Movimiento::retroceder() {
 	//stop();
 	back();
 	while(eCount1 + eCount2 < kEncoder30) {
+    // TODO implementar p
 		potenciasDerecho(iPowDD, iPowII);
 		if(!velocidad(iPowII, iPowDD))
-      return;
+			return;
 	}
 }
 
@@ -548,37 +570,37 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 	stop();
 	uint16_t encoderTemp1 = eCount1;
 	uint16_t encoderTemp2 = eCount2;
-  unsigned long inicio = millis();
-  double x;
-  back();
+	unsigned long inicio = millis();
+	double x;
+	back();
 	switch(switchCase) {
 	case 1:
-    velocidad(iPowI, 0);
+		velocidad(iPowI, 0);
 		while(millis() - inicio < 500)
-      real->getAngulo(x);
-    inicio = millis();
+			real->getAngulo(x);
+		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(millis() - inicio < 350)
-      real->getAngulo(x);
-    fSetPoint -= 90;
-    vueltaDer();
+			real->getAngulo(x);
+		fSetPoint -= 90;
+		vueltaDer();
 		break;
 	case 2:
-    velocidad(0, iPowD);
+		velocidad(0, iPowD);
 		while(millis() - inicio < 500)
-      real->getAngulo(x);
-    inicio = millis();
+			real->getAngulo(x);
+		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(millis() - inicio < 350)
-      real->getAngulo(x);
-    fSetPoint += 90;
-    vueltaIzq();
+			real->getAngulo(x);
+		fSetPoint += 90;
+		vueltaIzq();
 		break;
 	}
 	stop();
-  front();
-	eCount1 = encoderTemp1;
-	eCount2 = encoderTemp2;
+	front();
+	eCount1 = encoderTemp1 - 500;
+	eCount2 = encoderTemp2 - 500;
 }
 
 void Movimiento::avanzar() {
@@ -598,7 +620,7 @@ void Movimiento::avanzar() {
 	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
 		if(!velocidad(iPowII, iPowDD))
-      return;
+			return;
 
 		//Calor
 		while(Serial2.available())
@@ -643,7 +665,7 @@ void Movimiento::avanzar() {
 	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
 		potenciasDerecho(iPowII, iPowDD);
 		if(!velocidad(iPowII, iPowDD))
-      return;
+			return;
 
 		//Calor
 		while(Serial2.available())
@@ -675,7 +697,7 @@ void Movimiento::avanzar() {
 		cParedes |= 0b00000001;
 
 	eCount1 = eCount2 = 0;
-  iColor = real->color();
+	iColor = real->color();
 	if(iColor != 1  && real->sensarRampa() < abs(kRampaLimit)) {
 		if(real->getDistanciaEnfrente() < 200) {
 			cParedes |= 0b00000010;
@@ -770,12 +792,10 @@ void Movimiento::hacerInstrucciones(String sMov) {
 			avanzar();
 			break;
 		}
-    if(tMapa[*iPiso][*iRow][*iCol].checkpoint()){
-      stop();
-      checkpoint();
-    }
+		if(tMapa[*iPiso][*iRow][*iCol].checkpoint()) {
+			checkpoint();
+		}
 	}
-	//stop();
 }
 
 //Busca dónde está el no visitado usando funciones de aquí y de sensar mapa.
@@ -811,7 +831,7 @@ bool Movimiento::goToVisitado(char cD) {
 	        }
 	        Serial.println();
 	   }
-		 delay(5000);*/
+	         delay(5000);*/
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
@@ -826,17 +846,17 @@ bool Movimiento::goToVisitado(char cD) {
 
 //La hice bool para que de una forma estuviera como condición de un loop, pero aún no se me ocurre cómo
 bool Movimiento::decidir() {
-  bLack = false;
+	bLack = false;
 	// stop();
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder();
 	}
 	/*if(real->getDistanciaEnfrente() < 200) {
-		alinearParedEnfrente();
-	}
-	else if(real->getDistanciaAtras() < 200) {
-		alinearParedAtras();
-	}*/
+	        alinearParedEnfrente();
+	   }
+	   else if(real->getDistanciaAtras() < 200) {
+	        alinearParedAtras();
+	   }*/
 	uint8_t iCase;
 	while(Serial2.available())
 		cVictima = (char)Serial2.read();
@@ -996,11 +1016,11 @@ void Movimiento::encoder1() {
 }
 
 void Movimiento::encoder2() {
-  eCount2++;
+	eCount2++;
 }
 
 void Movimiento::boton1() {
-  bBoton1 = true;
+	bBoton1 = true;
 }
 
 char Movimiento::getParedes() {
@@ -1008,159 +1028,158 @@ char Movimiento::getParedes() {
 }
 
 void Movimiento::checkpoint(){
-  stop();
-  real->apantallanteLCD("    CHECKkk", "   POINT");
-  delay(2000);
-  for(int i = 0; i <= 2; i++){
-    for(int j = 0; j < kMapSize; j++){
-      for(int z = 0; z < kMapSize; z++){
-        tBueno[i][j][z] = tMapa[i][j][z];
-      }
-    }
-  }
-  (*iPisoLast) = (*iPiso);
-  (*iColLast) = (*iCol);
-  (*iRowLast) = (*iRow);
-  (*cDirLast) = (*cDir);
+	stop();
+	real->apantallanteLCD("    CHECKkk", "   POINT");
+	for(int i = 0; i <= 2; i++) {
+		for(int j = 0; j < kMapSize; j++) {
+			for(int z = 0; z < kMapSize; z++) {
+				tBueno[i][j][z] = tMapa[i][j][z];
+			}
+		}
+	}
+	(*iPisoLast) = (*iPiso);
+	(*iColLast) = (*iCol);
+	(*iRowLast) = (*iRow);
+	(*cDirLast) = (*cDir);
 }
 
 void Movimiento::lack(){
-  stop();
-  for(int i = 0; i <= 2; i++){
-    for(int j = 0; j < kMapSize; j++){
-      for(int z = 0; z < kMapSize; z++){
-        tMapa[i][j][z] = tBueno[i][j][z];
-      }
-    }
-  }
-  (*iPiso) = (*iPisoLast);
-  (*iCol) = (*iColLast);
-  (*iRow) = (*iRowLast);
-  (*cDir) = (*cDirLast);
-  real->apantallanteLCD("    WAIT", "   BYT");
-  while(!bBoton1){
-    delay(10);
-  }
-  bBoton1 = false;
-  real->apantallanteLCD("    BYE", "   BYT");
-  delay(1000);
-  bLack = true;
+	stop();
+	for(int i = 0; i <= 2; i++) {
+		for(int j = 0; j < kMapSize; j++) {
+			for(int z = 0; z < kMapSize; z++) {
+				tMapa[i][j][z] = tBueno[i][j][z];
+			}
+		}
+	}
+	(*iPiso) = (*iPisoLast);
+	(*iCol) = (*iColLast);
+	(*iRow) = (*iRowLast);
+	(*cDir) = (*cDirLast);
+	real->apantallanteLCD("    WAIT", "   BYE");
+	while(!bBoton1) {
+		delay(10);
+	}
+	bBoton1 = false;
+	real->apantallanteLCD("    BYE", "   BYE");
+	delay(1000);
+	bLack = true;
 }
 
 bool Movimiento::getLack(){
-  return bLack;
+	return bLack;
 }
 
 //////////////Funcion de impresión de mapa//////////////
 void Movimiento::muestra(bool t){
-  char cMapa[21][21];
-  for(int j = 0; j < 21; j++){
-    for(int z = 0; z < 21; z++){
-      cMapa[j][z] = 'x';
-    }
-  }
-  if(t){
-      int iRowC = 1;
-    for(int iRowT = 0; iRowT < 10; iRowT++) {
-      int iColC = 1;
-      for(int iColT = 0; iColT < 10; iColT++) {
-        if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
-          cMapa[iRowC][iColC] = 'i';
-        }
-        else if(tMapa[(*iPiso)][iRowT][iColT].visitado()) {
-          cMapa[iRowC][iColC] = 'v';
-        }
-        else if(tMapa[(*iPiso)][iRowT][iColT].existe()) {
-          cMapa[iRowC][iColC] = 'n';
-        }
-        else{
-          cMapa[iRowC][iColC] = 'x';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].arriba()) {
-          cMapa[iRowC-1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC-1][iColC] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].derecha()) {
-          cMapa[iRowC][iColC+1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC+1] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].abajo()) {
-          cMapa[iRowC+1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC+1][iColC] = '.';
-        }
-        if(tMapa[(*iPiso)][iRowT][iColT].izquierda()) {
-          cMapa[iRowC][iColC-1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC-1] = '.';
-        }
-        iColC+=2;
-      }
-      iRowC+=2;
-    }
-  }
-  else{
-      int iRowC = 1;
-    for(int iRowT = 0; iRowT < 10; iRowT++) {
-      int iColC = 1;
-      for(int iColT = 0; iColT < 10; iColT++) {
-        if(tBueno[(*iPiso)][iRowT][iColT].inicio()) {
-          cMapa[iRowC][iColC] = 'i';
-        }
-        else if(tBueno[(*iPiso)][iRowT][iColT].visitado()) {
-          cMapa[iRowC][iColC] = 'v';
-        }
-        else if(tBueno[(*iPiso)][iRowT][iColT].existe()) {
-          cMapa[iRowC][iColC] = 'n';
-        }
-        else{
-          cMapa[iRowC][iColC] = 'x';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].arriba()) {
-          cMapa[iRowC-1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC-1][iColC] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].derecha()) {
-          cMapa[iRowC][iColC+1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC+1] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].abajo()) {
-          cMapa[iRowC+1][iColC] = 'w';
-        }
-        else{
-          cMapa[iRowC+1][iColC] = '.';
-        }
-        if(tBueno[(*iPiso)][iRowT][iColT].izquierda()) {
-          cMapa[iRowC][iColC-1] = 'w';
-        }
-        else{
-          cMapa[iRowC][iColC-1] = '.';
-        }
-        iColC+=2;
-      }
-      iRowC+=2;
-    }
-  }
+	char cMapa[21][21];
+	for(int j = 0; j < 21; j++) {
+		for(int z = 0; z < 21; z++) {
+			cMapa[j][z] = 'x';
+		}
+	}
+	if(t) {
+		int iRowC = 1;
+		for(int iRowT = 0; iRowT < 10; iRowT++) {
+			int iColC = 1;
+			for(int iColT = 0; iColT < 10; iColT++) {
+				if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
+					cMapa[iRowC][iColC] = 'i';
+				}
+				else if(tMapa[(*iPiso)][iRowT][iColT].visitado()) {
+					cMapa[iRowC][iColC] = 'v';
+				}
+				else if(tMapa[(*iPiso)][iRowT][iColT].existe()) {
+					cMapa[iRowC][iColC] = 'n';
+				}
+				else{
+					cMapa[iRowC][iColC] = 'x';
+				}
+				if(tMapa[(*iPiso)][iRowT][iColT].arriba()) {
+					cMapa[iRowC-1][iColC] = 'w';
+				}
+				else{
+					cMapa[iRowC-1][iColC] = '.';
+				}
+				if(tMapa[(*iPiso)][iRowT][iColT].derecha()) {
+					cMapa[iRowC][iColC+1] = 'w';
+				}
+				else{
+					cMapa[iRowC][iColC+1] = '.';
+				}
+				if(tMapa[(*iPiso)][iRowT][iColT].abajo()) {
+					cMapa[iRowC+1][iColC] = 'w';
+				}
+				else{
+					cMapa[iRowC+1][iColC] = '.';
+				}
+				if(tMapa[(*iPiso)][iRowT][iColT].izquierda()) {
+					cMapa[iRowC][iColC-1] = 'w';
+				}
+				else{
+					cMapa[iRowC][iColC-1] = '.';
+				}
+				iColC+=2;
+			}
+			iRowC+=2;
+		}
+	}
+	else{
+		int iRowC = 1;
+		for(int iRowT = 0; iRowT < 10; iRowT++) {
+			int iColC = 1;
+			for(int iColT = 0; iColT < 10; iColT++) {
+				if(tBueno[(*iPiso)][iRowT][iColT].inicio()) {
+					cMapa[iRowC][iColC] = 'i';
+				}
+				else if(tBueno[(*iPiso)][iRowT][iColT].visitado()) {
+					cMapa[iRowC][iColC] = 'v';
+				}
+				else if(tBueno[(*iPiso)][iRowT][iColT].existe()) {
+					cMapa[iRowC][iColC] = 'n';
+				}
+				else{
+					cMapa[iRowC][iColC] = 'x';
+				}
+				if(tBueno[(*iPiso)][iRowT][iColT].arriba()) {
+					cMapa[iRowC-1][iColC] = 'w';
+				}
+				else{
+					cMapa[iRowC-1][iColC] = '.';
+				}
+				if(tBueno[(*iPiso)][iRowT][iColT].derecha()) {
+					cMapa[iRowC][iColC+1] = 'w';
+				}
+				else{
+					cMapa[iRowC][iColC+1] = '.';
+				}
+				if(tBueno[(*iPiso)][iRowT][iColT].abajo()) {
+					cMapa[iRowC+1][iColC] = 'w';
+				}
+				else{
+					cMapa[iRowC+1][iColC] = '.';
+				}
+				if(tBueno[(*iPiso)][iRowT][iColT].izquierda()) {
+					cMapa[iRowC][iColC-1] = 'w';
+				}
+				else{
+					cMapa[iRowC][iColC-1] = '.';
+				}
+				iColC+=2;
+			}
+			iRowC+=2;
+		}
+	}
 
-  for(int i = 0; i < 21; i++) {
-    for(int j = 0; j < 21; j++) {
-      Serial.print(cMapa[i][j]);
-      Serial.print(" ");
-    }
-    Serial.println(" ");
-  }
-  Serial.println(" ");
-  delay(200);
+	for(int i = 0; i < 21; i++) {
+		for(int j = 0; j < 21; j++) {
+			Serial.print(cMapa[i][j]);
+			Serial.print(" ");
+		}
+		Serial.println(" ");
+	}
+	Serial.println(" ");
+	delay(200);
 }
 
 
