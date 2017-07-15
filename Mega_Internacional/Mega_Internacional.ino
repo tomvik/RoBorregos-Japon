@@ -70,6 +70,11 @@ void setup() {
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
+
+  /*while(true){
+    sensar->escribirLCD(String(sensar->color()));
+    delay(50);
+  }*/
   
 	//if(digitalRead(BOTON_A))
 	//	sensar->test();
