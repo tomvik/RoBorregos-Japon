@@ -186,13 +186,13 @@ bool SensarRealidad::getAngulo(double &angle) {
 	bno.getEvent(&event);
 	angle = event.orientation.x;
 
-	if(angle < 20 && lastAngle > 340) {
+	if(angle < 35 && lastAngle > 325) {
 		temp -= 360;
-	} else if(lastAngle < 20 && angle > 340) {
+	} else if(lastAngle < 35 && angle > 325) {
 		temp += 360;
 	}
 	lastAngle = angle;
-	return !(abs(temp - angle) > 20);
+	return !(abs(temp - angle) > 35);
 }
 
 double SensarRealidad::sensarRampa() {
