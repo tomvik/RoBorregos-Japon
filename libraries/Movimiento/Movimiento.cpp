@@ -496,7 +496,8 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(110);
 			delay(500);
-			myservo.write(10);
+			myservo.write(20);
+      delay(500);
 			break;
 		case 2:
 			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
@@ -504,7 +505,8 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(70);
 			delay(500);
-			myservo.write(170);
+			myservo.write(160);
+      delay(500);
 			break;
 		}
 		delay(1000);
@@ -548,11 +550,11 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 	uint16_t encoderTemp2 = eCount2;
   unsigned long inicio = millis();
   double x;
+  back();
 	switch(switchCase) {
 	case 1:
-		back();
     velocidad(iPowI, 0);
-		while(millis() - inicio < 350)
+		while(millis() - inicio < 500)
       real->getAngulo(x);
     inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
@@ -562,9 +564,8 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
     vueltaDer();
 		break;
 	case 2:
-		back();
     velocidad(0, iPowD);
-		while(millis() - inicio < 350)
+		while(millis() - inicio < 500)
       real->getAngulo(x);
     inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);

@@ -66,13 +66,13 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
+	Movimiento robot(160, 160, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
 
-	if(digitalRead(BOTON_A))
-		sensar->test();
+	// if(digitalRead(BOTON_A))
+		// sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
@@ -84,7 +84,6 @@ void setup() {
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
-
 
 	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
