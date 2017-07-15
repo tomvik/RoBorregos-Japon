@@ -23,7 +23,7 @@ const double kD_Una_Pared = 2;
 
 const int kEncoder30 = 2400;
 const int kEncoder15 = kEncoder30 / 2;
-const double kP_Vueltas = 1.4;
+const double kP_Vueltas = 1.111;
 const int kDistanciaEnfrente = 65;
 const int kDistanciaAtras = 55;
 const int kMapearPared = 8;
@@ -256,7 +256,7 @@ void Movimiento::vueltaIzq() {
 	real->getAngulo(posInicial);
 	potIzq = potDer = kVelocidadBaseMenor;
 	left();
-	velocidad(225, 225);
+	velocidad(200, 200);
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
@@ -333,7 +333,7 @@ void Movimiento::vueltaDer() {
 	real->getAngulo(posInicial);
 	potIzq = potDer = kVelocidadBaseMenor;
 	right();
-	velocidad(225, 225);
+	velocidad(200, 200);
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
@@ -383,9 +383,26 @@ void Movimiento::vueltaDer() {
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	double angle;
+
 	if(!real->getAngulo(angle)) {
 		fSetPoint = angle;
-	}
+	} else {
+    if(angle < 20 && fSetPoint > 340) {
+      if(angle - fSetPoint + 360 > 7)
+  		  acomodaChoque(1);
+      else if(angle - fSetPoint + 360 < -7)
+  		  acomodaChoque(2);
+  	} else if(fSetPoint < 20 && angle > 340) {
+      if(angle - fSetPoint - 360 > 7)
+  		  acomodaChoque(1);
+      else if(angle - fSetPoint - 360 < -7)
+  		  acomodaChoque(2);
+  	} else if(angle - fSetPoint > 5) {
+  		  acomodaChoque(1);
+    } else if(angle - fSetPoint < -5) {
+  		  acomodaChoque(2);
+  	}
+  }
 
 	if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
 		inIzqIMU = angle - 360;

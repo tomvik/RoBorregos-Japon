@@ -192,7 +192,7 @@ bool SensarRealidad::getAngulo(double &angle) {
 		temp += 360;
 	}
 	lastAngle = angle;
-	return !(abs(temp - angle) > 10);
+	return !(abs(temp - angle) > 20);
 }
 
 double SensarRealidad::sensarRampa() {
