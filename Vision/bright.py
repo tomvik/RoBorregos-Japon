@@ -3,7 +3,7 @@ import numpy as np
 import os
 #27 es el promedio de H en negro
 #150 es el promedio de H en blanco
-num = len(os.listdir("F:/git/RoBorregos-Japon/Vision/photos/H/"))
+num = len(os.listdir("C:/Users/usuario/Desktop/git/RoBorregos-Japon/Vision/photos/"))
 
 
 def mayormenor(img):
@@ -56,7 +56,7 @@ def promedio():
     print sum / num
 
 for x in xrange(0, num):
-    image = cv2.imread("photos/H/H({}).jpg".format(x), 0)
+    image = cv2.imread("photos/({}).jpg".format(x), 0)
     image = image[image.shape[0]/8:image.shape[0],0:image.shape[1]]
 
     res = np.hstack((image, filter(image)))
