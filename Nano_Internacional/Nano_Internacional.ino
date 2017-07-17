@@ -7,16 +7,15 @@
 #define S1 4
 #define S2 5
 #define S3 6
+#define LED 13
 
-#define MlxL 0x1C
+#define MlxL 0x5A
 #define MlxR 0x4C
 
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR);
 Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
 
-unsigned long tiempoYa, tiempoAntes;
-uint8_t utemp;
-char cSend;
+char cSend, cLee, cEs = 0;
 //2 es checkpoint
 //1 es negro
 //0 es blanco
@@ -25,13 +24,16 @@ uint8_t sensorR() {
 	uint8_t iR = 0;
 	digitalWrite(S2, HIGH);
 	digitalWrite(S3, HIGH);
-	for (uint8_t i = 0; i < 3; i++)
+  digitalWrite(LED, HIGH);
+	for (uint8_t i = 0; i < 3; i++){
 		frequency += pulseIn(sensorOut, LOW);
+	}
 	frequency /= 3;
   //Serial.println(frequency);
-  if(frequency >= 100)
+  digitalWrite(LED, LOW);
+  if(frequency >= 250)
     iR = 1;
-  else if(frequency <= 40)
+  else if(frequency <= 70)
     iR = 2;
   return iR;
 }
@@ -41,15 +43,15 @@ uint8_t sensorR() {
 //3 = ambos
 uint8_t sensarTemperatura() {
 	uint8_t re = 0;
-	if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 3)
+	if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 4)
 		re++;
-	if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 3)
+	if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 4)
 		re+=2;
 	return re;
 }
 
 void setup() {
-	Serial3.begin(115200);
+	Serial3.begin(9600);
   //Serial.begin(9600);
   Serial2.begin(9600);
 	mlxRight.begin();
@@ -59,18 +61,30 @@ void setup() {
 	pinMode(S2, OUTPUT);
 	pinMode(S3, OUTPUT);
 	pinMode(sensorOut, INPUT);
+  pinMode(LED, OUTPUT);
 
 	digitalWrite(S0, HIGH);
 	digitalWrite(S1, LOW);
 }
 //Color ////// 0 si es blanco, 1 si es negro, 2 si es checkpoint
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
-//0, 0, 0, checkpoint,  color, izq, victima, der
+//0, 0, Letra, checkpoint,  color, izq, victima, der
 void loop() {
-  //Serial2.println("TOMA");
-	cSend = 0;
-	utemp = sensarTemperatura();
-	switch(utemp) {
+  Serial2.println("TOMA");
+	cSend = cLee = 0;
+  while(Serial2.available())
+    cLee = (char)Serial2.read();
+  //Serial.print("....... "); Serial.println(cLee);
+  if(cLee != 0){
+    cEs = cLee;
+  }
+  switch(cEs){
+    case 'L':
+      //Serial.println("HH");
+      cSend |= 0b00100000;
+      break;
+  }
+	switch(sensarTemperatura()) {
 	case 1:
     //Serial.println("DER");
 		cSend|=0b00000011;
@@ -94,5 +108,5 @@ void loop() {
     break;
  }
 	Serial3.print(cSend);
-  delay(10);
+  delay(20);
 }

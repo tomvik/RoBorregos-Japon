@@ -186,13 +186,13 @@ bool SensarRealidad::getAngulo(double &angle) {
 	bno.getEvent(&event);
 	angle = event.orientation.x;
 
-	if(angle < 20 && lastAngle > 340) {
+	if(angle < 35 && lastAngle > 325) {
 		temp -= 360;
-	} else if(lastAngle < 20 && angle > 340) {
+	} else if(lastAngle < 35 && angle > 325) {
 		temp += 360;
 	}
 	lastAngle = angle;
-	return !(abs(temp - angle) > 10);
+	return !(abs(temp - angle) > 35);
 }
 
 double SensarRealidad::sensarRampa() {
@@ -220,13 +220,29 @@ uint8_t SensarRealidad::switches() {
 uint8_t SensarRealidad::color() {
 	char cc = 0;
   uint8_t iR = 0;
+  while(!Serial2.available()){
+    escribirLCD("NO HAY NADA");
+    delay(10);
+  }
 	while(Serial2.available())
 		cc = (char) Serial2.read();
   if(cc&0b00001000)
     iR = 1;
   else if(cc&0b00010000)
     iR = 2;
+  else if(cc&0b10000000){
+    escribirLCD("TIME OUT");
+    delay(2000);
+  }
+
   return iR;
+}
+
+bool SensarRealidad::visual(){
+  char cc = 0;
+  while(Serial2.available())
+    cc = (char)Serial2.read();
+  return cc&0b00100000;
 }
 
 void SensarRealidad::test() {
