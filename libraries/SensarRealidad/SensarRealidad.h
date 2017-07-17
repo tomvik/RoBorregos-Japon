@@ -44,6 +44,8 @@ class SensarRealidad {
     uint8_t switches();
     //Regresa 0 si es blanco, 1 si es negro, 2 si es checkpoint
     uint8_t color();
+    //Regresa 0 si no hay, 1 si hay victima
+    bool visual();
     // Tests
     void test();
     //Escribe en la EEPROM
