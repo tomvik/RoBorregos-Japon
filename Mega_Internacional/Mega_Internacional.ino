@@ -48,7 +48,7 @@ void boton1() {
 void setup() {
 	//Serial
 	Serial.begin(9600);
-	Serial2.begin(115200);
+	Serial2.begin(9600);
 	while(Serial2.available()) {
 		Serial2.read();
 	}
@@ -70,15 +70,7 @@ void setup() {
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
-
-  /*while(true){
-    sensar->escribirLCD(String(sensar->color()));
-    delay(50);
-  }*/
-  
 	//if(digitalRead(BOTON_A))
-	//	sensar->test();
-
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
 	tMapa[iPiso][iRow][iCol].visitado(true);

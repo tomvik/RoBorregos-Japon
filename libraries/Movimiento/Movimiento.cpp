@@ -519,7 +519,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(110);
 			delay(500);
-			myservo.write(20);
+			myservo.write(0);
 			break;
 		case 2:
 			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
@@ -527,10 +527,10 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			delay(500);
 			myservo.write(70);
 			delay(500);
-			myservo.write(160);
+			myservo.write(180);
 			break;
 		}
-		delay(1000);
+		delay(500);
 		myservo.write(90);
 	}
 	while(Serial2.available())
@@ -623,12 +623,19 @@ void Movimiento::avanzar() {
 			return;
 
 		//Calor
-		while(Serial2.available())
+		while(Serial2.available() && !(cVictima&0b00100000) )
 			cVictima = (char)Serial2.read();
 
-		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
+		if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
 			iCase = (cVictima&0b00000001) ? 1 : 2;
-			dejarKit(iCase);
+      stop();
+      if(cVictima&0b00100000){
+        real->escribirLCD("VICTIMA", "VISUAL");
+        delay(2000);
+      }
+      else{
+        dejarKit(iCase);
+      }
 			front();
 		}
 		switchCase = real->switches();
@@ -668,13 +675,20 @@ void Movimiento::avanzar() {
 			return;
 
 		//Calor
-		while(Serial2.available())
+		while(Serial2.available() && !(cVictima&0b00100000) )
 			cVictima = (char)Serial2.read();
 
 
-		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
-			iCase = (cVictima&0b00000001) ? 1 : 2;
-			dejarKit( iCase);
+		if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
+      iCase = (cVictima&0b00000001) ? 1 : 2;
+      stop();
+      if(cVictima&0b00100000){
+        real->escribirLCD("VICTIMA", "VISUAL");
+        delay(2000);
+      }
+      else{
+        dejarKit(iCase);
+      }
 			front();
 		}
 		switchCase = real->switches();
@@ -697,7 +711,9 @@ void Movimiento::avanzar() {
 		cParedes |= 0b00000001;
 
 	eCount1 = eCount2 = 0;
-	iColor = real->color();
+  //for(int i = 0; i < 2; i++)
+  stop();
+  iColor = real->color();
 	if(iColor != 1  && real->sensarRampa() < abs(kRampaLimit)) {
 		if(real->getDistanciaEnfrente() < 200) {
 			cParedes |= 0b00000010;
@@ -713,11 +729,19 @@ void Movimiento::avanzar() {
 void Movimiento::derecha() {                                                                                                              //Modificarse en realidad
 	real->escribirLCD("DER");
 	uint8_t iCase;
-	while(Serial2.available())
+	while(Serial2.available() && !(cVictima&0b00100000) )
 		cVictima = (char)Serial2.read();
-	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
+	if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
 		iCase = (cVictima&0b00000001) ? 1 : 2;
-		dejarKit( iCase);
+    stop();
+    if(cVictima&0b00100000){
+      real->escribirLCD("VICTIMA", "VISUAL");
+      delay(2000);
+    }
+    else{
+      dejarKit(iCase);
+    }
+    front();
 	}
 	switch(*cDir) {
 	case 'n':
@@ -740,11 +764,19 @@ void Movimiento::derecha() {                                                    
 void Movimiento::izquierda() {
 	real->escribirLCD("IZQ");
 	uint8_t iCase;
-	while(Serial2.available())
+	while(Serial2.available() && !(cVictima&0b00100000) )
 		cVictima = (char)Serial2.read();
-	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
+	if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
 		iCase = (cVictima&0b00000001) ? 1 : 2;
-		dejarKit( iCase);
+    stop();
+    if(cVictima&0b00100000){
+      real->escribirLCD("VICTIMA", "VISUAL");
+      delay(2000);
+    }
+    else{
+      dejarKit(iCase);
+    }
+    front();
 	}
 	switch(*cDir) {
 	case 'n':
@@ -1030,6 +1062,7 @@ char Movimiento::getParedes() {
 void Movimiento::checkpoint(){
 	stop();
 	real->apantallanteLCD("    CHECKkk", "   POINT");
+  delay(1000);
 	for(int i = 0; i <= 2; i++) {
 		for(int j = 0; j < kMapSize; j++) {
 			for(int z = 0; z < kMapSize; z++) {
