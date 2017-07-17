@@ -540,7 +540,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 
 void Movimiento::retroceder() {
 	real->escribirLCD("CUADRO NEGRO");
-	uint8_t iPowII = iPowI, iPowDD = iPowD;
+	uint8_t iPowII = kVelocidadBaseMenor, iPowDD = kVelocidadBaseMenor;
 	switch(*cDir) {
 	case 'n':
 		(*iRow)++;
@@ -555,7 +555,6 @@ void Movimiento::retroceder() {
 		(*iCol)++;
 		break;
 	}
-	//stop();
 	back();
 	while(eCount1 + eCount2 < kEncoder30) {
     // TODO implementar p
@@ -563,6 +562,7 @@ void Movimiento::retroceder() {
 		if(!velocidad(iPowII, iPowDD))
 			return;
 	}
+	stop();
 }
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
@@ -576,22 +576,22 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 	switch(switchCase) {
 	case 1:
 		velocidad(iPowI, 0);
-		while(millis() - inicio < 500)
+		while(millis() - inicio < 475)
 			real->getAngulo(x);
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 350)
+		while(millis() - inicio < 250)
 			real->getAngulo(x);
 		fSetPoint -= 90;
 		vueltaDer();
 		break;
 	case 2:
 		velocidad(0, iPowD);
-		while(millis() - inicio < 500)
+		while(millis() - inicio < 475)
 			real->getAngulo(x);
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 350)
+		while(millis() - inicio < 250)
 			real->getAngulo(x);
 		fSetPoint += 90;
 		vueltaIzq();
@@ -599,8 +599,8 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 	}
 	stop();
 	front();
-	eCount1 = encoderTemp1 - 500;
-	eCount2 = encoderTemp2 - 500;
+	eCount1 = encoderTemp1 - 450;
+	eCount2 = encoderTemp2 - 450;
 }
 
 void Movimiento::avanzar() {
