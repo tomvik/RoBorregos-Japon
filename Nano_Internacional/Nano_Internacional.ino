@@ -74,13 +74,11 @@ void loop() {
 	cSend = cLee = 0;
   while(Serial2.available())
     cLee = (char)Serial2.read();
-  //Serial.print("....... "); Serial.println(cLee);
   if(cLee != 0){
     cEs = cLee;
   }
   switch(cEs){
     case 'L':
-      //Serial.println("HH");
       cSend |= 0b00100000;
       break;
   }
