@@ -29,6 +29,9 @@ class Movimiento {
     void right();
     /// Pone los motores para la izquierda
     void left();
+
+    void alinear();
+
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
     /// Se separa de la pared de enfrente
@@ -57,6 +60,7 @@ class Movimiento {
     void corregirIMU();
     /// No está puesta wtf
     void alinearParedAtras();
+    void checarVictima();
     /// Encoder 1
     void encoder1();
     /// Encoder 2

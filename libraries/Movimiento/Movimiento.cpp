@@ -21,12 +21,13 @@ const double kP_Una_Pared = 0.7;
 const double kI_Una_Pared = 0.035;
 const double kD_Una_Pared = 2;
 
-const int kEncoder30 = 2400;
+const int kEncoder30 = 2350;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.111;
-const int kDistanciaEnfrente = 65;
+const int kDistanciaEnfrente = 60;
 const int kDistanciaAtras = 55;
-const int kMapearPared = 8;
+const int kDistanciaLejos = 75;
+const int kMapearPared = 11;
 const int kParedDeseadoIzq = 52; // 105 mm
 const int kParedDeseadoDer = 52; // 105 mm
 
@@ -93,9 +94,10 @@ bool Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 
 	myMotorRightF->setSpeed(powDer);
 	myMotorRightB->setSpeed(powDer);
+
 	if(bBoton1) {
 		stop();
-		real->escribirLCD("     Perdon", "     Perdon");
+		real->escribirLCD("     Perdon", "   la ruegue");
 		delay(1000);
 		bBoton1 = false;
 		//TODO
@@ -160,17 +162,114 @@ void Movimiento::left() {
 	myMotorRightB->run(FORWARD);
 }
 
-void Movimiento::alinearParedEnfrente() {
+void Movimiento::alinear() {
+	uint8_t potIzq, potDer;
+	potIzq = potDer = kVelocidadBaseMenor;
+	int distanciaAtras = real->getDistanciaAtras();
+	int distanciaEnfrente = real->getDistanciaEnfrente();
+	int deseado = 0;
+
 	unsigned long inicio = millis();
+	if(distanciaEnfrente >= 0 && distanciaAtras >= 0) {
+		if(distanciaEnfrente < distanciaAtras) {
+			real->escribirLCD("Alinear enfrente");
+			if(distanciaEnfrente < 300) {
+				deseado = kDistanciaEnfrente;
+			} else {
+				deseado = (distanciaEnfrente / 300) * 300 + kDistanciaLejos;
+			}
+			while ((distanciaEnfrente < deseado - 5 || distanciaEnfrente > deseado + 5) && inicio + 2000 > millis()) {
+				real->escribirLCDabajo("     " + String(distanciaEnfrente));
+				if(!velocidad(potIzq, potDer))
+					return;
+				if(distanciaEnfrente < deseado) { //Muy cerca
+					back();
+				} else if (distanciaEnfrente == deseado) {
+					break;
+				} else { //Muy lejos
+					front();
+				}
+				distanciaEnfrente = real->getDistanciaEnfrente();
+			}
+		} else {
+			real->escribirLCD("Alinear atras");
+			if(distanciaAtras < 300) {
+				deseado = kDistanciaAtras;
+			} else {
+				deseado = (distanciaAtras / 300) * 300 + kDistanciaLejos;
+			}
+			while ((distanciaAtras < deseado - 5 || distanciaAtras > deseado + 5) && inicio + 2000 > millis()) {
+				real->escribirLCDabajo("     " + String(distanciaAtras));
+				if(!velocidad(potIzq, potDer))
+					return;
+				if(distanciaAtras < deseado) { //Muy cerca
+					front();
+				} else if (distanciaAtras == deseado) {
+					break;
+				} else { //Muy lejos
+					back();
+				}
+				distanciaAtras = real->getDistanciaAtras();
+			}
+		}
+	} else if (distanciaEnfrente >= 0) {
+		real->escribirLCD("Alinear enfrente");
+		if(distanciaEnfrente < 300) {
+			deseado = kDistanciaEnfrente;
+		} else {
+			deseado = (distanciaEnfrente / 300) * 300 + kDistanciaLejos;
+		}
+		while ((distanciaEnfrente < deseado - 5 || distanciaEnfrente > deseado + 5) && inicio + 2000 > millis()) {
+			real->escribirLCDabajo("     " + String(distanciaEnfrente));
+			if(!velocidad(potIzq, potDer))
+				return;
+			if(distanciaEnfrente < deseado) { //Muy cerca
+				back();
+			} else if (distanciaEnfrente == deseado) {
+				break;
+			} else { //Muy lejos
+				front();
+			}
+			distanciaEnfrente = real->getDistanciaEnfrente();
+		}
+	} else if (distanciaAtras >= 0) {
+		real->escribirLCD("Alinear atras");
+		if(distanciaAtras < 300) {
+			deseado = kDistanciaAtras;
+		} else {
+			deseado = (distanciaAtras / 300) * 300 + kDistanciaLejos;
+		}
+		while ((distanciaAtras < deseado - 5 || distanciaAtras > deseado + 5) && inicio + 2000 > millis()) {
+			real->escribirLCDabajo("     " + String(distanciaAtras));
+			if(!velocidad(potIzq, potDer))
+				return;
+			if(distanciaAtras < deseado) { //Muy cerca
+				front();
+			} else if (distanciaAtras == deseado) {
+				break;
+			} else { //Muy lejos
+				back();
+			}
+			distanciaAtras = real->getDistanciaAtras();
+		}
+	}
+	stop();
+}
+
+void Movimiento::alinearParedEnfrente() {
+	real->escribirLCD("Alinear enfrente");
 	uint8_t potIzq, potDer;
 	potIzq = potDer = kVelocidadBaseMenor;
 	int iActual = real->getDistanciaEnfrente();
-	real->escribirLCD("Alinear enfrente");
-	while ((iActual < kDistanciaEnfrente - 6 || iActual > kDistanciaEnfrente + 6 ) && inicio + 1500 > millis()) {
+	unsigned long inicio = millis();
+	while ((iActual < kDistanciaEnfrente - 5 || iActual > kDistanciaEnfrente + 5) && inicio + 1300 > millis()) {
+		real->escribirLCDabajo("     " + String(iActual));
 		if(!velocidad(potIzq, potDer))
 			return;
 		if(iActual < kDistanciaEnfrente) { //Muy cerca
 			back();
+		} else if (iActual == kDistanciaEnfrente) {
+			break;
 		} else { //Muy lejos
 			front();
 		}
@@ -180,17 +279,19 @@ void Movimiento::alinearParedEnfrente() {
 }
 
 void Movimiento::alinearParedAtras() {
-	unsigned long inicio = millis();
+	real->escribirLCD("Alinear atras");
 	uint8_t potIzq, potDer;
 	potIzq = potDer = kVelocidadBaseMenor;
 	int iActual = real->getDistanciaAtras();
-	real->escribirLCD("Alinear atras");
-	while ((iActual < kDistanciaAtras - 6 || iActual > kDistanciaAtras + 6 ) && inicio + 1500 > millis()) {
+	unsigned long inicio = millis();
+	while ((iActual < kDistanciaAtras - 5 || iActual > kDistanciaAtras + 5) && inicio + 1300 > millis()) {
 		if(!velocidad(potIzq, potDer))
 			return;
-		if(iActual < kDistanciaAtras) { //Muy cerca
+		if(iActual < kDistanciaAtras) {         //Muy cerca
 			front();
-		} else { //Muy lejos
+		} else if (iActual == kDistanciaAtras) {
+			break;
+		} else {         //Muy lejos
 			back();
 		}
 		iActual = real->getDistanciaAtras();
@@ -202,10 +303,10 @@ void Movimiento::corregirIMU() {
 	if(!(real->caminoAtras()) && (resetIMU > 10)) {
 		real->escribirLCD("corregir IMU");
 		double fRef = 0, angle;
-    unsigned long inicio = millis();
+		unsigned long inicio = millis();
 		back();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(real->getDistanciaAtras() > 20 && inicio + 1500 > millis()) {
+		while(real->getDistanciaAtras() > 20 && inicio + 1300 > millis()) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		delay(600); // TODO: Checar con sensor
@@ -219,10 +320,10 @@ void Movimiento::corregirIMU() {
 		fRef /= 5;
 		fSetPoint = fRef;
 
-    inicio = millis();
+		inicio = millis();
 		front();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(real->getDistanciaAtras() < 20 && inicio + 1500 > millis()) {
+		while(real->getDistanciaAtras() < 20 && inicio + 1300 > millis()) {
 			real->escribirLCD(String(real->getDistanciaAtras()));
 		}
 		//stop();
@@ -277,6 +378,8 @@ void Movimiento::vueltaIzq() {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
+
+			checarVictima();
 		}
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
@@ -298,15 +401,10 @@ void Movimiento::vueltaIzq() {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
+			checarVictima();
 		}
 	}
 	//stop();
-	if(real->getDistanciaEnfrente() < 200) {
-		alinearParedEnfrente();
-	}
-	else if(real->getDistanciaAtras() < 200) {
-		alinearParedAtras();
-	}
 }
 
 void Movimiento::vueltaDer() {
@@ -349,11 +447,12 @@ void Movimiento::vueltaDer() {
 			dif *= kP_Vueltas;
 			if(!velocidad(potIzq + dif, potDer + dif))
 				return;
-			/*if (millis() >= inicio + 10000) {
+			/*TODO if (millis() >= inicio + 10000) {
 			    velocidad(160, 160);
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
+			checarVictima();
 		}
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
@@ -372,15 +471,10 @@ void Movimiento::vueltaDer() {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
+			checarVictima();
 		}
 	}
 	//stop();
-	if(real->getDistanciaEnfrente() < 200) {
-		alinearParedEnfrente();
-	}
-	else if(real->getDistanciaAtras() < 200) {
-		alinearParedAtras();
-	}
 }
 
 void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
@@ -426,7 +520,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
-	if(distanciaIzq < 125 && distanciaDer < 125) {
+	if(distanciaIzq < 125 && distanciaDer < 125 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
 		contadorDer++;
 
@@ -445,7 +539,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
 		outDerPARED *= -1;
 
-	} else if(distanciaIzq < 125) {
+	} else if(distanciaIzq < 125 && distanciaIzq > 0) {
 		contadorIzq++;
 		iError = kParedDeseadoIzq - distanciaIzq;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -460,7 +554,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 
 		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
 		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else if(distanciaDer < 125) {
+	} else if(distanciaDer < 125 && distanciaDer > 0) {
 		contadorDer++;
 		iError = kParedDeseadoDer - distanciaDer;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -504,7 +598,7 @@ void Movimiento::pasaRampa() {
 	delay(800);
 	stop();
 	if(real->getDistanciaEnfrente() < 200) { //Si hay pared enfrente
-		alinearParedEnfrente();
+		alinearParedEnfrente(); //FIXME
 	}
 }
 
@@ -516,21 +610,21 @@ void Movimiento::dejarKit(uint8_t iCase) {
 		case 1:
 			real->apantallanteLCD("VICTIMA con KIT", "derecha");
 			myservo.write(70);
-			delay(500);
+			delay(400);
 			myservo.write(110);
-			delay(500);
+			delay(400);
 			myservo.write(0);
 			break;
 		case 2:
 			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
 			myservo.write(110);
-			delay(500);
+			delay(400);
 			myservo.write(70);
-			delay(500);
+			delay(400);
 			myservo.write(180);
 			break;
 		}
-		delay(500);
+		delay(400);
 		myservo.write(90);
 	}
 	while(Serial2.available())
@@ -540,7 +634,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 
 void Movimiento::retroceder() {
 	real->escribirLCD("CUADRO NEGRO");
-	uint8_t iPowII = iPowI, iPowDD = iPowD;
+	uint8_t iPowII = kVelocidadBaseMenor, iPowDD = kVelocidadBaseMenor;
 	switch(*cDir) {
 	case 'n':
 		(*iRow)++;
@@ -555,194 +649,142 @@ void Movimiento::retroceder() {
 		(*iCol)++;
 		break;
 	}
-	//stop();
 	back();
 	while(eCount1 + eCount2 < kEncoder30) {
-    // TODO implementar p
+		// TODO implementar p
 		potenciasDerecho(iPowDD, iPowII);
 		if(!velocidad(iPowII, iPowDD))
 			return;
 	}
+	stop();
 }
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
-	real->escribirLCD("LIMIT");
-	stop();
+	double basura;
+	real->escribirLCD("     LIMIT");
 	uint16_t encoderTemp1 = eCount1;
 	uint16_t encoderTemp2 = eCount2;
+	stop();
 	unsigned long inicio = millis();
-	double x;
 	back();
 	switch(switchCase) {
 	case 1:
 		velocidad(iPowI, 0);
-		while(millis() - inicio < 500)
-			real->getAngulo(x);
+		while(millis() - inicio < 475)
+			real->getAngulo(basura);
+
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 350)
-			real->getAngulo(x);
+		while(millis() - inicio < 250)
+			real->getAngulo(basura);
 		fSetPoint -= 90;
 		vueltaDer();
 		break;
+
 	case 2:
 		velocidad(0, iPowD);
-		while(millis() - inicio < 500)
-			real->getAngulo(x);
+		while(millis() - inicio < 475)
+			real->getAngulo(basura);
+
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 350)
-			real->getAngulo(x);
+		while(millis() - inicio < 250)
+			real->getAngulo(basura);
 		fSetPoint += 90;
 		vueltaIzq();
 		break;
 	}
 	stop();
+	eCount1 = encoderTemp1 - 400;
+	eCount2 = encoderTemp2 - 400;
 	front();
-	eCount1 = encoderTemp1 - 500;
-	eCount2 = encoderTemp2 - 500;
 }
 
 void Movimiento::avanzar() {
-	cParedes = 0;
 	resetIMU++;
+	cParedes = cVictima = eCount1 = eCount2 = 0;
 	double bumperMin = 0.0, bumperMax = 0.0;
-	uint8_t iPowII, iPowDD, switchCase, iCase;
+	uint8_t iPowII, iPowDD, switchCase;
+	int distanciaEnfrente = 0;
 
-	while(Serial2.available())
-		cVictima = (char)Serial2.read();
-
+	alinear();
 	corregirIMU();
-	eCount1 = eCount2 = 0;
-
+	checarVictima();
 	velocidad(iPowI, iPowD);
 	front();
-	while(eCount1 + eCount2 < kEncoder15 && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
+  distanciaEnfrente = real->getDistanciaEnfrente();
+	while(eCount1 + eCount2 < kEncoder15 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
+		checarVictima();
 		potenciasDerecho(iPowII, iPowDD);
-		if(!velocidad(iPowII, iPowDD))
-			return;
+		if(!velocidad(iPowII, iPowDD)) return;
 
-		//Calor
-		while(Serial2.available() && !(cVictima&0b00100000) )
-			cVictima = (char)Serial2.read();
-
-		if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
-			iCase = (cVictima&0b00000001) ? 1 : 2;
-      stop();
-      if(cVictima&0b00100000){
-        real->escribirLCD("VICTIMA", "VISUAL");
-        delay(2000);
-      }
-      else{
-        dejarKit(iCase);
-      }
-			front();
-		}
 		switchCase = real->switches();
 		if(switchCase > 0 && real->caminoEnfrente()) {
 			acomodaChoque(switchCase);
 		}
 
-		//bumper
-		bumperMin = real->sensarRampa() < bumperMin ? real->sensarRampa() : bumperMin;
-		bumperMax = real->sensarRampa() > bumperMax ? real->sensarRampa() : bumperMax;
-		if (bumperMax - bumperMin >= kToleranciaBumper)
-			tMapa[*iPiso][*iRow][*iCol].bumper(true);
-		cVictima = 0;
+		// bumper
+		if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
+			bumperMin = real->sensarRampa() < bumperMin ? real->sensarRampa() : bumperMin;
+			bumperMax = real->sensarRampa() > bumperMax ? real->sensarRampa() : bumperMax;
+			if(bumperMax - bumperMin >= kToleranciaBumper)
+				tMapa[*iPiso][*iRow][*iCol].bumper(true);
+		}
+		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
 
 	switch(*cDir) {
-	case 'n':
-		(*iRow)--;
-		break;
-	case 'e':
-		(*iCol)++;
-		break;
-	case 's':
-		(*iRow)++;
-		break;
-	case 'w':
-		(*iCol)--;
-		break;
+	case 'n': (*iRow)--; break;
+	case 'e': (*iCol)++; break;
+	case 's': (*iRow)++; break;
+	case 'w': (*iCol)--; break;
 	}
 
+	// paredes
 	contadorIzq = contadorDer = 0;
 
-	front();
-	while(eCount1 + eCount2 < kEncoder30  && real->getDistanciaEnfrente() > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
+		checarVictima();
 		potenciasDerecho(iPowII, iPowDD);
-		if(!velocidad(iPowII, iPowDD))
-			return;
+		if(!velocidad(iPowII, iPowDD)) return;
 
-		//Calor
-		while(Serial2.available() && !(cVictima&0b00100000) )
-			cVictima = (char)Serial2.read();
-
-
-		if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
-      iCase = (cVictima&0b00000001) ? 1 : 2;
-      stop();
-      if(cVictima&0b00100000){
-        real->escribirLCD("VICTIMA", "VISUAL");
-        delay(2000);
-      }
-      else{
-        dejarKit(iCase);
-      }
-			front();
-		}
 		switchCase = real->switches();
 		if(switchCase > 0 && real->caminoEnfrente()) {
 			acomodaChoque(switchCase);
 		}
 
-		//bumper
-		bumperMin = real->sensarRampa() < bumperMin ? real->sensarRampa() : bumperMin;
-		bumperMax = real->sensarRampa() > bumperMax ? real->sensarRampa() : bumperMax;
-		if (bumperMax - bumperMin >= kToleranciaBumper)
-			tMapa[*iPiso][*iRow][*iCol].bumper(true);
-		cVictima = 0;
+		// bumper
+		if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
+			bumperMin = real->sensarRampa() < bumperMin ? real->sensarRampa() : bumperMin;
+			bumperMax = real->sensarRampa() > bumperMax ? real->sensarRampa() : bumperMax;
+			if(bumperMax - bumperMin >= kToleranciaBumper)
+				tMapa[*iPiso][*iRow][*iCol].bumper(true);
+		}
+		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
-	// stop();
+	stop();
+
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
-
+	if(distanciaEnfrente < 200 && distanciaEnfrente >= 0)
+		cParedes |= 0b00000010;
 	if(contadorDer > kMapearPared)
 		cParedes |= 0b00000001;
 
-	eCount1 = eCount2 = 0;
-  //for(int i = 0; i < 2; i++)
-  stop();
-  iColor = real->color();
+	if(cVictima & 0b00001000)
+		iColor = 1;
+	else if(cVictima & 0b00010000)
+		iColor = 2;
+
 	if(iColor != 1  && real->sensarRampa() < abs(kRampaLimit)) {
-		if(real->getDistanciaEnfrente() < 200) {
-			cParedes |= 0b00000010;
-			alinearParedEnfrente();
-		}
-		else if(real->getDistanciaAtras() < 200) {
-			alinearParedAtras();
-		}
+		alinear();
 	}
 }
 
 //Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::derecha() {                                                                                                              //Modificarse en realidad
 	real->escribirLCD("DER");
-	uint8_t iCase;
-	while(Serial2.available() && !(cVictima&0b00100000) )
-		cVictima = (char)Serial2.read();
-	if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
-		iCase = (cVictima&0b00000001) ? 1 : 2;
-    stop();
-    if(cVictima&0b00100000){
-      real->escribirLCD("VICTIMA", "VISUAL");
-      delay(2000);
-    }
-    else{
-      dejarKit(iCase);
-    }
-    front();
-	}
+	checarVictima();
 	switch(*cDir) {
 	case 'n':
 		(*cDir) ='e';
@@ -758,26 +800,13 @@ void Movimiento::derecha() {                                                    
 		break;
 	}
 	vueltaDer();
+	alinear();
 }
 
 //Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::izquierda() {
 	real->escribirLCD("IZQ");
-	uint8_t iCase;
-	while(Serial2.available() && !(cVictima&0b00100000) )
-		cVictima = (char)Serial2.read();
-	if( (cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() ) || (cVictima&0b00100000 && real->caminoDerecha() ) ) {
-		iCase = (cVictima&0b00000001) ? 1 : 2;
-    stop();
-    if(cVictima&0b00100000){
-      real->escribirLCD("VICTIMA", "VISUAL");
-      delay(2000);
-    }
-    else{
-      dejarKit(iCase);
-    }
-    front();
-	}
+	checarVictima();
 	switch(*cDir) {
 	case 'n':
 		(*cDir) = 'w';
@@ -793,6 +822,7 @@ void Movimiento::izquierda() {
 		break;
 	}
 	vueltaIzq();
+	alinear();
 }
 
 //Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
@@ -879,23 +909,10 @@ bool Movimiento::goToVisitado(char cD) {
 //La hice bool para que de una forma estuviera como condición de un loop, pero aún no se me ocurre cómo
 bool Movimiento::decidir() {
 	bLack = false;
-	// stop();
 	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
 		retroceder();
 	}
-	/*if(real->getDistanciaEnfrente() < 200) {
-	        alinearParedEnfrente();
-	   }
-	   else if(real->getDistanciaAtras() < 200) {
-	        alinearParedAtras();
-	   }*/
-	uint8_t iCase;
-	while(Serial2.available())
-		cVictima = (char)Serial2.read();
-	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) {
-		iCase = (cVictima&0b00000001) ? 1 : 2;
-		dejarKit(iCase);
-	}
+	checarVictima();
 	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
 	tMapa[*iPiso][*iRow][*iCol].existe(true);
 	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
@@ -934,6 +951,23 @@ bool Movimiento::decidir() {
 	else{
 		//Llama la función recursiva
 		return goToVisitado( 'n');
+	}
+}
+void Movimiento::checarVictima() {
+	while(Serial2.available() && !(cVictima&0b00100000))
+		cVictima = (char)Serial2.read();
+
+	if((cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()) || (cVictima&0b00100000 && !(real->caminoDerecha()) ) ) {
+		uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
+		stop();
+		if(cVictima&0b00100000) {
+			real->escribirLCD("VICTIMA", "VISUAL");
+			delay(2000);
+		}
+		else{
+			dejarKit(iCase);
+		}
+		front();
 	}
 }
 
@@ -1062,7 +1096,7 @@ char Movimiento::getParedes() {
 void Movimiento::checkpoint(){
 	stop();
 	real->apantallanteLCD("    CHECKkk", "   POINT");
-  delay(1000);
+	delay(1000);
 	for(int i = 0; i <= 2; i++) {
 		for(int j = 0; j < kMapSize; j++) {
 			for(int z = 0; z < kMapSize; z++) {

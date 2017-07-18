@@ -61,6 +61,11 @@ SensarRealidad::SensarRealidad() {
 	lastAngle = 0.0;
 }
 
+void SensarRealidad::escribirLCDabajo(String sE1) {
+	lcd.setCursor(0, 1);
+	lcd.print(sE1);
+}
+
 void SensarRealidad::escribirLCD(String sE1, String sE2) {
 	lcd.clear();
 	lcd.print(sE1);
@@ -111,38 +116,42 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 
 int SensarRealidad::getDistanciaEnfrente() {
 	int distancia = sensor[0].readRangeContinuousMillimeters();
-	return distancia > 20 ? distancia - 20 : 0;
+	return distancia > 1000 ? -1 : (distancia > 20 ? distancia - 20 : 0);
 }
 
 int SensarRealidad::getDistanciaDerecha() {
 	int distancia = sensor[1].readRangeContinuousMillimeters();
-	return distancia > 50 ? distancia - 50 : 0;
+	return distancia > 1000 ? -1 : (distancia > 50 ? distancia - 50 : 0);
 }
 
 int SensarRealidad::getDistanciaAtras() {
 	int distancia = sensor[2].readRangeContinuousMillimeters();
-	return distancia > 35 ? distancia - 30 : 0;
+	return distancia > 1000 ? -1 : (distancia > 30 ? distancia - 30 : 0);
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
 	int distancia = sensor[3].readRangeContinuousMillimeters();
-	return distancia > 55 ? distancia - 55 : 0;
+	return distancia > 1000 ? -1 : (distancia > 55 ? distancia - 55 : 0);
 }
 
 bool SensarRealidad::caminoEnfrente() {
-	return (getDistanciaEnfrente()) > kMEDIDA_PARED_MM;
+	int distancia = getDistanciaEnfrente();
+	return distancia > kMEDIDA_PARED_MM || distancia == -1;
 }
 
 bool SensarRealidad::caminoDerecha() {
-	return (getDistanciaDerecha()) > kMEDIDA_PARED_MM;
+	int distancia = getDistanciaDerecha();
+	return distancia > kMEDIDA_PARED_MM || distancia == -1;
 }
 
 bool SensarRealidad::caminoAtras() {
-	return (getDistanciaAtras()) > kMEDIDA_PARED_MM;
+	int distancia = getDistanciaAtras();
+	return distancia > kMEDIDA_PARED_MM || distancia == -1;
 }
 
 bool SensarRealidad::caminoIzquierda() {
-	return (getDistanciaIzquierda()) > kMEDIDA_PARED_MM;
+	int distancia = getDistanciaIzquierda();
+	return distancia > kMEDIDA_PARED_MM || distancia == -1;
 }
 
 uint8_t SensarRealidad::getIMUCalibrationStatus() {
