@@ -1,3 +1,4 @@
+#include <Arduino.h>
 //TX mega y RX rasp
 //RX mega y TX rasp
 int iC = 1;

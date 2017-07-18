@@ -11,6 +11,8 @@ class SensarRealidad {
     //Escribe en la LCD en ambas lineas
     void escribirLCD(String sE1, String sE2 = " ");
     //Parpadea en la LCD en ambas lineas
+    void escribirLCDabajo(String sE1);
+    //Parpadea en la LCD en ambas lineas
     void apantallanteLCD(String sE1, String sE2 = " ");
     //Inicializa la cantidad de sensores que le pongas
     void inicializarSensoresDistancia(const uint8_t kINICIO_I2C);

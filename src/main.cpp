@@ -47,10 +47,10 @@ void boton1() {
 
 void setup() {
 	//Serial
-	Serial.begin(9600);
-	Serial2.begin(115200);
-	while(Serial2.available()) {
-		Serial2.read();
+	Serial2.begin(9600);
+	Serial.begin(115200);
+	while(Serial.available()) {
+		Serial.read();
 	}
 
 	// Interrupciones

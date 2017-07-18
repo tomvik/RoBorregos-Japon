@@ -3,7 +3,7 @@
 #include <Mapear.h>
 
 /////////// Encoders e interrupciones///////////
-#define BOTON_A 1
+#define BOTON_A 3
 #define ENCODER_A 4
 #define ENCODER_B 5
 
@@ -47,17 +47,17 @@ void boton1() {
 
 void setup() {
 	//Serial
-	Serial.begin(9600);
 	Serial2.begin(9600);
-	while(Serial2.available()) {
-		Serial2.read();
+	Serial.begin(115200);
+	while(Serial.available()) {
+		Serial.read();
 	}
 
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-  attachInterrupt(BOTON_A, boton1, RISING);
-  
+  // attachInterrupt(BOTON_A, boton1, RISING);
+
 	// Resto de los objetos
 	SensarRealidad sensarr;
 	SensarRealidad *const sensar = &sensarr;
@@ -66,11 +66,14 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(175, 175, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
+	Movimiento robot(160, 160, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
-	//if(digitalRead(BOTON_A))
+
+	// if(digitalRead(BOTON_A))
+		// sensar->test();
+
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
 	tMapa[iPiso][iRow][iCol].visitado(true);
@@ -81,6 +84,7 @@ void setup() {
 	} else {
 		tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow + 1][iCol]);
 	}
+
 	mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 
 	// Loop en el cual recorre todo el mapa
