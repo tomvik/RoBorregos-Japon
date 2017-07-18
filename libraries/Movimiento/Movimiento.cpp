@@ -203,11 +203,11 @@ void Movimiento::alinear() {
 				if(!velocidad(potIzq, potDer))
 					return;
 				if(distanciaAtras < deseado) { //Muy cerca
-					back();
+					front();
 				} else if (distanciaAtras == deseado) {
 					break;
 				} else { //Muy lejos
-					front();
+					back();
 				}
 				distanciaAtras = real->getDistanciaAtras();
 			}
@@ -244,11 +244,11 @@ void Movimiento::alinear() {
 			if(!velocidad(potIzq, potDer))
 				return;
 			if(distanciaAtras < deseado) { //Muy cerca
-				back();
+				front();
 			} else if (distanciaAtras == deseado) {
 				break;
 			} else { //Muy lejos
-				front();
+				back();
 			}
 			distanciaAtras = real->getDistanciaAtras();
 		}
@@ -520,7 +520,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
-	if(distanciaIzq < 125 && distanciaDer < 125) {
+	if(distanciaIzq < 125 && distanciaDer < 125 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
 		contadorDer++;
 
@@ -539,7 +539,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
 		outDerPARED *= -1;
 
-	} else if(distanciaIzq < 125) {
+	} else if(distanciaIzq < 125 && distanciaIzq > 0) {
 		contadorIzq++;
 		iError = kParedDeseadoIzq - distanciaIzq;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -554,7 +554,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 
 		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
 		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else if(distanciaDer < 125) {
+	} else if(distanciaDer < 125 && distanciaDer > 0) {
 		contadorDer++;
 		iError = kParedDeseadoDer - distanciaDer;
 		if(-5 < iError && iError < 5) iError = 0;
@@ -598,7 +598,7 @@ void Movimiento::pasaRampa() {
 	delay(800);
 	stop();
 	if(real->getDistanciaEnfrente() < 200) { //Si hay pared enfrente
-		alinearParedEnfrente();
+		alinearParedEnfrente(); //FIXME
 	}
 }
 
@@ -707,12 +707,13 @@ void Movimiento::avanzar() {
 	uint8_t iPowII, iPowDD, switchCase;
 	int distanciaEnfrente = 0;
 
+	alinear();
 	corregirIMU();
 	checarVictima();
 	velocidad(iPowI, iPowD);
 	front();
   distanciaEnfrente = real->getDistanciaEnfrente();
-	while(eCount1 + eCount2 < kEncoder15 && distanciaEnfrente > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder15 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
 		checarVictima();
 		potenciasDerecho(iPowII, iPowDD);
 		if(!velocidad(iPowII, iPowDD)) return;
@@ -742,7 +743,7 @@ void Movimiento::avanzar() {
 	// paredes
 	contadorIzq = contadorDer = 0;
 
-	while(eCount1 + eCount2 < kEncoder30 && distanciaEnfrente > kDistanciaEnfrente) {
+	while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
 		checarVictima();
 		potenciasDerecho(iPowII, iPowDD);
 		if(!velocidad(iPowII, iPowDD)) return;
@@ -765,7 +766,7 @@ void Movimiento::avanzar() {
 
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
-	if(distanciaEnfrente < 200)
+	if(distanciaEnfrente < 200 && distanciaEnfrente >= 0)
 		cParedes |= 0b00000010;
 	if(contadorDer > kMapearPared)
 		cParedes |= 0b00000001;
