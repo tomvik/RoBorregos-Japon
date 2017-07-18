@@ -90,7 +90,7 @@ class Movimiento {
   private:
   	Tile (*tBueno)[10][10], (*tMapa)[10][10];
     int iTerm, lastInput;
-    bool bBoton1, bLack;
+    bool bBoton1, bLack, bLimit;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
     uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;

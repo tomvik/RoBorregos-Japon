@@ -21,10 +21,10 @@ const double kP_Una_Pared = 0.7;
 const double kI_Una_Pared = 0.035;
 const double kD_Una_Pared = 2;
 
-const int kEncoder30 = 2400;
+const int kEncoder30 = 2375;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.111;
-const int kDistanciaEnfrente = 65;
+const int kDistanciaEnfrente = 60;
 const int kDistanciaAtras = 55;
 const int kMapearPared = 8;
 const int kParedDeseadoIzq = 52; // 105 mm
@@ -66,7 +66,7 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
  */
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10], uint8_t *iPM, uint8_t *iPML) {
 	//////////////////Inicializamos variables en 0////////////////////////////////
-	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
+	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = bLimit = 0;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
 	real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, iColLast = icl, iRowLast = irl, iPisoLast = ipl, cDirLast = cl, tBueno = tB, tMapa = tM, iPisoMax = iPM, iPisoMaxLast = iPML;
 
@@ -308,10 +308,10 @@ void Movimiento::vueltaIzq() {
 		}
 	}
 	//stop();
-	if(real->getDistanciaEnfrente() < 200) {
+	if(real->getDistanciaEnfrente() < 200 && !bLimit) {
 		alinearParedEnfrente();
 	}
-	else if(real->getDistanciaAtras() < 200) {
+	else if(real->getDistanciaAtras() < 200 && !bLimit) {
 		alinearParedAtras();
 	}
 }
@@ -382,10 +382,10 @@ void Movimiento::vueltaDer() {
 		}
 	}
 	//stop();
-	if(real->getDistanciaEnfrente() < 200) {
+	if(real->getDistanciaEnfrente() < 200 && !bLimit) {
 		alinearParedEnfrente();
 	}
-	else if(real->getDistanciaAtras() < 200) {
+	else if(real->getDistanciaAtras() < 200 && !bLimit) {
 		alinearParedAtras();
 	}
 }
@@ -573,41 +573,46 @@ void Movimiento::retroceder() {
 }
 
 void Movimiento::acomodaChoque(uint8_t switchCase) {
-	real->escribirLCD("LIMIT");
-	stop();
+	double basura;
+	real->escribirLCD("     LIMIT");
 	uint16_t encoderTemp1 = eCount1;
 	uint16_t encoderTemp2 = eCount2;
+	stop();
 	unsigned long inicio = millis();
-	double x;
+	bLimit = true;
 	back();
 	switch(switchCase) {
 	case 1:
 		velocidad(iPowI, 0);
 		while(millis() - inicio < 475)
-			real->getAngulo(x);
+			real->getAngulo(basura);
+
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(millis() - inicio < 250)
-			real->getAngulo(x);
+			real->getAngulo(basura);
 		fSetPoint -= 90;
 		vueltaDer();
 		break;
+
 	case 2:
 		velocidad(0, iPowD);
 		while(millis() - inicio < 475)
-			real->getAngulo(x);
+			real->getAngulo(basura);
+
 		inicio = millis();
 		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
 		while(millis() - inicio < 250)
-			real->getAngulo(x);
+			real->getAngulo(basura);
 		fSetPoint += 90;
 		vueltaIzq();
 		break;
 	}
 	stop();
+	eCount1 = encoderTemp1 - 400;
+	eCount2 = encoderTemp2 - 400;
+	bLimit = false;
 	front();
-	eCount1 = encoderTemp1 - 450;
-	eCount2 = encoderTemp2 - 450;
 }
 
 void Movimiento::avanzar() {
