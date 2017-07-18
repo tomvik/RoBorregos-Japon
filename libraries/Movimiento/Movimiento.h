@@ -29,6 +29,9 @@ class Movimiento {
     void right();
     /// Pone los motores para la izquierda
     void left();
+
+    void alinear();
+
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
     /// Se separa de la pared de enfrente
@@ -57,6 +60,7 @@ class Movimiento {
     void corregirIMU();
     /// No está puesta wtf
     void alinearParedAtras();
+    void checarVictima();
     /// Encoder 1
     void encoder1();
     /// Encoder 2
@@ -90,7 +94,7 @@ class Movimiento {
   private:
   	Tile (*tBueno)[10][10], (*tMapa)[10][10];
     int iTerm, lastInput;
-    bool bBoton1, bLack, bLimit;
+    bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
     uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
