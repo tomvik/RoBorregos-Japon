@@ -194,18 +194,20 @@ void Movimiento::alinear(uint8_t caso) {
 			real->getAngulo(posInicial);
 
 			if(limSup > limInf) {
-				if(posInicial < limInf || posInicial > limSup) {
+				if(posInicial < limInf) {
 					fSetPoint -= 90;
 					vueltaDer(1);
-
+				}
+				if(posInicial > limSup) {
 					fSetPoint += 90;
 					vueltaIzq(1);
 				}
 			} else {
-				if(posInicial < limInf && posInicial > limSup) {
+				if(posInicial < limInf && posInicial > 180) {
 					fSetPoint -= 90;
 					vueltaDer(1);
-
+				}
+				if(posInicial > limSup && posInicial < 180) {
 					fSetPoint += 90;
 					vueltaIzq(1);
 				}
@@ -401,11 +403,11 @@ void Movimiento::vueltaIzq(uint8_t caso) {
 			stop();
 			real->escribirLCD(String(fSetPoint), String(posInicial));
 			// delay(400);
-		if(dif > 100){
+		/*if(dif > 100){
 			fSetPoint -= 90;
 			vueltaDer(2);
 			return;
-		}
+		}*/
 	}
 
 	real->getAngulo(posInicial);
@@ -496,11 +498,11 @@ void Movimiento::vueltaDer(uint8_t caso) {
 			real->escribirLCD(String(fSetPoint), String(posInicial));
 			// delay(400);
 
-		if(dif > 100){
+		/*if(dif > 100){
 			fSetPoint += 90;
 			vueltaIzq(2);
 			return;
-		}
+		}*/
 	}
 
 	real->getAngulo(posInicial);
