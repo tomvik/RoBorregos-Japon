@@ -168,13 +168,33 @@ void Movimiento::left() {
 
 void Movimiento::alinear(uint8_t caso) {
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
-
 		if(caso == 0) {
-		fSetPoint -= 90;
-		vueltaDer(1);
+			double posInicial;
+			double limInf = fSetPoint - kPrecisionImu;
+			if(limInf < 0) limInf += 360;
 
-		fSetPoint += 90;
-		vueltaIzq(1);
+			double limSup = fSetPoint + kPrecisionImu;
+			if(limSup >= 360.0) limSup -= 360;
+
+			real->getAngulo(posInicial);
+
+			if(limSup > limInf) {
+				if(posInicial < limInf || posInicial > limSup) {
+					fSetPoint -= 90;
+					vueltaDer(1);
+
+					fSetPoint += 90;
+					vueltaIzq(1);
+				}
+			} else {
+				if(posInicial < limInf && posInicial > limSup) {
+					fSetPoint -= 90;
+					vueltaDer(1);
+
+					fSetPoint += 90;
+					vueltaIzq(1);
+				}
+			}
 }
 
 		uint8_t potIzq, potDer;
@@ -805,7 +825,6 @@ void Movimiento::avanzar() {
 		}
 		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
-	real->escribirLCD(String(contadorDer), String(contadorIzq));
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
