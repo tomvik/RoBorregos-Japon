@@ -5,11 +5,15 @@
 #include <Adafruit_MotorShield.h>
 #include <utility/Adafruit_MS_PWMServoDriver.h>
 #include <PID_v1.h>
-
+///////////Dimensiones///////////////////
+const uint8_t kMapSize = 10;
+const uint8_t kMapFloors = 3;
+//////////Mapas para algoritmo/////////////
+uint8_t iMapa[kMapSize][kMapSize];
+char cMapa[kMapSize][kMapSize];
 //////////////////////Define constants///////////////////////////
 const uint8_t kToleranciaBumper = 6;
 const double kPrecisionImu = 4.85;
-const uint8_t kMapSize = 10;
 const uint8_t kRampaLimit = 17;
 
 const int kLimITerm = 100;
@@ -626,6 +630,7 @@ void Movimiento::pasaRampa() {
 	uint8_t iPowII, iPowDD;
 	front();
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
+    checarVictima();
 		potenciasDerecho(iPowII, iPowDD, 1);
 		if(!velocidad(iPowII, iPowDD))
 			return;
@@ -778,7 +783,7 @@ void Movimiento::avanzar() {
 	}
 
 	// paredes
-	contadorIzq = contadorDer = 0;
+	contadorIzq = contadorDer = bumperMin = bumperMax = 0;
 
 	while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
 		checarVictima();
@@ -911,9 +916,6 @@ void Movimiento::hacerInstrucciones(String sMov) {
 //Aquí imprime el mapa de int
 //La funcion comparaMapa se podría modificar para depender si quiero ir al inicio o a un cuadro no visitado
 bool Movimiento::goToVisitado(char cD) {
-	//Declara un mapa de int, debe ser del tamaño que el otro mapa. Será mejor declararlo desde un principio del código?
-	uint8_t iMapa[10][10];
-	char cMapa[10][10];
 	//Llena el mapa de 0
 	for (uint8_t i = 0; i < kMapSize; i++)
 		for(uint8_t j = 0; j < kMapSize; j++) {
@@ -924,6 +926,8 @@ bool Movimiento::goToVisitado(char cD) {
 	iMapa[*iRow][*iCol] = 1;
 	cMapa[*iRow][*iCol] = 'i';
 	//LA FUNCION RECURSIVA
+  real->escribirLCD("   LLENA", "   MAPA");
+  mapa.tiempoI(millis());
 	mapa.llenaMapa(iMapa, cMapa, tMapa, *cDir, *iCol, *iRow, *iPiso);
 	///////////////Imprime el mapa//////////////////////////////
 	/*for (uint8_t i = 0; i < kMapSize; ++i) {
@@ -944,6 +948,7 @@ bool Movimiento::goToVisitado(char cD) {
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
+  real->escribirLCD("   COMPARA", "   HACER");
 	if(mapa.comparaMapa(iMapa, tMapa, cD, *iCol, *iRow, iNCol, iNRow, *iPiso)) { //Hace las instrucciones que recibe de la función en forma de string
 		hacerInstrucciones(mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, *iPiso));
 		*iCol = iNCol, *iRow = iNRow;
@@ -1005,16 +1010,14 @@ void Movimiento::checarVictima() {
 		cVictima = (char)Serial2.read();
 
 	if(!tMapa[*iPiso][*iRow][*iCol].victima() && (cVictima&0b00000010 || (cVictima&0b00100000 && !(real->caminoDerecha()) ) ) ) {
-		uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
-		uint16_t encoderTemp1 = eCount1;
-		uint16_t encoderTemp2 = eCount2;
-		stop();
+    tMapa[*iPiso][*iRow][*iCol].victima(true);
+    uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
+    uint16_t encoderTemp1 = eCount1;
+    uint16_t encoderTemp2 = eCount2;
+    stop();
 		if(cVictima&0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
 			delay(1000);
-			tMapa[*iPiso][*iRow][*iCol].victima(true);
-			while(Serial2.available())
-				cVictima = (char)Serial2.read();
 		}
 		else{
 			dejarKit(iCase);
@@ -1022,6 +1025,8 @@ void Movimiento::checarVictima() {
 		eCount1 = encoderTemp1;
 		eCount2 = encoderTemp2;
 	}
+  while(Serial2.available())
+    cVictima = (char)Serial2.read();
 }
 
 /*bool Movimiento::decidir_Prueba() {
@@ -1149,7 +1154,7 @@ char Movimiento::getParedes() {
 void Movimiento::checkpoint(){
 	stop();
 	real->apantallanteLCD("    CHECK", "   POINT");
-	for(int i = 0; i <= 2; i++) {
+	for(int i = 0; i < kMapFloors; i++) {
 		for(int j = 0; j < kMapSize; j++) {
 			for(int z = 0; z < kMapSize; z++) {
 				tBueno[i][j][z] = tMapa[i][j][z];
@@ -1164,7 +1169,7 @@ void Movimiento::checkpoint(){
 
 void Movimiento::lack(){
 	stop();
-	for(int i = 0; i <= 2; i++) {
+	for(int i = 0; i < kMapFloors; i++) {
 		for(int j = 0; j < kMapSize; j++) {
 			for(int z = 0; z < kMapSize; z++) {
 				tMapa[i][j][z] = tBueno[i][j][z];
@@ -1186,7 +1191,11 @@ void Movimiento::lack(){
 }
 
 bool Movimiento::getLack(){
-	return bLack;
+  return bLack;
+}
+
+bool Movimiento::getLackReal(){
+  return bBoton1;
 }
 
 //////////////Funcion de impresión de mapa//////////////
@@ -1199,9 +1208,9 @@ void Movimiento::muestra(bool t){
 	}
 	if(t) {
 		int iRowC = 1;
-		for(int iRowT = 0; iRowT < 10; iRowT++) {
+		for(int iRowT = 0; iRowT < kMapSize; iRowT++) {
 			int iColC = 1;
-			for(int iColT = 0; iColT < 10; iColT++) {
+			for(int iColT = 0; iColT < kMapSize; iColT++) {
 				if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
 					cMapa[iRowC][iColC] = 'i';
 				}
@@ -1245,9 +1254,9 @@ void Movimiento::muestra(bool t){
 	}
 	else{
 		int iRowC = 1;
-		for(int iRowT = 0; iRowT < 10; iRowT++) {
+		for(int iRowT = 0; iRowT < kMapSize; iRowT++) {
 			int iColC = 1;
-			for(int iColT = 0; iColT < 10; iColT++) {
+			for(int iColT = 0; iColT < kMapSize; iColT++) {
 				if(tBueno[(*iPiso)][iRowT][iColT].inicio()) {
 					cMapa[iRowC][iColC] = 'i';
 				}
@@ -1290,8 +1299,8 @@ void Movimiento::muestra(bool t){
 		}
 	}
 
-	for(int i = 0; i < 21; i++) {
-		for(int j = 0; j < 21; j++) {
+	for(int i = 0; i < (kMapSize * 2) + 1; i++) {
+		for(int j = 0; j < (kMapSize * 2) + 1; j++) {
 			Serial.print(cMapa[i][j]);
 			Serial.print(" ");
 		}
@@ -1300,7 +1309,6 @@ void Movimiento::muestra(bool t){
 	Serial.println(" ");
 	delay(200);
 }
-
 
 
 /*

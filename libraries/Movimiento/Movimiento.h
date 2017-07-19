@@ -5,7 +5,9 @@
 #include <SensarMapa.h>
 #include <SensarRealidad.h>
 #include <Tile.h>
-
+///////////Dimensiones///////////////////
+const uint8_t kMapSizeMovimiento = 10;
+const uint8_t kMapFloorsMovimiento = 3;
 // Mapa, direccion, col, row, piso, caso, fdeseado
 
 class Movimiento {
@@ -20,7 +22,6 @@ class Movimiento {
 
     /// Para los motores
     void stop();
-
     /// Pone los motores para enfrente
     void front();
     /// Pone los motores para atrás
@@ -87,11 +88,13 @@ class Movimiento {
     char getParedes();
     //Regresa si hubo un lack
     bool getLack();
+    //Regresa si presione el boton de lack
+    bool getLackReal();
     //Muestr mapa
     void muestra(bool t);
 
   private:
-  	Tile (*tBueno)[10][10], (*tMapa)[10][10];
+  	Tile (*tBueno)[kMapSizeMovimiento][kMapSizeMovimiento], (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
     int iTerm, lastInput;
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
