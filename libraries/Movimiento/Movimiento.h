@@ -37,7 +37,7 @@ class Movimiento {
     /// Se separa de la pared de enfrente
     void alinearParedEnfrente();
     /// Calcula la velocidad para avanzar derecho
-    void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer);
+    void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso = 0);
     /// Deja kit y mapea que hay una victima
     void dejarKit(uint8_t iCase);
 
