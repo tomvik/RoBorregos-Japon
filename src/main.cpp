@@ -71,8 +71,8 @@ void setup() {
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
 
-	// if(digitalRead(BOTON_A))
-		// sensar->test();
+	if(digitalRead(BOTON_A))
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
