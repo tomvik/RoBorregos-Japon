@@ -512,7 +512,7 @@ void Movimiento::vueltaDer(uint8_t caso) {
 	}
 }
 
-void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
+void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso) {
 	double angle;
 
 	if(!real->getAngulo(angle)) {
@@ -577,6 +577,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	} else if(distanciaIzq < 125 && distanciaIzq > 0) {
 		contadorIzq++;
 		iError = kParedDeseadoIzq - distanciaIzq;
+		if(caso == 1) iError -= 15;
 		if(-5 < iError && iError < 5) iError = 0;
 
 		// debe ser negativo, creo
@@ -592,6 +593,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer) {
 	} else if(distanciaDer < 125 && distanciaDer > 0) {
 		contadorDer++;
 		iError = kParedDeseadoDer - distanciaDer;
+		if(caso == 1) iError -= 15;
 		if(-5 < iError && iError < 5) iError = 0;
 
 		iTerm += iError;
@@ -624,7 +626,7 @@ void Movimiento::pasaRampa() {
 	uint8_t iPowII, iPowDD;
 	front();
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
-		potenciasDerecho(iPowII, iPowDD);
+		potenciasDerecho(iPowII, iPowDD, 1);
 		if(!velocidad(iPowII, iPowDD))
 			return;
 	}
@@ -798,6 +800,7 @@ void Movimiento::avanzar() {
 		}
 		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
+	real->escribirLCD(String(contadorDer), String(contadorIzq));
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
