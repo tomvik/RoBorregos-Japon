@@ -239,10 +239,6 @@ uint8_t SensarRealidad::color() {
     iR = 1;
   else if(cc&0b00010000)
     iR = 2;
-  else if(cc&0b10000000){
-    escribirLCD("TIME OUT");
-    delay(2000);
-  }
 
   return iR;
 }
@@ -272,6 +268,7 @@ void SensarRealidad::test() {
 	delay(500);
 	while(digitalRead(BOTON_A) == LOW) {
 		escribirLCD(String(color()));
+    delay(40);
 	}
 
 	// IMU RAMPA
