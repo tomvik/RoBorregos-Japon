@@ -800,6 +800,7 @@ void Movimiento::avanzar() {
 		}
 		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
+	real->escribirLCD(String(contadorDer), String(contadorIzq));
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 	if(contadorIzq > kMapearPared)
 		cParedes |= 0b00000100;
