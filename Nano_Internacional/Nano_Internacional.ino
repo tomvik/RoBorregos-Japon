@@ -70,7 +70,7 @@ void setup() {
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
 //0, 0, Letra, checkpoint,  color, izq, victima, der
 void loop() {
-  Serial2.println("TOMA");
+  //Serial2.println("TOMA");
 	cSend = cLee = 0;
   while(Serial2.available())
     cLee = (char)Serial2.read();
