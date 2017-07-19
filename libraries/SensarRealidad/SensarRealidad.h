@@ -11,6 +11,8 @@ class SensarRealidad {
     //Escribe en la LCD en ambas lineas
     void escribirLCD(String sE1, String sE2 = " ");
     //Parpadea en la LCD en ambas lineas
+    void escribirLCDabajo(String sE1);
+    //Parpadea en la LCD en ambas lineas
     void apantallanteLCD(String sE1, String sE2 = " ");
     //Inicializa la cantidad de sensores que le pongas
     void inicializarSensoresDistancia(const uint8_t kINICIO_I2C);
@@ -44,6 +46,8 @@ class SensarRealidad {
     uint8_t switches();
     //Regresa 0 si es blanco, 1 si es negro, 2 si es checkpoint
     uint8_t color();
+    //Regresa 0 si no hay, 1 si hay victima
+    bool visual();
     // Tests
     void test();
     //Escribe en la EEPROM

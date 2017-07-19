@@ -29,12 +29,15 @@ class Movimiento {
     void right();
     /// Pone los motores para la izquierda
     void left();
+
+    void alinear(uint8_t caso = 0);
+
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
     /// Se separa de la pared de enfrente
     void alinearParedEnfrente();
     /// Calcula la velocidad para avanzar derecho
-    void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer);
+    void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso = 0);
     /// Deja kit y mapea que hay una victima
     void dejarKit(uint8_t iCase);
 
@@ -50,13 +53,13 @@ class Movimiento {
     /// Da vuelta a la izquierda de 90
     void izquierda();
     /// Controla la veloicad para dar la vuelta a la izquierda
-    void vueltaIzq();
+    void vueltaIzq(uint8_t caso = 0);
     /// Controla la velocidad para dar la vuelta a la derecha
-    void vueltaDer();
+    void vueltaDer(uint8_t caso = 0);
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
-    void alinearParedAtras();
+    void checarVictima();
     /// Encoder 1
     void encoder1();
     /// Encoder 2

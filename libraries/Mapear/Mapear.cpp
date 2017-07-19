@@ -526,22 +526,22 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], ch
 		// Pared
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
-		// Si es un cuadro negro
-		iColor = mapa->color();
-		if(iColor == 1) {
-			mapa->apantallanteLCD("NEGRO");
-			delay(200);
-			// Poner pared a los cuatro lados
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
-			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
-			tMapa[iPiso][iRow][iCol].cuadroNegro(true);
-		}
-		else if(iColor == 2){
-			//TODO
-			checkpoint(tMapa, tBueno, cDir, iCol, iRow, iPiso);
-		}
+	}
+	// Si es un cuadro negro
+	iColor = mapa->color();
+	if(iColor == 1) {
+		mapa->apantallanteLCD("NEGRO");
+		delay(200);
+		// Poner pared a los cuatro lados
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
+		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
+		tMapa[iPiso][iRow][iCol].cuadroNegro(true);
+	}
+	else if(iColor == 2){
+		//TODO
+		checkpoint(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 }
 
@@ -689,8 +689,10 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 }
 
 void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+	robot->stop();
 	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("     CHECK", "     POINT");
+	delay(1000);
 	for(int i = 0; i <= 2; i++){
 		for(int j = 0; j < kSize; j++){
 			for(int z = 0; z < kSize; z++){
