@@ -1,0 +1,57 @@
+[Eagle]
+Version="07 06 00"
+Platform="Windows"
+Serial="62191E841E-LSR-WLM-1EL"
+Globals="Globals"
+Desktop="Desktop"
+
+[Globals]
+AutoSaveProject=1
+UsedLibrary="F:/Documents/external_lbrs/Atmel_By_element14_Batch_1-00.lbr"
+UsedLibrary="F:/Documents/external_lbrs/E14_Arduino_revC.lbr"
+UsedLibrary="F:/Documents/external_lbrs/LilyPad-Wearables.lbr"
+UsedLibrary="F:/Documents/external_lbrs/ROBORREGOS.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Aesthetics.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Batteries.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Boards.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Capacitors.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Clocks.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Coils.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Connectors.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-DiscreteSemi.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Displays.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Electromechanical.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Fuses.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-GPS.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Hardware.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Amplifiers.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Comms.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Conversion.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Logic.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Memory.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Microcontroller.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Power.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-IC-Special-Function.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Jumpers.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-LED.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-PowerSymbols.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-RF.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Resistors.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Retired.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Sensors.lbr"
+UsedLibrary="F:/Documents/external_lbrs/SparkFun-Switches.lbr"
+UsedLibrary="F:/Documents/external_lbrs/User-Submitted.lbr"
+UsedLibrary="F:/Documents/external_lbrs/adafruit.lbr"
+UsedLibrary="F:/Documents/external_lbrs/atmel.lbr"
+UsedLibrary="F:/Documents/external_lbrs/piher.lbr"
+UsedLibrary="F:/Documents/external_lbrs/pinhead.lbr"
+
+[Win_1]
+Type="Control Panel"
+Loc="246 117 1313 711"
+State=2
+Number=0
+
+[Desktop]
+Screen="3286 1080"
+Window="Win_1"
