@@ -80,6 +80,13 @@ void loop() {
   switch(cEs){
     case 'L':
       cSend |= 0b00100000;
+			while(Serial2.available())
+		    cLee = (char)Serial2.read();
+      break;
+    case 'H':
+      cSend |= 0b00110000;
+			while(Serial2.available())
+		    cLee = (char)Serial2.read();
       break;
   }
 	switch(sensarTemperatura()) {

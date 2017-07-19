@@ -1,3 +1,18 @@
+/*
+	TODO
+		- Mapa 4 pisos
+		- Mapa 15*15
+		- Comunicacion 2 rasps -> nano -> mega
+		- Victima visual pared no pared
+		- Quitar visual en vuelta
+		- Lack Inicio
+		----------------------------------
+		- Poner front en victima rampa
+		- arreglar codigo de casos alinear y vueltas
+		- vueltas lokas
+		- negro reversa?
+ */
+
 #include <Arduino.h>
 #include <Movimiento.h>
 #include <Servo.h>
@@ -648,12 +663,12 @@ void Movimiento::pasaRampa() {
 		cVictima = (char)Serial2.read();
 	real->apantallanteLCD("Rampa");
 	uint8_t iPowII, iPowDD;
-	front();
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
     checarVictima();
 		potenciasDerecho(iPowII, iPowDD, 1);
 		if(!velocidad(iPowII, iPowDD))
 			return;
+		front();
 	}
 	cParedes = 0;
 	velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
@@ -1025,6 +1040,7 @@ bool Movimiento::decidir() {
 	}
 }
 void Movimiento::checarVictima() {
+	cVictima = 0;
 	while(Serial2.available() && !(cVictima&0b00100000))
 		cVictima = (char)Serial2.read();
 
@@ -1036,7 +1052,12 @@ void Movimiento::checarVictima() {
     stop();
 		if(cVictima&0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
-			delay(1000);
+			while(true) {
+				cVictima = (char)Serial2.read();
+				if(cVictima&0b00110000)
+				return;
+			}
+			Serial2.flush();
 		}
 		else{
 			dejarKit(iCase);

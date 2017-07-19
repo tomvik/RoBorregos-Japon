@@ -59,7 +59,7 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-  attachInterrupt(BOTON_A, boton1, RISING);
+  attachInterrupt(1, boton1, RISING);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -74,8 +74,8 @@ void setup() {
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
 
-	// if(digitalRead(BOTON_A))
-		// sensar->test();
+	if(digitalRead(BOTON_A))
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
