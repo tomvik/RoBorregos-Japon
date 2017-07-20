@@ -6,11 +6,6 @@
 		- Victima visual pared no pared
 		- Quitar visual en vuelta
 		- Lack Inicio
-		----------------------------------
-		- Poner front en victima rampa
-		- arreglar codigo de casos alinear y vueltas
-		- vueltas lokas
-		- negro reversa?
  */
 
 #include <Arduino.h>
