@@ -229,12 +229,14 @@ uint8_t SensarRealidad::switches() {
 uint8_t SensarRealidad::color() {
 	char cc = 0;
   uint8_t iR = 0;
+  
+  Serial2.print("M");
   while(!Serial2.available()){
     escribirLCD("NO HAY NADA");
-    delay(10);
+    delay(1);
   }
-	while(Serial2.available())
-		cc = (char) Serial2.read();
+  cc = (char)Serial2.read();
+
   if(cc&0b00001000)
     iR = 1;
   else if(cc&0b00010000)

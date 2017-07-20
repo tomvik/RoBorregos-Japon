@@ -1,3 +1,18 @@
+/*
+	TODO
+		- Mapa 4 pisos
+		- Mapa 15*15
+		- Comunicacion 2 rasps -> nano -> mega
+		- Victima visual pared no pared
+		- Quitar visual en vuelta
+		- Lack Inicio
+		----------------------------------
+		- Poner front en victima rampa
+		- arreglar codigo de casos alinear y vueltas
+		- vueltas lokas
+		- negro reversa?
+ */
+
 #include <Arduino.h>
 #include <Movimiento.h>
 #include <Servo.h>
@@ -179,18 +194,20 @@ void Movimiento::alinear(uint8_t caso) {
 			real->getAngulo(posInicial);
 
 			if(limSup > limInf) {
-				if(posInicial < limInf || posInicial > limSup) {
+				if(posInicial < limInf) {
 					fSetPoint -= 90;
 					vueltaDer(1);
-
+				}
+				if(posInicial > limSup) {
 					fSetPoint += 90;
 					vueltaIzq(1);
 				}
 			} else {
-				if(posInicial < limInf && posInicial > limSup) {
+				if(posInicial < limInf && posInicial > 180) {
 					fSetPoint -= 90;
 					vueltaDer(1);
-
+				}
+				if(posInicial > limSup && posInicial < 180) {
 					fSetPoint += 90;
 					vueltaIzq(1);
 				}
@@ -386,11 +403,11 @@ void Movimiento::vueltaIzq(uint8_t caso) {
 			stop();
 			real->escribirLCD(String(fSetPoint), String(posInicial));
 			// delay(400);
-		if(dif > 100){
+		/*if(dif > 100){
 			fSetPoint -= 90;
 			vueltaDer(2);
 			return;
-		}
+		}*/
 	}
 
 	real->getAngulo(posInicial);
@@ -481,11 +498,11 @@ void Movimiento::vueltaDer(uint8_t caso) {
 			real->escribirLCD(String(fSetPoint), String(posInicial));
 			// delay(400);
 
-		if(dif > 100){
+		/*if(dif > 100){
 			fSetPoint += 90;
 			vueltaIzq(2);
 			return;
-		}
+		}*/
 	}
 
 	real->getAngulo(posInicial);
@@ -648,12 +665,12 @@ void Movimiento::pasaRampa() {
 		cVictima = (char)Serial2.read();
 	real->apantallanteLCD("Rampa");
 	uint8_t iPowII, iPowDD;
-	front();
 	while(real->sensarRampa() < -kRampaLimit || real->sensarRampa() > kRampaLimit) {
     checarVictima();
 		potenciasDerecho(iPowII, iPowDD, 1);
 		if(!velocidad(iPowII, iPowDD))
 			return;
+		front();
 	}
 	cParedes = 0;
 	velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
@@ -1025,10 +1042,13 @@ bool Movimiento::decidir() {
 	}
 }
 void Movimiento::checarVictima() {
-	while(Serial2.available() && !(cVictima&0b00000010))
-		cVictima = (char)Serial2.read();
-
-	if(!tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
+	cVictima = 0;
+  Serial2.print("M");
+  while(!Serial2.available()){
+    delay(1);
+  }
+  cVictima = (char)Serial2.read();
+	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
     tMapa[*iPiso][*iRow][*iCol].victima(true);
     uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
     uint16_t encoderTemp1 = eCount1;
@@ -1036,14 +1056,17 @@ void Movimiento::checarVictima() {
     stop();
 		if(cVictima & 0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
-      delay(1000);
+      //delay(1000);
       while(cVictima&0b00000010){
-        while(Serial2.available())
-          cVictima = (char)Serial2.read();
+        Serial2.print("C");
         real->escribirLCD("Cual", "Cual");
+        while(!Serial2.available()){
+          delay(1);
+        }
+        cVictima = (char)Serial2.read();
       }
       real->escribirLCD("YA", "YA");
-			delay(500);
+			//delay(500);
       if(cVictima & 0b10000000){
         real->escribirLCD("VICTIMA", "HHHHHHHHH");
         //delay(1000);
@@ -1059,6 +1082,8 @@ void Movimiento::checarVictima() {
         real->escribirLCD("VICTIMA", "UUUUUUUUU");
         delay(5000);
       }
+      Serial2.print("Y");
+      Serial2.print("Y");
 		}
 		else{
 			dejarKit(iCase);
@@ -1066,8 +1091,6 @@ void Movimiento::checarVictima() {
 		eCount1 = encoderTemp1;
 		eCount2 = encoderTemp2;
 	}
-  while(Serial2.available())
-    cVictima = (char)Serial2.read();
 }
 
 /*bool Movimiento::decidir_Prueba() {
