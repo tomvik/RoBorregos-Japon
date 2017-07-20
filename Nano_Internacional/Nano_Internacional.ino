@@ -31,9 +31,9 @@ uint8_t sensorR() {
 	frequency /= 3;
   //Serial.println(frequency);
   digitalWrite(LED, LOW);
-  if(frequency >= 250)
+  if(frequency >= 120)
     iR = 1;
-  else if(frequency <= 70)
+  else if(frequency <= 55)
     iR = 2;
   return iR;
 }
@@ -52,7 +52,7 @@ uint8_t sensarTemperatura() {
 
 void setup() {
 	Serial3.begin(9600);
-  //Serial.begin(9600);
+  Serial.begin(9600);
   Serial2.begin(9600);
 	mlxRight.begin();
 	mlxLeft.begin();
@@ -64,21 +64,72 @@ void setup() {
   pinMode(LED, OUTPUT);
 
 	digitalWrite(S0, HIGH);
-	digitalWrite(S1, LOW);
+	digitalWrite(S1, LOW);  
 }
 //Color ////// 0 si es blanco, 1 si es negro, 2 si es checkpoint
 //Temp  ////// 0 si no hay, 1 si está a la derecha, 2 si está a la izquierda
-//0, 0, Letra, checkpoint,  color, izq, victima, der
+//H/Letra, S/Letra, U/Letra, checkpoint,  color, izq, victima/Letra, der
 void loop() {
-  //Serial2.println("TOMA");
-	cSend = cLee = 0;
-  while(Serial2.available())
-    cLee = (char)Serial2.read();
-  if(cLee != 0){
-    cEs = cLee;
+  cSend = 0;
+  if(cEs == 'L'){
+    while(cEs == 'L'){
+      if(Serial2.available()){
+        cEs = (char)Serial2.read();
+        Serial.println("L");
+        Serial3.print(0b11100110);
+        Serial2.println("Cual");
+      }
+      Serial.println("L");
+      Serial3.print(0b11100110);
+      delay(10);
+    }
+    Serial2.println("Ya");
+    while(Serial2.available()){
+      (char)Serial2.read();
+      Serial2.println("Ya");
+    }
+  }
+  else if(cEs == 'D'){
+    while(cEs == 'D'){
+      if(Serial2.available()){
+        cEs = (char)Serial2.read();
+        Serial.println("D");
+        Serial3.print(0b11100011);
+        Serial2.println("Cual");
+      }
+      Serial.println("D");
+      Serial3.print(0b11100011);
+      delay(10);
+    }
+    Serial2.println("Ya");
+    while(Serial2.available()){
+      (char)Serial2.read();
+      Serial2.println("Ya");
+    }
+  }
+  else{
+    while(Serial2.available())
+      cEs = (char)Serial2.read();
   }
   switch(cEs){
     case 'L':
+      Serial.println("L");
+      cSend |= 0b11100110;
+      break;
+    case 'D':
+      Serial.println("D");
+      cSend |= 0b11100011;
+      break;
+    case 'H':
+      Serial.println("H");
+      cSend |= 0b10000000;
+      break;
+    case 'S':
+      Serial.println("S");
+      cSend |= 0b01000000;
+      break;
+    case 'U':
+      Serial.println("U");
       cSend |= 0b00100000;
 			while(Serial2.available())
 		    cLee = (char)Serial2.read();
@@ -88,6 +139,7 @@ void loop() {
 			while(Serial2.available())
 		    cLee = (char)Serial2.read();
       break;
+    
   }
 	switch(sensarTemperatura()) {
 	case 1:

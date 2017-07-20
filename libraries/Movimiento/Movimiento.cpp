@@ -1037,24 +1037,54 @@ bool Movimiento::decidir() {
 	}
 }
 void Movimiento::checarVictima() {
+<<<<<<< HEAD
 	cVictima = 0;
 	while(Serial2.available() && !(cVictima&0b00100000))
+=======
+	while(Serial2.available() && !(cVictima&0b00000010))
+>>>>>>> c74e040103ee14a4c0db438da8af0356f920c519
 		cVictima = (char)Serial2.read();
 
-	if(!tMapa[*iPiso][*iRow][*iCol].victima() && (cVictima&0b00000010 || (cVictima&0b00100000 && !(real->caminoDerecha()) ) ) ) {
+	if(!tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
     tMapa[*iPiso][*iRow][*iCol].victima(true);
     uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
     uint16_t encoderTemp1 = eCount1;
     uint16_t encoderTemp2 = eCount2;
     stop();
-		if(cVictima&0b00100000) {
+		if(cVictima & 0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
+<<<<<<< HEAD
 			while(true) {
 				cVictima = (char)Serial2.read();
 				if(cVictima&0b00110000)
 				return;
 			}
 			Serial2.flush();
+=======
+      delay(1000);
+      while(cVictima&0b00000010){
+        while(Serial2.available())
+          cVictima = (char)Serial2.read();
+        real->escribirLCD("Cual", "Cual");
+      }
+      real->escribirLCD("YA", "YA");
+			delay(500);
+      if(cVictima & 0b10000000){
+        real->escribirLCD("VICTIMA", "HHHHHHHHH");
+        //delay(1000);
+        dejarKit(iCase);
+        dejarKit(iCase);
+      }
+      else if(cVictima & 0b01000000){
+        real->escribirLCD("VICTIMA", "SSSSSSSSS");
+        //delay(1000);
+        dejarKit(iCase);
+      }
+      else if(cVictima & 0b00100000){
+        real->escribirLCD("VICTIMA", "UUUUUUUUU");
+        delay(5000);
+      }
+>>>>>>> c74e040103ee14a4c0db438da8af0356f920c519
 		}
 		else{
 			dejarKit(iCase);

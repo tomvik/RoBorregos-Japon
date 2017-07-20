@@ -185,7 +185,7 @@ void SensarMapa::llenaMapa(uint8_t iMapa[kMapSize][kMapSize], char cMapa[kMapSiz
 	//Verifica dependiendo hacia dónde está viendo el robot. Así sabe exactamente cuantos movimientos es para hacer cierta instrucción.
 	//También verifica si es 0 Ó mayor al numero en el que estoy. Y le suma lo correspondiente.
 	//Right, up, left, down, relativo al robot
-	if(tInicio + 5000 < millis()){
+	if(tInicio + 5000 >= millis()){
 		switch(cDir) {
 		case 'n':
 			//Right
