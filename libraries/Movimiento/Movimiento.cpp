@@ -1037,12 +1037,7 @@ bool Movimiento::decidir() {
 	}
 }
 void Movimiento::checarVictima() {
-<<<<<<< HEAD
-	cVictima = 0;
-	while(Serial2.available() && !(cVictima&0b00100000))
-=======
 	while(Serial2.available() && !(cVictima&0b00000010))
->>>>>>> c74e040103ee14a4c0db438da8af0356f920c519
 		cVictima = (char)Serial2.read();
 
 	if(!tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
@@ -1053,14 +1048,6 @@ void Movimiento::checarVictima() {
     stop();
 		if(cVictima & 0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
-<<<<<<< HEAD
-			while(true) {
-				cVictima = (char)Serial2.read();
-				if(cVictima&0b00110000)
-				return;
-			}
-			Serial2.flush();
-=======
       delay(1000);
       while(cVictima&0b00000010){
         while(Serial2.available())
@@ -1084,7 +1071,6 @@ void Movimiento::checarVictima() {
         real->escribirLCD("VICTIMA", "UUUUUUUUU");
         delay(5000);
       }
->>>>>>> c74e040103ee14a4c0db438da8af0356f920c519
 		}
 		else{
 			dejarKit(iCase);
