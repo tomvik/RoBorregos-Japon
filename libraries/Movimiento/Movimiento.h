@@ -54,9 +54,9 @@ class Movimiento {
     /// Da vuelta a la izquierda de 90
     void izquierda();
     /// Controla la veloicad para dar la vuelta a la izquierda
-    void vueltaIzq(uint8_t caso = 0);
+    void vueltaIzq();
     /// Controla la velocidad para dar la vuelta a la derecha
-    void vueltaDer(uint8_t caso = 0);
+    void vueltaDer();
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
@@ -99,7 +99,7 @@ class Movimiento {
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor, cuadrosSeguidos;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;
