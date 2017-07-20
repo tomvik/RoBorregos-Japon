@@ -914,6 +914,7 @@ void Movimiento::izquierda() {
 //Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
 void Movimiento::hacerInstrucciones(String sMov) {
 	real->escribirLCD("PATH");
+  delay(1000);
 	///////////////////////////TEST/////////////////////////////////
 	/*for(int i = sMov.length()-1; i >= 0; i--) {
 	        Serial.print(sMov[i]);
@@ -978,13 +979,14 @@ bool Movimiento::goToVisitado(char cD) {
 	        }
 	        Serial.println();
 	   }
-	         delay(5000);*/
+	delay(5000);*/
 	//Nuevas coordenadas a dónde moverse
 	uint8_t iNCol = 100, iNRow = 100;
 	//Compara las distancias para escoger la más pequeña
   real->escribirLCD("   COMPARA", "   HACER");
 	if(mapa.comparaMapa(iMapa, tMapa, cD, *iCol, *iRow, iNCol, iNRow, *iPiso)) { //Hace las instrucciones que recibe de la función en forma de string
 		hacerInstrucciones(mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, *iPiso));
+    //TODO
 		*iCol = iNCol, *iRow = iNRow;
 		return true;
 	}
@@ -1045,7 +1047,8 @@ void Movimiento::checarVictima() {
   while(!Serial2.available()){
     delay(1);
   }
-  cVictima = (char)Serial2.read();
+  while(Serial2.available())
+    cVictima = (char)Serial2.read();
 	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
     tMapa[*iPiso][*iRow][*iCol].victima(true);
     uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
@@ -1054,9 +1057,11 @@ void Movimiento::checarVictima() {
     stop();
 		if(cVictima & 0b00100000) {
 			real->escribirLCD("VICTIMA", "VISUAL");
-      //delay(1000);
+      Serial2.print("I");
+      while(Serial2.available()){
+        (char)Serial2.read();
+      }
       while(cVictima&0b00000010){
-        Serial2.print("C");
         real->escribirLCD("Cual", "Cual");
         while(!Serial2.available()){
           delay(1);
