@@ -77,9 +77,9 @@ void SensarRealidad::apantallanteLCD(String sE1, String sE2) {
 	escribirLCD(sE1, sE2);
 	for (size_t i = 0; i < 4; i++) {
 		lcd.noBacklight();
-		delay(40);
+		delay(35);
 		lcd.backlight();
-		delay(40);
+		delay(35);
 	}
 }
 
@@ -90,14 +90,14 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 	for (int i = 0; i < kCantVL53; i++)
 		digitalWrite(kXSHUT[i], LOW);
 
-	delay(100);
+	delay(75);
 
 	for (int i = 0; i < kCantVL53; i++) {
 		//We put it in '1', so it's enabled.
 		//*IMPORTANT NOTE* we cannot send a HIGH signal, because we would burn it. So, what we do is put a really high impedance on it. Because by default, that pin is connected to HIGH.
 		pinMode(kXSHUT[i], INPUT);
 		//Must wait this time for it to actually be enabled
-		delay(100);
+		delay(75);
 
 		//Initialize the sensor
 		sensor[i].init(true);

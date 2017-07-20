@@ -35,8 +35,7 @@ class Movimiento {
 
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
-    /// Se separa de la pared de enfrente
-    void alinearParedEnfrente();
+
     /// Calcula la velocidad para avanzar derecho
     void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso = 0);
     /// Deja kit y mapea que hay una victima
@@ -54,9 +53,9 @@ class Movimiento {
     /// Da vuelta a la izquierda de 90
     void izquierda();
     /// Controla la veloicad para dar la vuelta a la izquierda
-    void vueltaIzq();
+    void vueltaIzq(bool caso = true);
     /// Controla la velocidad para dar la vuelta a la derecha
-    void vueltaDer();
+    void vueltaDer(bool caso = true);
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
