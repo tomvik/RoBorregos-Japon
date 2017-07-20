@@ -15,7 +15,8 @@
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR);
 Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
 
-char cSend, cLee, cEs = 0;
+char cSend, cEs, cLee = 0;
+bool bLetra = true, bPorfavor = true;
 //2 es checkpoint
 //1 es negro
 //0 es blanco
@@ -71,75 +72,80 @@ void setup() {
 //H/Letra, S/Letra, U/Letra, checkpoint,  color, izq, victima/Letra, der
 void loop() {
   cSend = 0;
-  if(cEs == 'L'){
-    while(cEs == 'L'){
-      if(Serial2.available()){
-        cEs = (char)Serial2.read();
-        Serial.println("L");
-        Serial3.print(0b11100110);
-        Serial2.println("Cual");
-      }
-      Serial.println("L");
-      Serial3.print(0b11100110);
-      delay(10);
+  if(cLee == 'C' && bPorfavor){
+    Serial.println("AAAA");
+    while(!Serial2.available()){
+      delay(1);
     }
-    Serial2.println("Ya");
-    while(Serial2.available()){
-      (char)Serial2.read();
-      Serial2.println("Ya");
-    }
-  }
-  else if(cEs == 'D'){
-    while(cEs == 'D'){
-      if(Serial2.available()){
-        cEs = (char)Serial2.read();
-        Serial.println("D");
-        Serial3.print(0b11100011);
-        Serial2.println("Cual");
-      }
-      Serial.println("D");
-      Serial3.print(0b11100011);
-      delay(10);
-    }
-    Serial2.println("Ya");
-    while(Serial2.available()){
-      (char)Serial2.read();
-      Serial2.println("Ya");
-    }
-  }
-  else{
+    Serial.print("2......"); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
     while(Serial2.available())
       cEs = (char)Serial2.read();
+    Serial.print("3......"); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+    if(cEs == 'H' || cEs == 'S' || cEs == 'U'){
+      bLetra = true;
+    }
+    else{
+      Serial2.println("No");
+      bLetra = false;
+      //Volver a checar
+    }
+  }
+  else if(cLee == 'Y'){
+    Serial.println("BBBB");
+    Serial2.println("Si");
+    bPorfavor = true;
+  }
+  else if(bLetra){
+    Serial.print("CCCC"); Serial.println(cLee);;
+    cEs = 0;
+    while(Serial2.available())
+      cEs = (char)Serial2.read();
+    if(cEs == 'L'){
+      //TODO same as D
+      Serial.print("1................."); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+      Serial2.println("Si");
+      bPorfavor = true;
+    }
+    else if(cEs == 'D'){
+      //TODO same as L
+      Serial.print("1................."); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+      Serial2.println("Si");
+      bPorfavor = true;
+    }
+    else if(cEs != 0){
+      //TODO regresarse
+      Serial.print("NO....."); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+      Serial2.println("No");
+    }
   }
   switch(cEs){
     case 'L':
-      Serial.println("L");
+      //TODO same as D
+      Serial.print("1......"); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+      bLetra = false;
       cSend |= 0b11100110;
       break;
     case 'D':
-      Serial.println("D");
+      //TODO same as L
+      Serial.print("1......"); Serial.print(cEs); Serial.print("......"); Serial.println(cLee);
+      bLetra = false;
       cSend |= 0b11100011;
       break;
     case 'H':
       Serial.println("H");
+      bPorfavor = false;
       cSend |= 0b10000000;
       break;
     case 'S':
       Serial.println("S");
+      bPorfavor = false;
       cSend |= 0b01000000;
       break;
     case 'U':
       Serial.println("U");
+      bPorfavor = false;
       cSend |= 0b00100000;
-			while(Serial2.available())
-		    cLee = (char)Serial2.read();
       break;
-    case 'H':
-      cSend |= 0b00110000;
-			while(Serial2.available())
-		    cLee = (char)Serial2.read();
-      break;
-    
   }
 	switch(sensarTemperatura()) {
 	case 1:
@@ -154,16 +160,24 @@ void loop() {
 		cSend|=0b00000111;
 		break;
 	}
- switch(sensorR()){
-  case 1:
-    //Serial.println("NEGRO");
-    cSend |= 0b00001000;
-    break;
-  case 2:
-    //Serial.println("CHECK");
-    cSend |= 0b00010000;
-    break;
- }
-	Serial3.print(cSend);
-  delay(20);
+  switch(sensorR()){
+    case 1:
+      //Serial.println("NEGRO");
+      cSend |= 0b00001000;
+      break;
+    case 2:
+      //Serial.println("CHECK");
+      cSend |= 0b00010000;
+      break;
+  }
+  Serial.print("..."); Serial.println(cLee);
+  if(Serial3.available()){
+    while(Serial3.available()){
+      cLee = (char)Serial3.read();
+    }
+    if(cLee != 'Y')
+      Serial3.print(cSend);
+  }
+  Serial.print("..."); Serial.println(cLee);
+  delay(5);
 }

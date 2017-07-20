@@ -59,11 +59,7 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-<<<<<<< HEAD
   attachInterrupt(1, boton1, RISING);
-=======
-  //attachInterrupt(BOTON_A, boton1, RISING);
->>>>>>> c74e040103ee14a4c0db438da8af0356f920c519
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
