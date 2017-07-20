@@ -5,6 +5,9 @@
 #include <Tile.h>
 #include <Movimiento.h>
 #include <SensarRealidad.h>
+///////////Dimensiones///////////////////
+const uint8_t kMapSizeMapear = 10;
+const uint8_t kMapFloorsMapear = 3;
 
 // Usa la clase Tile y la clase SensarRealidad
 // NOTE ÓRDEN DE PARÁMETROS
@@ -22,24 +25,24 @@ class Mapear {
     void afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow);
     ////////////////Desplaza los datos de la matriz//////////////////
     //Desplaza hacia abajo
-    void moverRowAbajo(Tile tMapa[3][10][10], uint8_t &iPiso);
+    void moverRowAbajo(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], uint8_t &iPiso);
     //Desplaza hacia arriba
-    void moverRowArr(Tile tMapa[3][10][10], uint8_t &iPiso);
+    void moverRowArr(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], uint8_t &iPiso);
     //Desplaza hacia la izquierda
-    void moverColIzq(Tile tMapa[3][10][10], uint8_t &iPiso);
+    void moverColIzq(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], uint8_t &iPiso);
     //Desplaza hacia la derecha
-    void moverColDer(Tile tMapa[3][10][10], uint8_t &iPiso);
+    void moverColDer(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], uint8_t &iPiso);
     //Llama a las 4 de desplazar dependiendo del caso y modifica la columna y el row
-    void desplazaDatos(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase);
+    void desplazaDatos(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase);
     // dependiendo de si es true o false, pone existente o pared.
-    void escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP);
+    void escribeMapaLoP(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP);
     //////////////////////////////Mapea//////////////////////////////////////////
     //Mapea con las variables
-    void llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+    void llenaMapaVariable(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
     //Mapea con los sensores
-    void llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+    void llenaMapaSensor(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
     //Pasa el mapa a el chido
-    void checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+    void checkpoint(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
   private:
   	uint8_t *iPisoLast, *iColLast, *iRowLast, *iPisoMax, *iPisoMaxLast;

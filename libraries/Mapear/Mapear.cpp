@@ -1,7 +1,10 @@
 #include <Arduino.h>
 #include <Mapear.h>
 
-const uint8_t kSize = 10;
+///////////Dimensiones///////////////////
+const uint8_t kMapSize = 10;
+const uint8_t kMapFloors = 3;
+//////////Constant Rampa////////////////
 const uint8_t kRampaLimit = 17;
 
 /*
@@ -57,27 +60,27 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase) {
 		case 'e':
 			return iRow > 0;
 		case 'd':
-			return iCol < kSize-1;
+			return iCol < kMapSize-1;
 		case 'i':
 			return iCol > 0;
 		}
 	case 'e':
 		switch(cCase) {
 		case 'e':
-			return iCol < kSize-1;
+			return iCol < kMapSize-1;
 		case 'd':
-			return iRow < kSize-1;
+			return iRow < kMapSize-1;
 		case 'i':
 			return iRow > 0;
 		}
 	case 's':
 		switch(cCase) {
 		case 'e':
-			return iRow < kSize-1;
+			return iRow < kMapSize-1;
 		case 'd':
 			return iCol > 0;
 		case 'i':
-			return iCol < kSize-1;
+			return iCol < kMapSize-1;
 		}
 	case 'w':
 		switch(cCase) {
@@ -86,22 +89,22 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase) {
 		case 'd':
 			return iRow > 0;
 		case 'i':
-			return iRow < kSize-1;
+			return iRow < kMapSize-1;
 		}
 	}
 	return false;
 }
 
 // Desplaza los datos HACIA ABAJO
-void Mapear::moverRowAbajo(Tile tMapa[3][10][10], uint8_t &iPiso) {
+void Mapear::moverRowAbajo(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
-	for (int iCol = 0; iCol < kSize; ++iCol){
-		tTemp1 = tMapa[iPiso][kSize-1][iCol];
+	for (int iCol = 0; iCol < kMapSize; ++iCol){
+		tTemp1 = tMapa[iPiso][kMapSize-1][iCol];
 		tTemp2 = tMapa[iPiso][0][iCol];
 		tMapa[iPiso][0][iCol] = tTemp1;
 		if(tTemp2.arriba())
 			tMapa[iPiso][0][iCol].abajo(true, NULL);
-		for (int iRow = 1; iRow < kSize; ++iRow){
+		for (int iRow = 1; iRow < kMapSize; ++iRow){
 			tTemp1 = tTemp2;
 			tTemp2 = tMapa[iPiso][iRow][iCol];
 			tMapa[iPiso][iRow][iCol] = tTemp1;
@@ -110,15 +113,15 @@ void Mapear::moverRowAbajo(Tile tMapa[3][10][10], uint8_t &iPiso) {
 }
 
 // Desplaza los datos HACIA ARRIBA
-void Mapear::moverRowArr(Tile tMapa[3][10][10], uint8_t &iPiso) {
+void Mapear::moverRowArr(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
-	for (int iCol = 0; iCol < kSize; ++iCol){
+	for (int iCol = 0; iCol < kMapSize; ++iCol){
 		tTemp1 = tMapa[iPiso][0][iCol];
-		tTemp2 = tMapa[iPiso][kSize-1][iCol];
-		tMapa[iPiso][kSize-1][iCol] = tTemp1;
+		tTemp2 = tMapa[iPiso][kMapSize-1][iCol];
+		tMapa[iPiso][kMapSize-1][iCol] = tTemp1;
 		if(tTemp2.abajo())
-			tMapa[iPiso][kSize-1][iCol].arriba(true, NULL);
-		for (int iRow = kSize-2; iRow >= 0; --iRow){
+			tMapa[iPiso][kMapSize-1][iCol].arriba(true, NULL);
+		for (int iRow = kMapSize-2; iRow >= 0; --iRow){
 			tTemp1 = tTemp2;
 			tTemp2 = tMapa[iPiso][iRow][iCol];
 			tMapa[iPiso][iRow][iCol] = tTemp1;
@@ -127,15 +130,15 @@ void Mapear::moverRowArr(Tile tMapa[3][10][10], uint8_t &iPiso) {
 }
 
 // Desplaza los datos HACIA LA IZQUIERDA
-void Mapear::moverColIzq(Tile tMapa[3][10][10], uint8_t &iPiso) {
+void Mapear::moverColIzq(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
-	for (int iRow = 0; iRow < kSize; ++iRow){
+	for (int iRow = 0; iRow < kMapSize; ++iRow){
 		tTemp1 = tMapa[iPiso][iRow][0];
-		tTemp2 = tMapa[iPiso][iRow][kSize-1];
-		tMapa[iPiso][iRow][kSize-1] = tTemp1;
+		tTemp2 = tMapa[iPiso][iRow][kMapSize-1];
+		tMapa[iPiso][iRow][kMapSize-1] = tTemp1;
 		if(tTemp2.derecha())
-			tMapa[iPiso][iRow][kSize-1].izquierda(true, NULL);
-		for (int iCol = kSize-2; iCol >= 0; --iCol){
+			tMapa[iPiso][iRow][kMapSize-1].izquierda(true, NULL);
+		for (int iCol = kMapSize-2; iCol >= 0; --iCol){
 			tTemp1 = tTemp2;
 			tTemp2 = tMapa[iPiso][iRow][iCol];
 			tMapa[iPiso][iRow][iCol] = tTemp1;
@@ -144,15 +147,15 @@ void Mapear::moverColIzq(Tile tMapa[3][10][10], uint8_t &iPiso) {
 }
 
 // Desplaza los datos HACIA LA DERECHA
-void Mapear::moverColDer(Tile tMapa[3][10][10], uint8_t &iPiso) {
+void Mapear::moverColDer(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
-	for (int iRow = 0; iRow < kSize; ++iRow){
-		tTemp1 = tMapa[iPiso][iRow][kSize-1];
+	for (int iRow = 0; iRow < kMapSize; ++iRow){
+		tTemp1 = tMapa[iPiso][iRow][kMapSize-1];
 		tTemp2 = tMapa[iPiso][iRow][0];
 		tMapa[iPiso][iRow][0] = tTemp1;
 		if(tTemp2.izquierda())
 			tMapa[iPiso][iRow][0].derecha(true, NULL);
-		for (int iCol = 1; iCol < kSize; ++iCol){
+		for (int iCol = 1; iCol < kMapSize; ++iCol){
 			tTemp1 = tTemp2;
 			tTemp2 = tMapa[iPiso][iRow][iCol];
 			tMapa[iPiso][iRow][iCol] = tTemp1;
@@ -161,7 +164,7 @@ void Mapear::moverColDer(Tile tMapa[3][10][10], uint8_t &iPiso) {
 }
 
 // Llama a las cuatro funciones anteriores y decide cuál hacer y modifica la posición para que concuerde con el nuevo mapa->
-void Mapear::desplazaDatos(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase) {
+void Mapear::desplazaDatos(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase) {
 	switch(cDir) {
 	case 'n':
 		switch(cCase) {
@@ -232,7 +235,7 @@ void Mapear::desplazaDatos(Tile tMapa[3][10][10], char cDir, uint8_t &iCol, uint
 
 // Si es true, pone a ese cuadro como existente, si es false, le pone pared.
 // Lo unico es que EL PRIMER CUADRO donde empiece el robot, debe ser marcado como existente manualmente
-void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP) {
+void Mapear::escribeMapaLoP(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP) {
 	switch(cDir) {
 	case 'n':
 		switch(cCase) {
@@ -250,7 +253,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow][iCol+1].existe(true);
 			else{
-				if(iCol < kSize-1)
+				if(iCol < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol+1]);
 				else
 					tMapa[iPiso][iRow][iCol].derecha(true, NULL);
@@ -270,7 +273,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow+1][iCol].existe(true);
 			else{
-				if(iRow < kSize-1)
+				if(iRow < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
 				else
 					tMapa[iPiso][iRow][iCol].abajo(true, NULL);
@@ -284,7 +287,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow][iCol+1].existe(true);
 			else{
-				if(iCol < kSize-1)
+				if(iCol < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol+1]);
 				else
 					tMapa[iPiso][iRow][iCol].derecha(true, NULL);
@@ -294,7 +297,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow+1][iCol].existe(true);
 			else{
-				if(iRow < kSize-1)
+				if(iRow < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
 				else
 					tMapa[iPiso][iRow][iCol].abajo(true, NULL);
@@ -328,7 +331,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow+1][iCol].existe(true);
 			else{
-				if(iRow < kSize-1)
+				if(iRow < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
 				else
 					tMapa[iPiso][iRow][iCol].abajo(true, NULL);
@@ -348,7 +351,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow][iCol+1].existe(true);
 			else{
-				if(iCol < kSize-1)
+				if(iCol < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol+1]);
 				else
 					tMapa[iPiso][iRow][iCol].derecha(true, NULL);
@@ -392,7 +395,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow+1][iCol].existe(true);
 			else{
-				if(iRow < kSize-1)
+				if(iRow < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].abajo(true, &tMapa[iPiso][iRow+1][iCol]);
 				else
 					tMapa[iPiso][iRow][iCol].abajo(true, NULL);
@@ -402,7 +405,7 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 			if(bLoP)
 				tMapa[iPiso][iRow][iCol+1].existe(true);
 			else{
-				if(iCol < kSize-1)
+				if(iCol < kMapSize-1)
 					tMapa[iPiso][iRow][iCol].derecha(true, &tMapa[iPiso][iRow][iCol+1]);
 				else
 					tMapa[iPiso][iRow][iCol].derecha(true, NULL);
@@ -415,16 +418,16 @@ void Mapear::escribeMapaLoP(Tile tMapa[3][10][10], char cDir, uint8_t iCol, uint
 
 // Llena el mapa dependiendo de los valores que mande la clase SensarMapa. Y en dado caso, desplaza los datos.
 // Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
-void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tBueno[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
 			uint8_t iTemp = iPiso, i = 0, j;
 			robot->pasaRampa();
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
 			bool bT = false;
-			while(i < kSize && !bT) {
+			while(i < kMapSize && !bT) {
 				j = 0;
-				while(j < kSize && !bT) {
+				while(j < kMapSize && !bT) {
 					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp) {
 						// Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
 						iCol = j;
@@ -545,7 +548,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[3][10][10], Tile tBueno[3][10][10], ch
 	}
 }
 
-void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tBueno[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
 		// tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
@@ -553,9 +556,9 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 			robot->pasaRampa();
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
 			bool bT = false;
-			while(i < kSize && !bT) { // CAMBIO AQUI DE bT == false a !bT
+			while(i < kMapSize && !bT) { // CAMBIO AQUI DE bT == false a !bT
 				j = 0;
-				while(j < kSize && !bT) {
+				while(j < kMapSize && !bT) {
 					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp) {
 						// Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
 						iCol = j;
@@ -688,14 +691,14 @@ void Mapear::llenaMapaSensor(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char
 	// delay(500);
 }
 
-void Mapear::checkpoint(Tile tMapa[3][10][10], Tile tBueno[3][10][10], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
+void Mapear::checkpoint(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tBueno[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
 	robot->stop();
 	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("     CHECK", "     POINT");
 	delay(1000);
-	for(int i = 0; i <= 2; i++){
-		for(int j = 0; j < kSize; j++){
-			for(int z = 0; z < kSize; z++){
+	for(int i = 0; i < kMapFloors; i++){
+		for(int j = 0; j < kMapSize; j++){
+			for(int z = 0; z < kMapSize; z++){
 				tBueno[i][j][z] = tMapa[i][j][z];
 			}
 		}

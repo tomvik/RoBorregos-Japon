@@ -6,17 +6,20 @@
 #define BOTON_A 3
 #define ENCODER_A 4
 #define ENCODER_B 5
+///////////Dimensiones///////////////////
+const uint8_t kMapSize = 10;
+const uint8_t kMapFloors = 3;
 
 /////////// Variables, mapa y mover ///////////
 uint8_t iRow = 4, iCol = 4, iPiso = 0, iPisoMax = 0;
 char cDir = 'n';
-Tile tMapa[3][10][10];
+Tile tMapa[kMapFloors][kMapSize][kMapSize];
 Movimiento *mover;
 
 ///////////Variables para checkpoint//////////
 uint8_t iRowL = iRow, iColL = iCol, iPisoL = iPiso, iPisoMaxLast = 0;
 char cDirL = cDir;
-Tile tBueno[3][10][10];
+Tile tBueno[kMapFloors][kMapSize][kMapSize], tBackUp[kMapFloors][kMapSize][kMapSize];
 
 /////////// Apuntadores constantes a las variables ///////////
 uint8_t *const iR = &iRow;
@@ -48,7 +51,7 @@ void boton1() {
 void setup() {
 	//Serial
 	Serial2.begin(9600);
-	Serial.begin(115200);
+	Serial.begin(9600);
 	while(Serial.available()) {
 		Serial.read();
 	}
@@ -56,7 +59,7 @@ void setup() {
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
-  // attachInterrupt(BOTON_A, boton1, RISING);
+  attachInterrupt(1, boton1, RISING);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -71,8 +74,8 @@ void setup() {
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
 
-	// if(digitalRead(BOTON_A))
-		// sensar->test();
+	if(digitalRead(BOTON_A))
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
@@ -90,22 +93,46 @@ void setup() {
 	// Loop en el cual recorre todo el mapa
 	while (mover->decidir()) {
 		mover->stop();
-    if(mover->getLack())
+    if(mover->getLack()){
+      prueba:
       mapa.llenaMapaSensor(tMapa, tBueno, cDir, iCol, iRow, iPiso);
+    }
     else
 		  mapa.llenaMapaVariable(tMapa, tBueno, cDir, iCol, iRow, iPiso);
 	}
 
 	// Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
+  mover->stop();
+  for(int i = 0; i < kMapFloors; i++) {
+    for(int j = 0; j < kMapSize; j++) {
+      for(int z = 0; z < kMapSize; z++) {
+        tBackUp[i][j][z] = tBueno[i][j][z];
+      }
+    }
+  }
 	while(!tMapa[iPiso][iRow][iCol].inicio())
-		mover->goToVisitado('i');
+    mover->goToVisitado('i');
+		
 
 	// Regresó al incio
 	mover->stop();
 	sensar->apantallanteLCD("      HE","    LLEGADO");
 	delay(1500);
 	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
+
+  while(true){
+    if(mover->getLackReal()){
+      for(int i = 0; i < kMapFloors; i++) {
+        for(int j = 0; j < kMapSize; j++) {
+          for(int z = 0; z < kMapSize; z++) {
+            tBueno[i][j][z] = tBackUp[i][j][z];
+          }
+        }
+      }
+      goto prueba;
+    }
+  }
 }
 
 void loop() {

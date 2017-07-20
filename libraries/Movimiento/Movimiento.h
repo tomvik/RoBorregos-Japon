@@ -5,7 +5,9 @@
 #include <SensarMapa.h>
 #include <SensarRealidad.h>
 #include <Tile.h>
-
+///////////Dimensiones///////////////////
+const uint8_t kMapSizeMovimiento = 10;
+const uint8_t kMapFloorsMovimiento = 3;
 // Mapa, direccion, col, row, piso, caso, fdeseado
 
 class Movimiento {
@@ -20,7 +22,6 @@ class Movimiento {
 
     /// Para los motores
     void stop();
-
     /// Pone los motores para enfrente
     void front();
     /// Pone los motores para atrás
@@ -53,9 +54,9 @@ class Movimiento {
     /// Da vuelta a la izquierda de 90
     void izquierda();
     /// Controla la veloicad para dar la vuelta a la izquierda
-    void vueltaIzq(uint8_t caso = 0);
+    void vueltaIzq();
     /// Controla la velocidad para dar la vuelta a la derecha
-    void vueltaDer(uint8_t caso = 0);
+    void vueltaDer();
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
@@ -87,16 +88,18 @@ class Movimiento {
     char getParedes();
     //Regresa si hubo un lack
     bool getLack();
+    //Regresa si presione el boton de lack
+    bool getLackReal();
     //Muestr mapa
     void muestra(bool t);
 
   private:
-  	Tile (*tBueno)[10][10], (*tMapa)[10][10];
+  	Tile (*tBueno)[kMapSizeMovimiento][kMapSizeMovimiento], (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
     int iTerm, lastInput;
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor, cuadrosSeguidos;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;
