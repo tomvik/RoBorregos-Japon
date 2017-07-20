@@ -51,7 +51,7 @@ void boton1() {
 void setup() {
 	//Serial
 	Serial2.begin(9600);
-	Serial.begin(115200);
+	Serial.begin(9600);
 	while(Serial.available()) {
 		Serial.read();
 	}
@@ -112,7 +112,8 @@ void setup() {
     }
   }
 	while(!tMapa[iPiso][iRow][iCol].inicio())
-		mover->goToVisitado('i');
+    mover->goToVisitado('i');
+		
 
 	// Regresó al incio
 	mover->stop();

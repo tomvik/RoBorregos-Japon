@@ -340,10 +340,16 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[kMapSize][kMapSize], Tile tMapa[kMapF
 //Con el resultado de la función anterior, crea las instrucciones de cómo llegar hasta ese punto yendose en reversa.
 //También para simplicidad, todo lo hace viendo a su "norte"
 String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMapa[kMapSize][kMapSize], Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t iNCol, uint8_t iNRow, uint8_t iPiso) {
+	uint8_t iNRSave = iNRow, iNCSave = iNCol;
+	bool b1 = true, b2 = true, b3 = true, b4 = true;
+	///////////FIX
+	fix:
+	iNRow = iNRSave, iNCol = iNCSave;
 	String sIns = "";
 	sIns += cMapa[iNRow][iNCol];
 	uint8_t iR, iU, iL, iD;
 	char cDir;
+	int x = 0;
 	//Sacar la distancia de cada una
 	iR = iU = iL = iD = 255;
 	if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && sensaExiste(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && iMapa[iNRow][iNCol+1] != 0)
@@ -354,8 +360,13 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 		iL = iMapa[iNRow][iNCol-1];
 	if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'd') && sensaExiste(tMapa, 'n', iNCol, iNRow, iPiso, 'd') && iMapa[iNRow+1][iNCol] != 0)
 		iD = iMapa[iNRow+1][iNCol];
+	iR = b1 ? iR : 255;
+	iU = b2 ? iU : 255;
+	iL = b3 ? iL : 255;
+	iD = b4 ? iD : 255;
 	//Compararlas
-	if(iR <= iU && iR <= iL && iR <= iD) {
+	if(b1 && iR <= iU && iR <= iL && iR <= iD) {
+		b1 = false;
 		switch(cMapa[iNRow][iNCol]) {
 		case 'r':
 			cDir = 's';
@@ -372,7 +383,8 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 		}
 		iNCol++;
 	}
-	else if(iU <= iR && iU <= iL && iU <= iD) {
+	else if(b2 && iU <= iR && iU <= iL && iU <= iD) {
+		b2 = false;
 		switch(cMapa[iNRow][iNCol]) {
 		case 'r':
 			cDir = 'e';
@@ -389,7 +401,8 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 		}
 		iNRow--;
 	}
-	else if(iL <= iU && iL <= iR && iL <= iD) {
+	else if(b3 && iL <= iU && iL <= iR && iL <= iD) {
+		b3 = false;
 		switch(cMapa[iNRow][iNCol]) {
 		case 'r':
 			cDir = 'n';
@@ -406,7 +419,8 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 		}
 		iNCol--;
 	}
-	else{
+	else if (b4){
+		b4 = false;
 		switch(cMapa[iNRow][iNCol]) {
 		case 'r':
 			cDir = 'w';
@@ -425,6 +439,10 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 	}
 	//Loop hasta que llegue a donde en realidad está
 	while(cMapa[iNRow][iNCol] != 'i') {
+		//FIXME
+		if(cMapa[iNRow][iNCol] == 'n' || iNRow > kMapSize || iNCol > kMapSize){
+			goto fix;
+		}
 		sIns += cMapa[iNRow][iNCol];
 		switch(cDir) {
 		case 'n':
