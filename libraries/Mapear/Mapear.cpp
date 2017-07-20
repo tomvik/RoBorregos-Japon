@@ -534,7 +534,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile 
 	iColor = mapa->color();
 	if(iColor == 1) {
 		mapa->apantallanteLCD("NEGRO");
-		delay(200);
+		// delay(200);
 		// Poner pared a los cuatro lados
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
@@ -636,7 +636,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tB
 	iColor = mapa->color();
 	if(iColor == 1) {
 		mapa->apantallanteLCD("NEGRO");
-		delay(200);
+		// delay(200);
 		// Poner pared a los cuatro lados
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
@@ -695,7 +695,7 @@ void Mapear::checkpoint(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tBueno[
 	robot->stop();
 	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("     CHECK", "     POINT");
-	delay(1000);
+	// delay(1000);
 	for(int i = 0; i < kMapFloors; i++){
 		for(int j = 0; j < kMapSize; j++){
 			for(int z = 0; z < kMapSize; z++){
