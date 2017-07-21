@@ -9,8 +9,8 @@
 #define S3 6
 #define LED 13
 
-#define MlxL 0x5A
-#define MlxR 0x4C
+#define MlxL 0x1C
+#define MlxR 0x5C
 
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR);
 Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
@@ -66,6 +66,7 @@ void setup() {
 
   digitalWrite(S0, HIGH);
   digitalWrite(S1, LOW);  
+  //Serial.println("porfas");
 }
 /*
 //Serial
@@ -82,7 +83,7 @@ void setup() {
   2 si está a la izquierda
 //cSendMega   //   H/Letra, S/Letra, U/Letra, checkpoint,  color, izq, victima/Letra, der
 ///cSendRaspD e I   //   Busca, Identifica
-///cLeeMega    //   Enviar (E), Identifica (I), Busca (B)
+///cLeeMega    //   Mandar (M), Identifica (I), Busca (B)
 //TODO duplicar todo para la otra rasp
 */
 void loop() {
@@ -143,14 +144,16 @@ void loop() {
   }
   ////////////////////Serial
   switch(cLeeMega){
-    case 'E':
-      Serial3.print(cSendMega);
-      break;
     case 'I':
       Serial2.println("Identifica");
+      if(cLeeRasp != 'N' && cLeeRasp != 'L')
+        Serial3.print(cSendMega);
       break;
     case 'B':
       Serial2.println("Busca");
+      break;
+    case 'M':
+      Serial3.print(cSendMega);
       break;
   }
 }

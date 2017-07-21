@@ -349,7 +349,6 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 	sIns += cMapa[iNRow][iNCol];
 	uint8_t iR, iU, iL, iD;
 	char cDir;
-	int x = 0;
 	//Sacar la distancia de cada una
 	iR = iU = iL = iD = 255;
 	if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && sensaExiste(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && iMapa[iNRow][iNCol+1] != 0)

@@ -16,7 +16,7 @@ Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR);
 Adafruit_MLX90614 mlxLeft = Adafruit_MLX90614(MlxL);
 
 char cSendMega, cSendRaspD, cSendRaspI, cLeeRasp, cLeeMega = 0;
-bool bLetra = true, bPorfavor = true;
+bool bI = true;
 //2 es checkpoint
 //1 es negro
 //0 es blanco
@@ -88,7 +88,8 @@ void setup() {
 */
 void loop() {
   cSendMega = 0;
-  cLeeRasp = 'N';
+  cLeeRasp = bI ? cLeeRasp : 'N';
+  cLeeMega = (cLeeMega == 'I') ? 'I' : 'N';
   ////////////////////Lee Serial Mega
   while(Serial3.available()){
     cLeeMega = (char)Serial3.read();
@@ -100,19 +101,20 @@ void loop() {
   ////////////////////Letra
   switch(cLeeRasp){
     case 'L':
-      //Serial.println("Letra");
-      cSendMega |= 0b11100110;
+      bI = true;
+      Serial.println("Letra");
+      cSendMega |= 0b11100011;
       break;
     case 'H':
-      //Serial.println("H");
+      Serial.println("H");
       cSendMega |= 0b10000000;
       break;
     case 'S':
-      //Serial.println("S");
+      Serial.println("S");
       cSendMega |= 0b01000000;
       break;
     case 'U':
-      //Serial.println("U");
+      Serial.println("U");
       cSendMega |= 0b00100000;
       break;
   }
@@ -145,12 +147,17 @@ void loop() {
   ////////////////////Serial
   switch(cLeeMega){
     case 'I':
+      bI = false;
       Serial2.println("Identifica");
+      if(cLeeRasp != 'N' && cLeeRasp != 'L')
+        Serial3.print(cSendMega);
       break;
     case 'B':
+      Serial.println("BUSCA");
       Serial2.println("Busca");
       break;
     case 'M':
+      Serial.println("MANDA");
       Serial3.print(cSendMega);
       break;
   }

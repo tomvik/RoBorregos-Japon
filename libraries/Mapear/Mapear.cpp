@@ -467,7 +467,8 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile 
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
-		robot->stop();
+		// TODO NETO
+		// robot->stop();
 		if(mapa->caminoEnfrente()) {
 			if(!espacio(cDir, iCol, iRow, 'e'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
@@ -598,7 +599,8 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tB
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
-		robot->stop();
+		// TODO NETO
+		// robot->stop();
 	}
 	/////////////////////////////NORMAL//////////////////////////////////
 	if(mapa->caminoEnfrente()) {
@@ -692,7 +694,8 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tB
 }
 
 void Mapear::checkpoint(Tile tMapa[kMapFloors][kMapSize][kMapSize], Tile tBueno[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso){
-	robot->stop();
+	// TODO NETO
+	// robot->stop();
 	tMapa[iPiso][iRow][iCol].checkpoint(true);
 	mapa->apantallanteLCD("     CHECK", "     POINT");
 	// delay(1000);
