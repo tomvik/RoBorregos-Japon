@@ -34,8 +34,6 @@ uint8_t sensorColor() {
   digitalWrite(LED, LOW);
   if(frequency >= 120)
     iR = 1;
-  else if(frequency <= 55)
-    iR = 2;
   return iR;
 }
 //0 = nada
@@ -76,12 +74,11 @@ void setup() {
 //Color
   0 si es blanco
   1 si es negro
-  2 si es checkpoint
 //Temp  
   0 si no hay
   1 si está a la derecha
   2 si está a la izquierda
-//cSendMega   //   H/Letra, S/Letra, U/Letra, checkpoint,  color, izq, victima/Letra, der
+//cSendMega   //   H/Letra, S/Letra, U/Letra, NADA,  color, izq, victima/Letra, der
 ///cSendRaspD e I   //   Busca, Identifica
 ///cLeeMega    //   Mandar (M), Identifica (I), Busca (B)
 //TODO duplicar todo para la otra rasp
@@ -117,6 +114,10 @@ void loop() {
       Serial.println("U");
       cSendMega |= 0b00100000;
       break;
+    case 'N':
+      Serial.println("N");
+      cSendMega |= 0b00010000;
+      break;
   }
   ////////////////////Temperatura
   switch(sensarTemperatura()) {
@@ -139,10 +140,6 @@ void loop() {
       //Serial.println("NEGRO");
       cSendMega |= 0b00001000;
       break;
-    case 2:
-      //Serial.println("CHECK");
-      cSendMega |= 0b00010000;
-      break;
   }
   ////////////////////Serial
   switch(cLeeMega){
@@ -153,11 +150,14 @@ void loop() {
         Serial3.print(cSendMega);
       break;
     case 'B':
-      Serial.println("BUSCA");
+      Serial.println("BUSCA"); 
       Serial2.println("Busca");
       break;
     case 'M':
       Serial.println("MANDA");
+      Serial3.print(cSendMega);
+      break;
+    default:
       Serial3.print(cSendMega);
       break;
   }

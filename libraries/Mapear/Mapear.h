@@ -18,7 +18,7 @@ class Mapear {
     // Constructor default
     Mapear();
     // Constructor con SensarRealidad y Movimiento y last pos
-    Mapear(SensarRealidad *ma, Movimiento *ro, char *cD, uint8_t *iC, uint8_t *iR, uint8_t *iP, uint8_t *iPM, uint8_t *iPML);
+    Mapear(SensarRealidad *ma, Movimiento *ro, uint8_t *iPM);
     // Verifica si hay espacio en la matriz
     bool espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase);
     //Mapea que hay rampa y todo lo necesario
@@ -38,15 +38,12 @@ class Mapear {
     void escribeMapaLoP(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP);
     //////////////////////////////Mapea//////////////////////////////////////////
     //Mapea con las variables
-    void llenaMapaVariable(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+    void llenaMapaVariable(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
     //Mapea con los sensores
-    void llenaMapaSensor(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
-    //Pasa el mapa a el chido
-    void checkpoint(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], Tile tBueno[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
+    void llenaMapaSensor(Tile tMapa[kMapFloorsMapear][kMapSizeMapear][kMapSizeMapear], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso);
 
   private:
-  	uint8_t *iPisoLast, *iColLast, *iRowLast, *iPisoMax, *iPisoMaxLast;
-  	char *cDirLast;
+  	uint8_t *iPisoMax;
     uint8_t iColor;
     SensarRealidad *mapa;
     Movimiento *robot;

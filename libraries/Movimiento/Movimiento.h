@@ -13,12 +13,11 @@ const uint8_t kMapFloorsMovimiento = 3;
 class Movimiento {
   public:
     /// Constructor por parámetros
-    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[kMapSizeMovimiento][kMapSizeMovimiento], Tile (*tM)[kMapSizeMovimiento][kMapSizeMovimiento], uint8_t *iPM, uint8_t *iPML);
+    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, Tile (*tM)[kMapSizeMovimiento][kMapSizeMovimiento], uint8_t *iPM);
 
     //////////////////////////////////Movimientos//////////////////////////////////////
-
     /// Ajusta la velocidad
-    bool velocidad(uint8_t powIzq, uint8_t powDer);
+    void velocidad(uint8_t powIzq, uint8_t powDer);
 
     /// Para los motores
     void stop();
@@ -31,7 +30,7 @@ class Movimiento {
     /// Pone los motores para la izquierda
     void left();
 
-    void alinear(uint8_t caso = 0);
+    void alinear();
 
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
@@ -77,28 +76,21 @@ class Movimiento {
     bool decidir();
     // bool decidir_Prueba();
 
-    ////////////////////Pasa el mapa a el chido////////////////////////////
-    void checkpoint();
-    ////////////////////LACK////////////////////////////////
-    void lack();
-
     /////////////Getter//////////
     //Regresa cuales paredes se mapeó
     char getParedes();
     //Regresa si hubo un lack
-    bool getLack();
-    //Regresa si presione el boton de lack
-    bool getLackReal();
+    uint8_t getColor();
     //Muestr mapa
-    void muestra(bool t);
+    void muestra();
 
   private:
-  	Tile (*tBueno)[kMapSizeMovimiento][kMapSizeMovimiento], (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
-    int iTerm, lastInput;
+  	Tile (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
+    int iTerm, lastInput, cuadrosSeguidos;
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
-    uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor, cuadrosSeguidos;
+    uint8_t *iCol, *iRow, *iPiso, *iPisoMax;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;
