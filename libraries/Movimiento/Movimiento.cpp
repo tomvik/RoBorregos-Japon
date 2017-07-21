@@ -1016,52 +1016,59 @@ bool Movimiento::decidir() {
 	}
 }
 void Movimiento::checarVictima() {
+  //Lee Serial
 	cVictima = 0;
 	Serial2.print("M");
 	while(!Serial2.available()) {
-		delay(1);
+    //real->escribirLCD("ESPERO");
+		//delay(100);
 	}
-	while(Serial2.available())
+	while(Serial2.available()){
+    //real->escribirLCD("LEO");
+    //delay(100);
 		cVictima = (char)Serial2.read();
+  }
+  //Valida que puede haber una victima
 	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
-		tMapa[*iPiso][*iRow][*iCol].victima(true);
+		real->escribirLCD("VICTIMAAAAA");
+    //Se detiene y mapea que hay una
+    tMapa[*iPiso][*iRow][*iCol].victima(true);
 		uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
 		uint16_t encoderTemp1 = eCount1;
 		uint16_t encoderTemp2 = eCount2;
 		stop();
+    //Visual
 		if(cVictima & 0b00100000) {
-			real->escribirLCD("VICTIMA", "VISUAL");
+      real->escribirLCD("VICTIMA", "VISUAL");
+      //Le mandamos I para identificar y vaciamos Serial
 			Serial2.print("I");
+      real->escribirLCD("Cual", "Cual");
 			while(Serial2.available()) {
 				(char)Serial2.read();
 			}
-			while(cVictima&0b00000010) {
-				real->escribirLCD("Cual", "Cual");
-				while(!Serial2.available()) {
-					delay(1);
-				}
-				cVictima = (char)Serial2.read();
-			}
+      while(!Serial2.available()) {
+        delay(1);
+      }
+      while(Serial2.available()) {
+        (char)Serial2.read();
+      }
 			real->escribirLCD("YA", "YA");
-			//delay(500);
 			if(cVictima & 0b10000000) {
 				real->escribirLCD("VICTIMA", "HHHHHHHHH");
-				//delay(1000);
 				dejarKit(iCase);
 				dejarKit(iCase);
 			}
 			else if(cVictima & 0b01000000) {
 				real->escribirLCD("VICTIMA", "SSSSSSSSS");
-				//delay(1000);
 				dejarKit(iCase);
 			}
 			else if(cVictima & 0b00100000) {
 				real->escribirLCD("VICTIMA", "UUUUUUUUU");
 				delay(5000);
 			}
-			Serial2.print("Y");
-			Serial2.print("Y");
+      Serial2.print("B");
 		}
+    //Calor
 		else{
 			dejarKit(iCase);
 		}
