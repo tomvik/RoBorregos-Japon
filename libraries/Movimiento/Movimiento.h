@@ -94,11 +94,11 @@ class Movimiento {
 
   private:
   	Tile (*tBueno)[kMapSizeMovimiento][kMapSizeMovimiento], (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
-    int iTerm, lastInput;
+    int iTerm, lastInput, cuadrosSeguidos;
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iColLast, *iRowLast, *iPisoLast, *iPisoMax, *iPisoMaxLast;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor, cuadrosSeguidos;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;

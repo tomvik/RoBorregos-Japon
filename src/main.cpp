@@ -70,7 +70,7 @@ void setup() {
 	sensar->apantallanteLCD("      El", "    MARIACHI");
 
 	// Resto de los objetos
-	Movimiento robot(170, 170, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
+	Movimiento robot(165, 165, sensar, cD, iC, iR, iP, cDL, iCL, iRL, iPL, tBueno, tMapa, iPM, iPML);
 	mover = &robot;
 	Mapear mapa(sensar, mover, cDL, iCL, iRL, iPL, iPM, iPML);
 	mover->stop();
