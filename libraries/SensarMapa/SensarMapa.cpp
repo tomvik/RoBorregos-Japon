@@ -16,7 +16,7 @@
    d = down = abajo
 */
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 10;
+const uint8_t kMapSize = 14;
 const uint8_t kMapFloors = 3;
 //////////Valor bumper//////////////////
 const uint8_t kBumper = 8;
@@ -436,6 +436,10 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 			break;
 		}
 		iNRow++;
+	}
+	else{
+		//TODO que nada jalo
+		return "K";
 	}
 	//Loop hasta que llegue a donde en realidad está
 	while(cMapa[iNRow][iNCol] != 'i') {

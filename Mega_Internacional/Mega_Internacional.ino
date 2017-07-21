@@ -7,7 +7,7 @@
 #define ENCODER_A 4
 #define ENCODER_B 5
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 10;
+const uint8_t kMapSize = 14;
 const uint8_t kMapFloors = 3;
 
 /////////// Variables, mapa y mover ///////////

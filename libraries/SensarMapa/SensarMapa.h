@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Tile.h>
 ///////////Dimensiones///////////////////
-const uint8_t kMapSizeSensarMapa = 10;
+const uint8_t kMapSizeSensarMapa = 14;
 const uint8_t kMapFloorsSensarMapa = 3;
 
 //Mapa int, Mapa tile, Direccion, Columna, Row, Piso, Caso, Bool

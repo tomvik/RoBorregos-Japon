@@ -17,7 +17,7 @@
 #include <PID_v1.h>
 
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 10;
+const uint8_t kMapSize = 14;
 const uint8_t kMapFloors = 3;
 //////////Mapas para algoritmo/////////////
 uint8_t iMapa[kMapSize][kMapSize];
@@ -80,7 +80,7 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
    i = izquierda
    a = atrás
  */
-Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10], uint8_t *iPM, uint8_t *iPML) {
+Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[kMapSize][kMapSize], Tile (*tM)[kMapSize][kMapSize], uint8_t *iPM, uint8_t *iPML) {
 	//////////////////Inicializamos variables en 0////////////////////////////////
 	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = cuadrosSeguidos = bBoton1 = 0;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
@@ -111,10 +111,6 @@ bool Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 	myMotorRightB->setSpeed(powDer);
 
 	if(bBoton1) {
-		stop();
-		real->escribirLCD("     Perdon", "   la ruegue");
-		delay(1000);
-		bBoton1 = false;
 		//TODO
 		lack();
 		delay(100);
@@ -406,7 +402,7 @@ void Movimiento::vueltaIzq(bool caso) {
 			    velocidad(170, 170);
 			   }*/
 
-			checarVictima();
+			checarVictima(false);
 			left();
 		}
 	} else {
@@ -426,7 +422,7 @@ void Movimiento::vueltaIzq(bool caso) {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
-			checarVictima();
+			checarVictima(false);
 			left();
 		}
 	}
@@ -476,7 +472,7 @@ void Movimiento::vueltaDer(bool caso) {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
-			checarVictima();
+			checarVictima(false);
 			right();
 		}
 	} else {
@@ -496,7 +492,7 @@ void Movimiento::vueltaDer(bool caso) {
 			   } else if (millis() >= inicio + 5000) {
 			    velocidad(170, 170);
 			   }*/
-			checarVictima();
+			checarVictima(false);
 			right();
 		}
 	}
@@ -896,6 +892,13 @@ void Movimiento::hacerInstrucciones(String sMov) {
 	   Serial.println(" ");
 	   delay(5000);
 	   cDir = (char)Serial.read();*/
+  if(sMov == "K"){
+    real->apantallanteLCD("   MATAME", "   POR FAVOR");
+    bBoton1 = false;
+    while(!bBoton1);
+    lack();
+    return;
+  }
 	for(int i = sMov.length()-1; i >= 0; i--) {
 		switch(sMov[i]) {
 		case 'r':
@@ -1015,7 +1018,7 @@ bool Movimiento::decidir() {
 		return goToVisitado( 'n');
 	}
 }
-void Movimiento::checarVictima() {
+void Movimiento::checarVictima(bool caso) {
   //Lee Serial
 	cVictima = 0;
 	Serial2.print("M");
@@ -1038,7 +1041,7 @@ void Movimiento::checarVictima() {
 		uint16_t encoderTemp2 = eCount2;
 		stop();
     //Visual
-		if(cVictima & 0b00100000) {
+		if(caso && cVictima & 0b00100000) {
       real->escribirLCD("VICTIMA", "VISUAL");
       //Le mandamos I para identificar y vaciamos Serial
 			Serial2.print("I");
@@ -1069,7 +1072,7 @@ void Movimiento::checarVictima() {
       Serial2.print("B");
 		}
     //Calor
-		else{
+		else if(!(cVictima & 0b00100000)){
 			dejarKit(iCase);
 		}
 		eCount1 = encoderTemp1;
@@ -1216,7 +1219,10 @@ void Movimiento::checkpoint(){
 }
 
 void Movimiento::lack(){
-	stop();
+  stop();
+  real->escribirLCD("     Perdon", "   la ruegue");
+  delay(1000);
+  bBoton1 = false;
 	for(int i = 0; i < kMapFloors; i++) {
 		for(int j = 0; j < kMapSize; j++) {
 			for(int z = 0; z < kMapSize; z++) {

@@ -2,7 +2,7 @@
 #include <Mapear.h>
 
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 10;
+const uint8_t kMapSize = 14;
 const uint8_t kMapFloors = 3;
 //////////Constant Rampa////////////////
 const uint8_t kRampaLimit = 17;

@@ -6,14 +6,14 @@
 #include <SensarRealidad.h>
 #include <Tile.h>
 ///////////Dimensiones///////////////////
-const uint8_t kMapSizeMovimiento = 10;
+const uint8_t kMapSizeMovimiento = 14;
 const uint8_t kMapFloorsMovimiento = 3;
 // Mapa, direccion, col, row, piso, caso, fdeseado
 
 class Movimiento {
   public:
     /// Constructor por parámetros
-    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[10][10], Tile (*tM)[10][10], uint8_t *iPM, uint8_t *iPML);
+    Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, char *cl, uint8_t *icl, uint8_t *irl, uint8_t *ipl, Tile (*tB)[kMapSizeMovimiento][kMapSizeMovimiento], Tile (*tM)[kMapSizeMovimiento][kMapSizeMovimiento], uint8_t *iPM, uint8_t *iPML);
 
     //////////////////////////////////Movimientos//////////////////////////////////////
 
@@ -59,7 +59,7 @@ class Movimiento {
     /// Corrige el IMU con la pared de atrás
     void corregirIMU();
     /// No está puesta wtf
-    void checarVictima();
+    void checarVictima(bool caso = true);
     /// Encoder 1
     void encoder1();
     /// Encoder 2
