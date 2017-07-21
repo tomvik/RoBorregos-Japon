@@ -31,7 +31,7 @@ class Movimiento {
     /// Pone los motores para la izquierda
     void left();
 
-    void alinear(uint8_t caso = 0);
+    void alinear();
 
     /// Se acomoda tras chocar con la pared dependiendo del caso
     void acomodaChoque(uint8_t switchCase);
