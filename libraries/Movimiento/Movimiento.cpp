@@ -355,7 +355,6 @@ void Movimiento::vueltaIzq(bool caso) {
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
-			// TODO implementar correcion
 			real->getAngulo(posInicial);
 			if(posInicial < 90 && fSetPoint > 270)
 				dif = abs(fSetPoint - 360 - posInicial);
@@ -384,7 +383,6 @@ void Movimiento::vueltaIzq(bool caso) {
 		}
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
-			// TODO implementar correcion
 			real->getAngulo(posInicial);
 			if(posInicial < 90 && fSetPoint > 270)
 				dif = abs(fSetPoint - 360 - posInicial);
@@ -445,7 +443,6 @@ void Movimiento::vueltaDer(bool caso) {
 
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
-			// TODO implementar correcion
 			real->getAngulo(posInicial);
 			if(posInicial > 270 && fSetPoint < 90)
 				dif = abs(fSetPoint + 360 - posInicial);
@@ -474,7 +471,6 @@ void Movimiento::vueltaDer(bool caso) {
 		}
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
-			// TODO implementar correcion
 			real->getAngulo(posInicial);
 			if(posInicial > 270 && fSetPoint < 90)
 				dif = abs(fSetPoint + 360 - posInicial);
@@ -700,7 +696,6 @@ void Movimiento::retroceder() {
 	cuadrosSeguidos = -100;
 	back();
 	while(eCount1 + eCount2 < kEncoder30) {
-		// TODO implementar p
 		potenciasDerecho(iPowDD, iPowII, 3);
 		if(!velocidad(iPowII, iPowDD))
 			return;
