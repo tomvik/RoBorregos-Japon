@@ -6,8 +6,8 @@
 #include <SensarRealidad.h>
 #include <Tile.h>
 ///////////Dimensiones///////////////////
-const uint8_t kMapSizeMovimiento = 14;
-const uint8_t kMapFloorsMovimiento = 3;
+const uint8_t kMapSizeMovimiento = 15;
+const uint8_t kMapFloorsMovimiento = 4;
 // Mapa, direccion, col, row, piso, caso, fdeseado
 
 class Movimiento {
@@ -82,7 +82,7 @@ class Movimiento {
     //Regresa si hubo un lack
     uint8_t getColor();
     //Muestr mapa
-    void muestra();
+    //void muestra();
 
   private:
   	Tile (*tMapa)[kMapSizeMovimiento][kMapSizeMovimiento];
@@ -90,7 +90,7 @@ class Movimiento {
     bool bBoton1, bLack;
     char cVictima, cParedes, *cDir, *cDirLast;
     uint8_t *iCol, *iRow, *iPiso, *iPisoMax;
-    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor;
+    uint8_t servo_pos, iPowI, iPowD, contadorIzq, contadorDer, resetIMU, iColor, iVisual, iCalor, iCalorD, iKit;
     volatile uint16_t eCount1, eCount2;
     SensarMapa mapa;
     SensarRealidad *real;

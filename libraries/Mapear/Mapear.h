@@ -6,8 +6,8 @@
 #include <Movimiento.h>
 #include <SensarRealidad.h>
 ///////////Dimensiones///////////////////
-const uint8_t kMapSizeMapear = 14;
-const uint8_t kMapFloorsMapear = 3;
+const uint8_t kMapSizeMapear = 15;
+const uint8_t kMapFloorsMapear = 4;
 
 // Usa la clase Tile y la clase SensarRealidad
 // NOTE ÓRDEN DE PARÁMETROS

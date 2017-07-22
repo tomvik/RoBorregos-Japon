@@ -7,11 +7,11 @@
 #define ENCODER_A 4
 #define ENCODER_B 5
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 14;
-const uint8_t kMapFloors = 3;
+const uint8_t kMapSize = 15;
+const uint8_t kMapFloors = 4;
 
 /////////// Variables, mapa y mover ///////////
-uint8_t iRow = 4, iCol = 4, iPiso = 0, iPisoMax = 0;
+uint8_t iRow = 7, iCol = 7, iPiso = 0, iPisoMax = 0;
 char cDir = 'n';
 Tile tMapa[kMapFloors][kMapSize][kMapSize];
 Movimiento *mover;

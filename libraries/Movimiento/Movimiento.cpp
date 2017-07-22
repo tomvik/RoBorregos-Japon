@@ -13,11 +13,12 @@
 #include <PID_v1.h>
 
 ///////////Dimensiones///////////////////
-const uint8_t kMapSize = 14;
-const uint8_t kMapFloors = 3;
+const uint8_t kMapSize = 15;
+const uint8_t kMapFloors = 4;
 //////////Mapas para algoritmo/////////////
 uint8_t iMapa[kMapSize][kMapSize];
 char cMapa[kMapSize][kMapSize];
+//char cMapaImprime[(kMapSize*2)+1][(kMapSize*2)+1];
 //////////////////////Define constants///////////////////////////
 const uint8_t kToleranciaBumper = 6;
 const double kPrecisionImu = 4.85;
@@ -78,7 +79,8 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
  */
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, Tile (*tM)[kMapSize][kMapSize], uint8_t *iPM) {
 	//////////////////Inicializamos variables en 0////////////////////////////////
-	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = 0;
+	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = iVisual = iKit = iCalorD = 0;
+  iCalor = 5;
 	cuadrosSeguidos = -100;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
 	real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, tMapa = tM, iPisoMax = iPM;
@@ -625,6 +627,7 @@ void Movimiento::pasaRampa() {
 }
 
 void Movimiento::dejarKit(uint8_t iCase) {
+  iKit++;
 	tMapa[*iPiso][*iRow][*iCol].victima(true);
 	if(real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit) {
 		switch(iCase) {
@@ -772,7 +775,7 @@ void Movimiento::avanzar() {
 		}
 
 		uint8_t contadorNegro;
-		contadorIzq = contadorDer = bumperMin = bumperMax = contadorNegro = 0;
+		contadorIzq = contadorDer = bumperMin = bumperMax = contadorNegro = iColor = 0;
 
 		while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
 			checarVictima();
@@ -1007,78 +1010,146 @@ void Movimiento::checarVictima(bool caso) {
 	while(Serial2.available()) {
 		cVictima = (char)Serial2.read();
 	}
+  //Si está dando vuelta
   if(!caso){
+    //Si es posible victima de calor
     if(!(cVictima & 0b00100000) && cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima()){
-      //Se detiene y mapea que hay una
+      //Se detiene
       uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
       uint16_t encoderTemp1 = eCount1;
       uint16_t encoderTemp2 = eCount2;
       stop();
-      real->apantallanteLCD("WHAT");
-      dejarKit(iCase);
+      iCalorD++;
+      iCalor = (iCalorD > 4) ? iCalorD : iCalor;
+      //Si se pasó de kits
+      if(iKit > 12){
+        tMapa[*iPiso][*iRow][*iCol].victima(true);
+        delay(5000);
+      }
+      else{
+        dejarKit(iCase);
+      }
+      //Encoder normal
       eCount1 = encoderTemp1;
       eCount2 = encoderTemp2;
     }
   }
+  //Si está andando normal o rampa
   else{
   	//Valida que puede haber una victima
   	if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
   		real->escribirLCD("VICTIMAAAAA");
-  		//Se detiene y mapea que hay una
+  		//Se detiene
   		uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
   		uint16_t encoderTemp1 = eCount1;
   		uint16_t encoderTemp2 = eCount2;
   		stop();
       //Visual
-  		if(cVictima & 0b00100000) {
-        real->escribirLCD("VICTIMA", "VISUAL");
-        //Le mandamos I para identificar y vaciamos Serial
-  			Serial2.print("I");
-  			real->escribirLCD("Cual", "Cual");
+      if((iVisual < iCalor) && (cVictima & 0b00100000)){
+        //Visual Derecha
+        if(iCase == 1){
+          real->escribirLCD("Derecha", "VISUAL");
+          Serial2.print("I");
+        }
+        //Visual Izquierda
+        else{
+          real->escribirLCD("Izquierda", "VISUAL");
+          Serial2.print("R");
+        }
+        //Esperar a ver cuál es
+        real->escribirLCD("Cual", "Cual");
         unsigned long start = millis();
-  			while(Serial2.available() && start + 400 >= millis()) {
-  				(char)Serial2.read();
-  			}
-  			while(!Serial2.available()&& start + 400 >= millis()) {
-  				delay(1);
-  			}
-  			while(Serial2.available()&& start + 400 >= millis()) {
-  				cVictima = (char)Serial2.read();
-  			}
-        if(start + 400 >= millis()){
-    			real->escribirLCD("YA", "YA");
-    			if(cVictima & 0b10000000) {
-    				real->escribirLCD("VICTIMA", "HHHHHHHHH");
+        while(Serial2.available() && start + 300 >= millis()) {
+          (char)Serial2.read();
+        }
+        while(!Serial2.available() && start + 300 >= millis()) {
+          delay(1);
+        }
+        while(!(cVictima == 0b10000000) && !(cVictima == 0b01000000) && !(cVictima == 0b00100000) && !(cVictima == 0b00010000) && start + 300 >= millis()){
+          while(Serial2.available()) {
+            cVictima = (char)Serial2.read();
+          }
+        }
+        real->escribirLCD("SALI");
+        //delay(30000);
+        //Si no se pasó de tiempo
+        if(start + 300 >= millis()){
+          //H
+          if(cVictima == 0b10000000) {
+            iVisual++;
+            real->escribirLCD("VICTIMA", "HHHHHHHHH");
             delay(1000);
-    				dejarKit(iCase);
-    				dejarKit(iCase);
-    			}
-    			else if(cVictima & 0b01000000) {
-    				real->escribirLCD("VICTIMA", "SSSSSSSSS");
+            //Si se pasó de kits
+            if(iKit > 12){
+              tMapa[*iPiso][*iRow][*iCol].victima(true);
+              delay(5000);
+            }
+            else{
+              dejarKit(iCase);
+              if(iKit <= 12)
+                dejarKit(iCase);
+            }
+          }
+          //S u Letra
+          else if(cVictima == 0b01000000) {
+            iVisual++;
+            real->escribirLCD("VICTIMA", "SSSSSSSSS");
             delay(1000);
-    				dejarKit(iCase);
-    			}
-    			else if(cVictima & 0b00100000) {
-    				real->escribirLCD("VICTIMA", "UUUUUUUUU");
+            //Si se pasó de kits
+            if(iKit > 12){
+              tMapa[*iPiso][*iRow][*iCol].victima(true);
+              delay(5000);
+            }
+            else{
+              dejarKit(iCase);
+            }
+          }
+          //U
+          else if(cVictima == 0b00100000) {
+            iVisual++;
+            real->escribirLCD("VICTIMA", "UUUUUUUUU");
             tMapa[*iPiso][*iRow][*iCol].victima(true);
-    				delay(5000);
-    			}
-          else if(cVictima & 0b00010000){
+            delay(5000);
+          }
+          //Nada
+          else if(cVictima == 0b00010000){
             real->escribirLCD("NADA");
           }
         }
+        //Time limit
         else{
           real->escribirLCD("SSSSLLLLOOW");
         }
-    		Serial2.print("B");
-  		}
+        //Derecha Buscar
+        if(iCase == 1){
+          Serial2.print("B");
+          Serial2.print("B");
+        }
+        //Izquierda Buscar
+        else{
+          Serial2.print("E");
+          Serial2.print("E");
+        }
+      }
       //Calor
   		else if(!(cVictima & 0b00100000) && (cVictima & 0b00000010)){
+        iCalorD++;
+        iCalor = (iCalorD > 4) ? iCalorD : iCalor;
         real->apantallanteLCD("NORMAL");
-  			dejarKit(iCase);
+        //Si se pasó de kits
+  			if(iKit > 12){
+          tMapa[*iPiso][*iRow][*iCol].victima(true);
+          delay(5000);
+        }
+        else{
+          dejarKit(iCase);
+        }
   		}
+      //Encoder normal
   		eCount1 = encoderTemp1;
   		eCount2 = encoderTemp2;
+      while(Serial2.available())
+        Serial2.read();
   	}
   }
 }
@@ -1210,11 +1281,10 @@ uint8_t Movimiento::getColor(){
 }
 
 //////////////Funcion de impresión de mapa//////////////
-void Movimiento::muestra(){
-	char cMapa[21][21];
-	for(int j = 0; j < 21; j++) {
-		for(int z = 0; z < 21; z++) {
-			cMapa[j][z] = 'x';
+/*void Movimiento::muestra(){
+	for(int j = 0; j < (kMapSize*2)+1; j++) {
+		for(int z = 0; z < (kMapSize*2)+1; z++) {
+			cMapaImprime[j][z] = 'x';
 		}
 	}
 	int iRowC = 1;
@@ -1222,40 +1292,40 @@ void Movimiento::muestra(){
 		int iColC = 1;
 		for(int iColT = 0; iColT < kMapSize; iColT++) {
 			if(tMapa[(*iPiso)][iRowT][iColT].inicio()) {
-				cMapa[iRowC][iColC] = 'i';
+				cMapaImprime[iRowC][iColC] = 'i';
 			}
 			else if(tMapa[(*iPiso)][iRowT][iColT].visitado()) {
-				cMapa[iRowC][iColC] = 'v';
+				cMapaImprime[iRowC][iColC] = 'v';
 			}
 			else if(tMapa[(*iPiso)][iRowT][iColT].existe()) {
-				cMapa[iRowC][iColC] = 'n';
+				cMapaImprime[iRowC][iColC] = 'n';
 			}
 			else{
-				cMapa[iRowC][iColC] = 'x';
+				cMapaImprime[iRowC][iColC] = 'x';
 			}
 			if(tMapa[(*iPiso)][iRowT][iColT].arriba()) {
-				cMapa[iRowC-1][iColC] = 'w';
+				cMapaImprime[iRowC-1][iColC] = 'w';
 			}
 			else{
-				cMapa[iRowC-1][iColC] = '.';
+				cMapaImprime[iRowC-1][iColC] = '.';
 			}
 			if(tMapa[(*iPiso)][iRowT][iColT].derecha()) {
-				cMapa[iRowC][iColC+1] = 'w';
+				cMapaImprime[iRowC][iColC+1] = 'w';
 			}
 			else{
-				cMapa[iRowC][iColC+1] = '.';
+				cMapaImprime[iRowC][iColC+1] = '.';
 			}
 			if(tMapa[(*iPiso)][iRowT][iColT].abajo()) {
-				cMapa[iRowC+1][iColC] = 'w';
+				cMapaImprime[iRowC+1][iColC] = 'w';
 			}
 			else{
-				cMapa[iRowC+1][iColC] = '.';
+				cMapaImprime[iRowC+1][iColC] = '.';
 			}
 			if(tMapa[(*iPiso)][iRowT][iColT].izquierda()) {
-				cMapa[iRowC][iColC-1] = 'w';
+				cMapaImprime[iRowC][iColC-1] = 'w';
 			}
 			else{
-				cMapa[iRowC][iColC-1] = '.';
+				cMapaImprime[iRowC][iColC-1] = '.';
 			}
 			iColC+=2;
 		}
@@ -1264,13 +1334,13 @@ void Movimiento::muestra(){
 
 	for(int i = 0; i < (kMapSize * 2) + 1; i++) {
 		for(int j = 0; j < (kMapSize * 2) + 1; j++) {
-			Serial.print(cMapa[i][j]);
+			Serial.print(cMapaImprime[i][j]);
 			Serial.print(" ");
 		}
 		Serial.println(" ");
 	}
 	Serial.println(" ");
-}
+}*/
 
 
 /*
