@@ -79,7 +79,7 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
  */
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, Tile (*tM)[kMapSize][kMapSize], uint8_t *iPM) {
 	//////////////////Inicializamos variables en 0////////////////////////////////
-	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = bBoton1 = iVisual = iKit = iCalorD = 0;
+	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = iVisual = iKit = iCalorD = bBoton1 = 0;
   iCalor = 5;
 	cuadrosSeguidos = -100;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
@@ -228,7 +228,7 @@ void Movimiento::alinear() {
 			} else {
 				deseado = (distanciaEnfrente / 300) * 300 + kDistanciaLejos;
 				deseadoAlt = ((distanciaEnfrente / 300) + 1) * 300 + kDistanciaLejos;
-				if(abs(distanciaEnfrente - deseado) > abs(distanciaEnfrente - deseadoAlt))
+				if(abs(distanciaEnfrente - deseado) > abs(distanciaEnfrente - deseadoAlt) * 0.90)
 					deseado = deseadoAlt;
 				margen *= 4;
 			}
@@ -257,7 +257,7 @@ void Movimiento::alinear() {
 				} else {
 					deseado = (distanciaAtras / 300) * 300 + kDistanciaLejos;
 					deseadoAlt = ((distanciaAtras / 300) + 1) * 300 + kDistanciaLejos;
-					if(abs(distanciaAtras - deseado) > abs(distanciaAtras - deseadoAlt))
+					if(abs(distanciaAtras - deseado) > abs(distanciaAtras - deseadoAlt) * 0.90)
 						deseado = deseadoAlt;
 				}
 				margen *= 4;
@@ -344,6 +344,7 @@ void Movimiento::vueltaIzq(bool caso) {
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
 			real->getAngulo(posInicial);
+			real->escribirLCDabajo("     " + String(posInicial));
 			if(posInicial < 90 && fSetPoint > 270)
 				dif = abs(fSetPoint - 360 - posInicial);
 			else
@@ -371,6 +372,7 @@ void Movimiento::vueltaIzq(bool caso) {
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
 			real->getAngulo(posInicial);
+			real->escribirLCDabajo("     " + String(posInicial));
 			if(posInicial < 90 && fSetPoint > 270)
 				dif = abs(fSetPoint - 360 - posInicial);
 			else
@@ -429,6 +431,7 @@ void Movimiento::vueltaDer(bool caso) {
 	if(limSup > limInf) {
 		while(posInicial < limInf || posInicial > limSup) {
 			real->getAngulo(posInicial);
+			real->escribirLCDabajo("     " + String(posInicial));
 			if(posInicial > 270 && fSetPoint < 90)
 				dif = abs(fSetPoint + 360 - posInicial);
 			else
@@ -455,6 +458,7 @@ void Movimiento::vueltaDer(bool caso) {
 	} else {
 		while(posInicial < limInf && posInicial > limSup) {
 			real->getAngulo(posInicial);
+			real->escribirLCDabajo("     " + String(posInicial));
 			if(posInicial > 270 && fSetPoint < 90)
 				dif = abs(fSetPoint + 360 - posInicial);
 			else
@@ -765,7 +769,6 @@ void Movimiento::avanzar() {
 		distanciaEnfrente = real->getDistanciaEnfrente();
 	}
 
-	if(distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1) {
 		cuadrosSeguidos++;
 		switch(*cDir) {
 		case 'n': (*iRow)--; break;
@@ -824,7 +827,6 @@ void Movimiento::avanzar() {
     //TODO a mapear
 		if(contadorNegro > 14)
 			iColor = 1; // NEGRO
-	}
 
 	if(iColor != 1  && abs(real->sensarRampa()) < abs(kRampaLimit)) {
 		alinear();
@@ -1059,21 +1061,21 @@ void Movimiento::checarVictima(bool caso) {
         //Esperar a ver cuál es
         real->escribirLCD("Cual", "Cual");
         unsigned long start = millis();
-        while(Serial2.available() && start + 300 >= millis()) {
+        while(Serial2.available() && start + 400 >= millis()) {
           (char)Serial2.read();
         }
-        while(!Serial2.available() && start + 300 >= millis()) {
+        while(!Serial2.available() && start + 400 >= millis()) {
           delay(1);
         }
-        while(!(cVictima == 0b10000000) && !(cVictima == 0b01000000) && !(cVictima == 0b00100000) && !(cVictima == 0b00010000) && start + 300 >= millis()){
+        while(!(cVictima == 0b10000000) && !(cVictima == 0b01000000) && !(cVictima == 0b00100000) && !(cVictima == 0b00010000) && start + 400 >= millis()){
           while(Serial2.available()) {
             cVictima = (char)Serial2.read();
           }
         }
         real->escribirLCD("SALI");
-        //delay(30000);
+        //delay(40000);
         //Si no se pasó de tiempo
-        if(start + 300 >= millis()){
+        if(start + 400 >= millis()){
           //H
           if(cVictima == 0b10000000) {
             iVisual++;

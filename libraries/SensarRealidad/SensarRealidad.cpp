@@ -17,7 +17,7 @@ const int kMEDIDA_PARED_MM = 150;
 const int kDistanciaMinimaVertical = 40;
 const int kDistanciaMinimaLados = 60;
 
-#define BOTON_A 3
+#define BOTON_B 31
 
 // LCD
 #define I2C_ADDR  0x3F
@@ -257,19 +257,19 @@ void SensarRealidad::test() {
 	double angles;
 	escribirLCD("   DISTANCIAS");
 	delay(500);
-	while(digitalRead(BOTON_A) == LOW)
+	while(digitalRead(BOTON_B))
 		escribirLCD(String(getDistanciaDerecha()) + "    " + String(getDistanciaAtras()) + "    " + String(getDistanciaIzquierda()), "      " + String(getDistanciaEnfrente()));
 
 	escribirLCD("      IMU");
 	delay(500);
-	while(digitalRead(BOTON_A) == LOW) {
+	while(digitalRead(BOTON_B)) {
 		getAngulo(angles);
 		escribirLCD("      " + String(angles), "      " + String(sensarRampa()));
 	}
 
 	escribirLCD("     COLOR");
 	delay(500);
-	while(digitalRead(BOTON_A) == LOW) {
+	while(digitalRead(BOTON_B)) {
 		escribirLCD(String(color()));
     delay(40);
 	}

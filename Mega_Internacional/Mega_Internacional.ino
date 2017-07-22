@@ -2,11 +2,13 @@
 #include <Arduino.h>
 #include <Mapear.h>
 
-/////////// Encoders e interrupciones///////////
+/////////// Encoders e interrupciones ///////////
 #define BOTON_A 1
+#define BOTON_B 31
 #define ENCODER_A 4
 #define ENCODER_B 5
-///////////Dimensiones///////////////////
+
+/////////// Dimensiones ///////////////////
 const uint8_t kMapSize = 15;
 const uint8_t kMapFloors = 4;
 
@@ -36,19 +38,18 @@ void boton1() {
   mover->boton1();
 }
 
-
 void setup() {
-	//Serial
+	// Serial
 	Serial2.begin(9600);
 	Serial.begin(9600);
-	while(Serial.available()) {
+	while(Serial.available())
 		Serial.read();
-	}
 
 	// Interrupciones
 	attachInterrupt(ENCODER_A, encoder1, RISING);
 	attachInterrupt(ENCODER_B, encoder2, RISING);
   attachInterrupt(BOTON_A, boton1, RISING);
+	pinMode(BOTON_B, INPUT);
 
 	// Resto de los objetos
 	SensarRealidad sensarr;
@@ -63,8 +64,8 @@ void setup() {
 	Mapear mapa(sensar, mover, iPM);
 	mover->stop();
 
-	//if(digitalRead(BOTON_A))
-	//	sensar->test();
+	if(digitalRead(BOTON_B) == LOW)
+		sensar->test();
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
@@ -78,7 +79,6 @@ void setup() {
 	}
 
 	mapa.llenaMapaSensor(tMapa, cDir, iCol, iRow, iPiso);
-
 	// Loop en el cual recorre todo el mapa
 	while (mover->decidir()) {
 		mover->stop();
@@ -89,12 +89,11 @@ void setup() {
 	sensar->apantallanteLCD("Let's go home");
 	while(!tMapa[iPiso][iRow][iCol].inicio())
     mover->goToVisitado('i');
-		
 
 	// Regresó al incio
 	mover->stop();
 	sensar->apantallanteLCD("      HE","    LLEGADO");
-	delay(1500);
+	delay(1000);
 	sensar->apantallanteLCD("    V I V A", "  M E X I C O");
 }
 
