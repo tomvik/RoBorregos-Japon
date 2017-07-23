@@ -56,6 +56,7 @@ class SensarRealidad {
     static int leerEEPROM(int dir);
   private:
     double lastAngle;
+    bool malo;
 };
 
 #endif

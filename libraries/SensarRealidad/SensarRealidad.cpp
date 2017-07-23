@@ -59,6 +59,7 @@ SensarRealidad::SensarRealidad() {
 	Wire.begin();
 	inicializarSensoresDistancia(4);
 	lastAngle = 0.0;
+	malo = false;
 }
 
 void SensarRealidad::escribirLCDabajo(String sE1) {
@@ -231,9 +232,13 @@ uint8_t SensarRealidad::color() {
   uint8_t iR = 0;
 
   Serial2.print("M");
-  while(!Serial2.available()){
+	unsigned long inicio = millis();
+  while(!Serial2.available() && !malo){
     escribirLCD("NO HAY NADA");
     delay(1);
+
+		if(inicio + 1000 < millis())
+			malo = true;
   }
   while(Serial2.available())
     cc = (char)Serial2.read();

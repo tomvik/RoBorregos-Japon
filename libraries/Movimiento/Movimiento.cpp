@@ -12,14 +12,16 @@
 #include <utility/Adafruit_MS_PWMServoDriver.h>
 #include <PID_v1.h>
 
-///////////Dimensiones///////////////////
+/////////// Dimensiones ///////////////////
 const uint8_t kMapSize = 15;
 const uint8_t kMapFloors = 4;
-//////////Mapas para algoritmo/////////////
+
+////////// Mapas para algoritmo /////////////
 uint8_t iMapa[kMapSize][kMapSize];
 char cMapa[kMapSize][kMapSize];
 //char cMapaImprime[(kMapSize*2)+1][(kMapSize*2)+1];
-//////////////////////Define constants///////////////////////////
+
+////////////////////// Define constants ///////////////////////////
 const uint8_t kToleranciaBumper = 6;
 const double kPrecisionImu = 4.85;
 const uint8_t kRampaLimit = 17;
@@ -36,10 +38,10 @@ const double kD_Una_Pared = 2;
 const int kEncoder30 = 2350;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.111;
-const int kDistanciaEnfrente = 40;
+const int kDistanciaEnfrente = 45;
 const int kDistanciaAtras = 55;
 const int kDistanciaLejos = 75;
-const int kMapearPared = 11;
+const int kMapearPared = 7;
 const int kParedDeseadoIzq = 52; // 105 mm
 const int kParedDeseadoDer = 52; // 105 mm
 
@@ -52,7 +54,7 @@ Adafruit_MotorShield AFMS = Adafruit_MotorShield();
 Adafruit_DCMotor *myMotorRightF = AFMS.getMotor(1);
 Adafruit_DCMotor *myMotorRightB = AFMS.getMotor(4);
 Adafruit_DCMotor *myMotorLeftF = AFMS.getMotor(3);
-Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(2);//al revés
+Adafruit_DCMotor *myMotorLeftB = AFMS.getMotor(2); //al revés
 Servo myservo;
 //1 Enfrente derecha
 //2 Atras derecha
@@ -230,9 +232,9 @@ void Movimiento::alinear() {
 				deseadoAlt = ((distanciaEnfrente / 300) + 1) * 300 + kDistanciaLejos;
 				if(abs(distanciaEnfrente - deseado) > abs(distanciaEnfrente - deseadoAlt) * 0.90)
 					deseado = deseadoAlt;
-				margen *= 4;
+				margen *= 20;
 			}
-			while ((distanciaEnfrente < deseado - margen || distanciaEnfrente > deseado + margen) && (inicio + 2000 > millis())) {
+			while ((distanciaEnfrente < deseado - margen || distanciaEnfrente > deseado + margen) && (inicio + 1000 > millis())) {
 				distanciaEnfrente = real->getDistanciaEnfrente();
 				real->escribirLCDabajo("     " + String(distanciaEnfrente));
 				velocidad(potIzq, potDer);
@@ -260,9 +262,9 @@ void Movimiento::alinear() {
 					if(abs(distanciaAtras - deseado) > abs(distanciaAtras - deseadoAlt) * 0.90)
 						deseado = deseadoAlt;
 				}
-				margen *= 4;
+				margen *= 20;
 			}
-			while ((distanciaAtras < deseado - margen || distanciaAtras > deseado + margen) && (inicio + 2000 > millis())) {
+			while ((distanciaAtras < deseado - margen || distanciaAtras > deseado + margen) && (inicio + 1000 > millis())) {
 				distanciaAtras = real->getDistanciaAtras();
 				real->escribirLCDabajo("     " + String(distanciaAtras));
 				velocidad(potIzq, potDer);
@@ -652,7 +654,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			myservo.write(180);
 			break;
 		}
-		delay(400);
+		delay(1200);
 		myservo.write(90);
 	}
 	while(Serial2.available())
@@ -767,6 +769,7 @@ void Movimiento::avanzar() {
 				tMapa[*iPiso][*iRow][*iCol].bumper(true);
 		}
 		distanciaEnfrente = real->getDistanciaEnfrente();
+		real->escribirLCDabajo("     " + String(distanciaEnfrente));
 	}
 
 		cuadrosSeguidos++;
@@ -803,6 +806,7 @@ void Movimiento::avanzar() {
 				contadorNegro++; // NEGRO
 
 			distanciaEnfrente = real->getDistanciaEnfrente();
+			real->escribirLCDabajo("     " + String(distanciaEnfrente));
 		}
 		if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 			if(contadorIzq > kMapearPared)
@@ -825,7 +829,7 @@ void Movimiento::avanzar() {
 			}
 		}
     //TODO a mapear
-		if(contadorNegro > 14)
+		if(contadorNegro > kMapearPared)
 			iColor = 1; // NEGRO
 
 	if(iColor != 1  && abs(real->sensarRampa()) < abs(kRampaLimit)) {
@@ -1061,9 +1065,11 @@ void Movimiento::checarVictima(bool caso) {
         //Esperar a ver cuál es
         real->escribirLCD("Cual", "Cual");
         unsigned long start = millis();
+				char x;
         while(Serial2.available() && start + 400 >= millis()) {
-          (char)Serial2.read();
+          x = (char)Serial2.read();
         }
+				x++;
         while(!Serial2.available() && start + 400 >= millis()) {
           delay(1);
         }
