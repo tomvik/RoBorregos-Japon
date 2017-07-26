@@ -238,6 +238,9 @@ void Movimiento::alinear() {
 				distanciaEnfrente = real->getDistanciaEnfrente();
 				real->escribirLCDabajo("     " + String(distanciaEnfrente));
 				velocidad(potIzq, potDer);
+				if(distanciaEnfrente == -1) {
+					break;
+				}
 				if(distanciaEnfrente < deseado) //Muy cerca
 					back();
 				else if (distanciaEnfrente == deseado)
@@ -268,6 +271,9 @@ void Movimiento::alinear() {
 				distanciaAtras = real->getDistanciaAtras();
 				real->escribirLCDabajo("     " + String(distanciaAtras));
 				velocidad(potIzq, potDer);
+				if(distanciaEnfrente == -1) {
+					break;
+				}
 				if(distanciaAtras < deseado) //Muy cerca
 					front();
 				else if (distanciaAtras == deseado)
@@ -1012,7 +1018,7 @@ void Movimiento::checarVictima(bool caso) {
   //Lee Serial
 	cVictima = 0;
 	Serial2.print("M");
-	while(!Serial2.available());
+	while(!Serial2.available() && !(real->getMalo()));
 	while(Serial2.available()) {
 		cVictima = (char)Serial2.read();
 	}

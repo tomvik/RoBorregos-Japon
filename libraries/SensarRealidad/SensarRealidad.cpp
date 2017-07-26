@@ -234,14 +234,16 @@ uint8_t SensarRealidad::color() {
   Serial2.print("M");
 	unsigned long inicio = millis();
   while(!Serial2.available() && !malo){
-    escribirLCD("NO HAY NADA");
+    escribirLCD("NO HAY NADA 2");
     delay(1);
 
 		if(inicio + 1000 < millis())
 			malo = true;
   }
+
   while(Serial2.available())
     cc = (char)Serial2.read();
+
 
   if(cc&0b00001000)
     iR = 1;
@@ -288,6 +290,10 @@ void escribirEEPROM(int dir, int val) {
 
 	EEPROM.write(dir, lowByte);
 	EEPROM.write(dir + 1, highByte);
+}
+
+bool SensarRealidad::getMalo(){
+	return malo;
 }
 
 int leerEEPROM(int dir) {

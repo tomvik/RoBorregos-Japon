@@ -39,6 +39,8 @@ class SensarRealidad {
     //Regresa el Angulo en el eje X
     bool getAngulo(double &angle);
     //Regresa el Angulo en el eje Y
+    bool getMalo();
+    //Regresa el Angulo en el eje Y
     double sensarRampa();
     //Regresa si está muy inclinado
     uint8_t switchesIMU(double fDeseado, double grados);
