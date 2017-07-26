@@ -35,13 +35,13 @@ const double kP_Una_Pared = 0.7;
 const double kI_Una_Pared = 0.035;
 const double kD_Una_Pared = 2;
 
-const int kEncoder30 = 2350;
+const int kEncoder30 = 2300;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.111;
 const int kDistanciaEnfrente = 45;
 const int kDistanciaAtras = 55;
 const int kDistanciaLejos = 75;
-const int kMapearPared = 7;
+const int kMapearPared = 4;
 const int kParedDeseadoIzq = 52; // 105 mm
 const int kParedDeseadoDer = 52; // 105 mm
 
@@ -537,7 +537,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
-	if(distanciaIzq < 125 && distanciaDer < 125 && distanciaIzq > 0 && distanciaDer > 0) {
+	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
 		contadorDer++;
 
@@ -556,7 +556,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
 		outDerPARED *= -1;
 
-	} else if(distanciaIzq < 125 && distanciaIzq > 0) {
+	} else if(distanciaIzq < 120 && distanciaIzq > 0) {
 		contadorIzq++;
 		iError = kParedDeseadoIzq - distanciaIzq;
 		if(caso == 1 || caso == 2) iError -= 20;
@@ -572,7 +572,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 
 		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
 		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else if(distanciaDer < 125 && distanciaDer > 0) {
+	} else if(distanciaDer < 120 && distanciaDer > 0) {
 		contadorDer++;
 		iError = kParedDeseadoDer - distanciaDer;
 		if(caso == 1 || caso == 2) iError -= 20;
@@ -979,6 +979,12 @@ bool Movimiento::decidir() {
 	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
 	tMapa[*iPiso][*iRow][*iCol].visitado(true);
 	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
+	//Si HAY BUMPER y ESTA LIBRE ENFRENTE, mejor haz eso
+	if(tMapa[*iPiso][*iRow][*iCol].bumper() && mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
+		avanzar();
+		stop();
+		return true;
+	}
 	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
 	if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r')) {
 		derecha();

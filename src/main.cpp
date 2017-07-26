@@ -1,4 +1,4 @@
-/*/////////// Librerias ///////////
+/////////// Librerias ///////////
 #include <Arduino.h>
 #include <Mapear.h>
 
@@ -98,8 +98,8 @@ void setup() {
 }
 
 void loop() {
-}*/
-
+}
+/*
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
@@ -131,7 +131,7 @@ uint8_t sensorColor() {
     frequency += pulseIn(sensorOut, LOW);
   }
   frequency /= 3;
-  //Serial.println(frequency);
+  Serial.println(frequency);
   digitalWrite(LED, LOW);
   if(frequency >= 120)
     iR = 1;
@@ -147,7 +147,7 @@ uint8_t sensarTemperatura() {
     re++;
   if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 5)
     re+=2;
-  //Serial.print("Derecha: "); Serial.print((mlxRight.readObjectTempC())); Serial.print("Izquierda: "); Serial.println((mlxLeft.readObjectTempC()));
+  Serial.print("Derecha: "); Serial.print((mlxRight.readObjectTempC())); Serial.print("Izquierda: "); Serial.println((mlxLeft.readObjectTempC()));
   return re;
 }
 
@@ -205,7 +205,7 @@ void setup() {
   digitalWrite(S1, LOW);
   //Ponemos a las rasp en buscar (no es necesario)
   Serial2.println("Busca");
-  //Serial.println("porfas");
+  Serial.println("porfas");
 }
 /*
 //Serial
@@ -230,6 +230,7 @@ void setup() {
   Letra (L), H, S, U, No hay letra (N), No recibió nada (W)
 //TODO duplicar todo para la otra rasp
 */
+/*
 void loop() {
   //Ponemos en 0 lo que enviaremos al mega
   cSendMega = 0;
@@ -291,3 +292,4 @@ void loop() {
       break;
   }
 }
+*/
