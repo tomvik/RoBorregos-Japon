@@ -467,8 +467,6 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
-		// TODO NETO
-		// robot->stop();
 		if(mapa->caminoEnfrente()) {
 			if(!espacio(cDir, iCol, iRow, 'e'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
@@ -480,13 +478,16 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 		// Lectura Derecha
 		// Libre
 		if(mapa->caminoDerecha()) {
+			robot->llenaArreglo(false);
 			if(!espacio(cDir, iCol, iRow, 'd'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 		}
 		// Pared
-		else
+		else{
+			robot->llenaArreglo(true);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		}
 		// Lectura I<quierda
 		// Libre
 		if(mapa->caminoIzquierda()) {
@@ -511,14 +512,17 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 		// Lectura Derecha
 		// Libre
 		if(!(robot->getParedes()&0b00000001)) {
+			robot->llenaArreglo(false);
 			if(!espacio(cDir, iCol, iRow, 'd')) {
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 			}
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 		}
 		// Pared
-		else
+		else{
+			robot->llenaArreglo(true);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+		}
 		// Lectura I<quierda
 		// Libre
 		if(!(robot->getParedes()&0b00000100)) {
@@ -611,14 +615,17 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 	// Lectura Derecha
 	// Libre
 	if(mapa->caminoDerecha()) {
+		robot->llenaArreglo(false);
 		if(!espacio(cDir, iCol, iRow, 'd')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 		}
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 	}
 	// Pared
-	else
+	else{
+		robot->llenaArreglo(false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
+	}
 	// Lectura I<quierda
 	// Libre
 	if(mapa->caminoIzquierda()) {

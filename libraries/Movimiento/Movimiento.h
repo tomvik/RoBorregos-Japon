@@ -82,6 +82,8 @@ class Movimiento {
     char getParedes();
     //Regresa si hubo un lack
     uint8_t getColor();
+    //Actualiza la matriz
+    void llenaArreglo(bool b);
     //Muestr mapa
     //void muestra();
 
