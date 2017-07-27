@@ -303,7 +303,7 @@ void SensarRealidad::test() {
 		if(cVictima&0b00000010)
       uint8_t mo = (cVictima&0b00000001) ? 1 : 2;
 			escribirLCD(String(mo));
-    delay(35);
+    delay(100);
 	}
 }
 
