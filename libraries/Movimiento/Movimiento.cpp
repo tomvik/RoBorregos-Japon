@@ -79,9 +79,11 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
    i = izquierda
    a = atrás
  */
+
+int der[35], derY[20], contadorX, contadorY;
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, Tile (*tM)[kMapSize][kMapSize], uint8_t *iPM) {
 	//////////////////Inicializamos variables en 0////////////////////////////////
-	eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = iVisual = iKit = iCalorD = bBoton1 = 0;
+	contadorX = contadorY = eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = iVisual = iKit = iCalorD = bBoton1 = 0;
 	iCalor = 5;
 	cuadrosSeguidos = -100;
 	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
@@ -537,6 +539,11 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
+
+	der[contadorX] = distanciaDer;
+	contadorX++;
+
+
 	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
 		contadorDer++;
@@ -715,6 +722,7 @@ void Movimiento::retroceder() {
 	while(eCount1 + eCount2 < kEncoder30) {
 		potenciasDerecho(iPowDD, iPowII, 3);
 		velocidad(iPowII, iPowDD);
+		real->escribirLCD(String(iPowII), String(iPowDD));
 	}
 	stop();
 	alinear();
@@ -765,7 +773,7 @@ void Movimiento::acomodaChoque(uint8_t switchCase) {
 
 void Movimiento::avanzar() {
 	resetIMU++;
-	cParedes = cVictima = eCount1 = eCount2 = 0;
+	cParedes = cVictima = eCount1 = eCount2 = contadorX = 0;
 	double bumperMin = 0.0, bumperMax = 0.0;
 	uint8_t iPowII, iPowDD, switchCase;
 	int distanciaEnfrente = 0;
@@ -812,13 +820,15 @@ void Movimiento::avanzar() {
 	}
 
 	uint8_t contadorNegro;
-	contadorIzq = contadorDer = bumperMin = bumperMax = contadorNegro = iColor = 0;
+	contadorIzq = contadorDer = bumperMin = bumperMax = contadorNegro = iColor = contadorY = 0;
 
 	while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
 		checarVictima();
 		front();
 		potenciasDerecho(iPowII, iPowDD);
 		velocidad(iPowII, iPowDD);
+
+		derY[contadorY] = der[contadorX - 1];
 
 		switchCase = real->switches();
 		if(switchCase > 0 && real->caminoEnfrente()) {
@@ -859,6 +869,7 @@ void Movimiento::avanzar() {
 				cParedes |= 0b00000001;
 		}
 	}
+
 	//TODO a mapear
 	if(contadorNegro > kMapearPared)
 		iColor = 1;         // NEGRO
@@ -1080,117 +1091,121 @@ void Movimiento::checarVictima(bool caso) {
 	else{
 		//Valida que puede haber una victima
 		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
-			real->escribirLCD("VICTIMAAAAA");
-			//Se detiene
-			uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
-			uint16_t encoderTemp1 = eCount1;
-			uint16_t encoderTemp2 = eCount2;
-			stop();
-			//Visual
-			if((iVisual < iCalor) && (cVictima & 0b00100000)) {
-				//Visual Derecha
-				if(iCase == 1) {
-					real->escribirLCD("Derecha", "VISUAL");
-					Serial2.print("I");
-				}
-				//Visual Izquierda
-				else{
-					real->escribirLCD("Izquierda", "VISUAL");
-					Serial2.print("R");
-				}
-				//Esperar a ver cuál es
-				real->escribirLCD("Cual", "Cual");
-				unsigned long start = millis();
-				char x;
-				while(Serial2.available() && start + 400 >= millis()) {
-					x = (char)Serial2.read();
-				}
-				x++;
-				while(!Serial2.available() && start + 400 >= millis()) {
-					delay(1);
-				}
-				while(!(cVictima == 0b10000000) && !(cVictima == 0b01000000) && !(cVictima == 0b00100000) && !(cVictima == 0b00010000) && start + 400 >= millis()) {
-					while(Serial2.available()) {
-						cVictima = (char)Serial2.read();
+			if(contadorX >= 11 && der[contadorX - 11] < 125 && der[contadorX - 11] >= 0) {
+
+				real->escribirLCD("VICTIMAAAAA");
+				//Se detiene
+				uint8_t iCase = (cVictima&0b00000001) ? 1 : 2;
+				uint16_t encoderTemp1 = eCount1;
+				uint16_t encoderTemp2 = eCount2;
+				stop();
+				real->escribirLCD(String(der[contadorX - 11]));
+				//Visual
+				if((iVisual < iCalor) && (cVictima & 0b00100000)) {
+					//Visual Derecha
+					if(iCase == 1) {
+						real->escribirLCD("Derecha", "VISUAL");
+						Serial2.print("I");
 					}
-				}
-				real->escribirLCD("SALI");
-				//delay(40000);
-				//Si no se pasó de tiempo
-				if(start + 400 >= millis()) {
-					//H
-					if(cVictima == 0b10000000) {
-						iVisual++;
-						real->escribirLCD("VICTIMA", "HHHHHHHHH");
-						delay(700);
-						//Si se pasó de kits
-						if(iKit > 12) {
-							noKit(iCase);
+					//Visual Izquierda
+					else{
+						real->escribirLCD("Izquierda", "VISUAL");
+						Serial2.print("R");
+					}
+					//Esperar a ver cuál es
+					real->escribirLCD("Cual", "Cual");
+					unsigned long start = millis();
+					char x;
+					while(Serial2.available() && start + 400 >= millis()) {
+						x = (char)Serial2.read();
+					}
+					x++;
+					while(!Serial2.available() && start + 400 >= millis()) {
+						delay(1);
+					}
+					while(!(cVictima == 0b10000000) && !(cVictima == 0b01000000) && !(cVictima == 0b00100000) && !(cVictima == 0b00010000) && start + 400 >= millis()) {
+						while(Serial2.available()) {
+							cVictima = (char)Serial2.read();
 						}
-						else{
-							dejarKit(iCase);
-							if(iKit <= 12)
+					}
+					real->escribirLCD("SALI");
+					//delay(40000);
+					//Si no se pasó de tiempo
+					if(start + 400 >= millis()) {
+						//H
+						if(cVictima == 0b10000000) {
+							iVisual++;
+							real->escribirLCD("VICTIMA", "HHHHHHHHH");
+							delay(700);
+							//Si se pasó de kits
+							if(iKit > 12) {
+								noKit(iCase);
+							}
+							else{
 								dejarKit(iCase);
+								if(iKit <= 12)
+									dejarKit(iCase);
+							}
+						}
+						//S u Letra
+						else if(cVictima == 0b01000000) {
+							iVisual++;
+							real->escribirLCD("VICTIMA", "SSSSSSSSS");
+							delay(700);
+							//Si se pasó de kits
+							if(iKit > 12) {
+								noKit(iCase);
+							}
+							else{
+								dejarKit(iCase);
+							}
+						}
+						//U
+						else if(cVictima == 0b00100000) {
+							iVisual++;
+							real->escribirLCD("VICTIMA", "UUUUUUUUU");
+							tMapa[*iPiso][*iRow][*iCol].victima(true);
+							delay(4500);
+						}
+						//Nada
+						else if(cVictima == 0b00010000) {
+							real->escribirLCD("NADA");
 						}
 					}
-					//S u Letra
-					else if(cVictima == 0b01000000) {
-						iVisual++;
-						real->escribirLCD("VICTIMA", "SSSSSSSSS");
-						delay(700);
-						//Si se pasó de kits
-						if(iKit > 12) {
-							noKit(iCase);
-						}
-						else{
-							dejarKit(iCase);
-						}
+					//Time limit
+					else{
+						real->escribirLCD("SSSSLLLLOOW");
 					}
-					//U
-					else if(cVictima == 0b00100000) {
-						iVisual++;
-						real->escribirLCD("VICTIMA", "UUUUUUUUU");
-						tMapa[*iPiso][*iRow][*iCol].victima(true);
-						delay(4500);
+					//Derecha Buscar
+					if(iCase == 1) {
+						Serial2.print("B");
+						Serial2.print("B");
 					}
-					//Nada
-					else if(cVictima == 0b00010000) {
-						real->escribirLCD("NADA");
+					//Izquierda Buscar
+					else{
+						Serial2.print("E");
+						Serial2.print("E");
 					}
 				}
-				//Time limit
-				else{
-					real->escribirLCD("SSSSLLLLOOW");
+				//Calor
+				else if(!(cVictima & 0b00100000) && (cVictima & 0b00000010)) {
+					iCalorD++;
+					iCalor = (iCalorD > 4) ? iCalorD : iCalor;
+					real->apantallanteLCD("NORMAL");
+					//Si se pasó de kits
+					if(iKit > 12) {
+						noKit(iCase);
+					}
+					else{
+						dejarKit(iCase);
+					}
 				}
-				//Derecha Buscar
-				if(iCase == 1) {
-					Serial2.print("B");
-					Serial2.print("B");
-				}
-				//Izquierda Buscar
-				else{
-					Serial2.print("E");
-					Serial2.print("E");
-				}
+				//Encoder normal
+				eCount1 = encoderTemp1;
+				eCount2 = encoderTemp2;
+				while(Serial2.available())
+					Serial2.read();
 			}
-			//Calor
-			else if(!(cVictima & 0b00100000) && (cVictima & 0b00000010)) {
-				iCalorD++;
-				iCalor = (iCalorD > 4) ? iCalorD : iCalor;
-				real->apantallanteLCD("NORMAL");
-				//Si se pasó de kits
-				if(iKit > 12) {
-					noKit(iCase);
-				}
-				else{
-					dejarKit(iCase);
-				}
-			}
-			//Encoder normal
-			eCount1 = encoderTemp1;
-			eCount2 = encoderTemp2;
-			while(Serial2.available())
-				Serial2.read();
 		}
 	}
 }

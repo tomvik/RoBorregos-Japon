@@ -534,7 +534,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 	// Si es un cuadro negro
 	iColor = robot->getColor();
 	if(iColor == 1) {
-		// mapa->apantallanteLCD("NEGRO");
+		mapa->apantallanteLCD("NEGRO");
 		// delay(200);
 		// Poner pared a los cuatro lados
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
