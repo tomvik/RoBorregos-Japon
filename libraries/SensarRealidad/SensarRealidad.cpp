@@ -57,7 +57,9 @@ SensarRealidad::SensarRealidad() {
 	lcd.begin();
 	lcd.backlight();
 	Wire.begin();
+	escribirLCD("LCD lista");
 	inicializarSensoresDistancia(4);
+	escribirLCD("senores listos");
 	lastAngle = 0.0;
 	malo = false;
 }
@@ -78,9 +80,9 @@ void SensarRealidad::apantallanteLCD(String sE1, String sE2) {
 	escribirLCD(sE1, sE2);
 	for (size_t i = 0; i < 4; i++) {
 		lcd.noBacklight();
-		delay(35);
+		delay(30);
 		lcd.backlight();
-		delay(35);
+		delay(30);
 	}
 }
 
@@ -91,26 +93,26 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 	for (int i = 0; i < kCantVL53; i++)
 		digitalWrite(kXSHUT[i], LOW);
 
-	delay(75);
+	delay(70);
 
 	for (int i = 0; i < kCantVL53; i++) {
 		//We put it in '1', so it's enabled.
 		//*IMPORTANT NOTE* we cannot send a HIGH signal, because we would burn it. So, what we do is put a really high impedance on it. Because by default, that pin is connected to HIGH.
 		pinMode(kXSHUT[i], INPUT);
 		//Must wait this time for it to actually be enabled
-		delay(75);
+		delay(70);
 
 		//Initialize the sensor
 		sensor[i].init(true);
 
 		//Wait for it to be initialized
-		delay(75);
+		delay(70);
 		//Set a new address
 		//*IMPORTANT NOTE* we have to check that the addresses doesn't match with those of other sensors
 		sensor[i].setAddress((uint8_t)(kINICIO_I2C + i));
-		delay(75);
+		delay(70);
 		sensor[i].setTimeout(200);
-		delay(75);
+		delay(70);
 		sensor[i].startContinuous();
 	}
 }
@@ -263,25 +265,46 @@ bool SensarRealidad::visual(){
 void SensarRealidad::test() {
 	double angles;
 	escribirLCD("   DISTANCIAS");
-	delay(500);
-	while(digitalRead(BOTON_B))
+	delay(650);
+	while(digitalRead(BOTON_B)) {
 		escribirLCD(String(getDistanciaDerecha()) + "    " + String(getDistanciaAtras()) + "    " + String(getDistanciaIzquierda()), "      " + String(getDistanciaEnfrente()));
-
+		delay(35);
+	}
 	escribirLCD("      IMU");
-	delay(500);
+	delay(650);
 	while(digitalRead(BOTON_B)) {
 		getAngulo(angles);
 		escribirLCD("      " + String(angles), "      " + String(sensarRampa()));
+		delay(35);
 	}
 
 	escribirLCD("     COLOR");
-	delay(500);
+	delay(650);
 	while(digitalRead(BOTON_B)) {
 		escribirLCD(String(color()));
-    delay(40);
+    delay(35);
 	}
 
-	// IMU RAMPA
+	escribirLCD("     SWITCH");
+	delay(650);
+	while(digitalRead(BOTON_B)) {
+		escribirLCD(String(switches()));
+    delay(35);
+	}
+
+	escribirLCD("     VICTIMAS");
+	delay(650);
+	char cVictima;
+	uint8_t mo = 0;
+	while(digitalRead(BOTON_B)) {
+		while(Serial2.available()) {
+			cVictima = (char)Serial2.read();
+		}
+		if(cVictima&0b00000010)
+      uint8_t mo = (cVictima&0b00000001) ? 1 : 2;
+			escribirLCD(String(mo));
+    delay(35);
+	}
 }
 
 void escribirEEPROM(int dir, int val) {

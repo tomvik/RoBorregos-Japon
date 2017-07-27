@@ -41,9 +41,9 @@ uint8_t sensorColor() {
 //3 = ambos
 uint8_t sensarTemperatura() {
   uint8_t re = 0;
-  if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 5)
+  if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 4)
     re++;
-  if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 5)
+  if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 4)
     re+=2;
   //Serial.print("Derecha: "); Serial.print((mlxRight.readObjectTempC()); Serial.print("Izquierda: "); Serial.println((mlxLeft.readObjectTempC());
   return re;
@@ -82,7 +82,7 @@ void queDijo(char c, bool &b, bool d){
       Serial.println("N");
       cSendMega = 0b00010000;
       Serial3.print(cSendMega);
-      break;  
+      break;
   }
 }
 
@@ -104,9 +104,9 @@ void setup() {
   pinMode(LED, OUTPUT);
   //Los ponemosen un estado
   digitalWrite(S0, HIGH);
-  digitalWrite(S1, LOW);  
+  digitalWrite(S1, LOW);
   //Ponemos a las rasp en buscar (no es necesario)
-  Serial1.println("Busca"); 
+  Serial1.println("Busca");
   Serial2.println("Busca");
   //Serial.println("porfas");
 }
@@ -119,16 +119,16 @@ void setup() {
 //Color
   0 si es blanco
   1 si es negro
-//Temp  
+//Temp
   0 si no hay
   1 si está a la derecha
   2 si está a la izquierda
 //cSendMega   //   H/Letra, S/Letra, U/Letra, NADA,  color, izq, victima/Letra, der
 ///cSendRaspD e I   //   Busca, Identifica
-///cLeeMega    ////// 
+///cLeeMega    //////
   Mandar (M)
   Derecha:    Identifica (I), Busca (B);
-  Izquierda:  Reconocer (R), Encuentra (E); 
+  Izquierda:  Reconocer (R), Encuentra (E);
 ///cLeeRasp
   Letra (L), H, S, U, No hay letra (N), No recibió nada (W)
 //TODO duplicar todo para la otra rasp
@@ -190,7 +190,7 @@ void loop() {
       break;
     case 'B':
       bID = false;
-      //Serial.println("BUSCA"); 
+      //Serial.println("BUSCA");
       Serial2.println("Busca");
       break;
     case 'M':
@@ -204,7 +204,7 @@ void loop() {
         Serial3.print(cSendMega);
       break;
     case 'E':
-      //Serial.println("BUSCA"); 
+      //Serial.println("BUSCA");
       Serial1.println("Busca");
       break;
     default:

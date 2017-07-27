@@ -84,7 +84,6 @@ void setup() {
 		mover->stop();
 		mapa.llenaMapaVariable(tMapa, cDir, iCol, iRow, iPiso);
 	}
-
 	// Se regresa al inicio
 	sensar->apantallanteLCD("Let's go home");
 	while(!tMapa[iPiso][iRow][iCol].inicio())

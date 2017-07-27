@@ -39,6 +39,7 @@ class Movimiento {
     void potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso = 0);
     /// Deja kit y mapea que hay una victima
     void dejarKit(uint8_t iCase);
+    void noKit(uint8_t iCase);
 
     ///  void ErrorGradosVuelta(float &error);
     /// Pasa la rampa
