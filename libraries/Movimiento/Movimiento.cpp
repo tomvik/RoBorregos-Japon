@@ -861,8 +861,8 @@ void Movimiento::avanzar() {
 				tMapa[*iPiso][*iRow][*iCol].bumper(true);
 		}
 
-		//if(cVictima & 0b00001000)
-		//	contadorNegro++;         // NEGRO
+		if(cVictima & 0b00001000)
+			contadorNegro++;         // NEGRO
 
 		distanciaEnfrente = real->getDistanciaEnfrente();
 		real->escribirLCDabajo("     " + String(distanciaEnfrente));
@@ -887,11 +887,6 @@ void Movimiento::avanzar() {
 				cParedes |= 0b00000001;
 		}
 	}
-
-	stop();
-	real->escribirLCD(String(contadorNegro));
-	delay(400);
-
 
 	//TODO a mapear
 	if(contadorNegro > 1)
@@ -1087,8 +1082,6 @@ void Movimiento::checarVictima(bool caso) {
 	while(Serial2.available()) {
 		cVictima = (char)Serial2.read();
 	}
-	if(cVictima & 0b00001000)
-		contadorNegro++;
 	//Si está dando vuelta
 	if(!caso) {
 		//Si es posible victima de calor

@@ -64,8 +64,15 @@ void setup() {
 	Mapear mapa(sensar, mover, iPM);
 	mover->stop();
 
-	if(digitalRead(BOTON_B) == LOW)
+	if(digitalRead(BOTON_B) == LOW) {
 		sensar->test();
+		sensar->escribirLCD("       K I T");
+		delay(1000);
+		mover->dejarKit(1);
+		delay(1000);
+		mover->dejarKit(2);
+		delay(5000);
+	}
 
 	//Inicializamos el tile actual
 	tMapa[iPiso][iRow][iCol].inicio(true);
