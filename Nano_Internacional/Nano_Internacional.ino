@@ -140,7 +140,7 @@ void loop() {
     cLeeMega = (char)Serial3.read();
   }
   ////////////////////Lee Serial Rasp Derecha
-  while(Serial2.available()){
+  if(Serial2.available()){
     cLeeRaspD = (char)Serial2.read();
   }
   ////////////////////Letra Derecha
