@@ -889,7 +889,7 @@ void Movimiento::avanzar() {
 	}
 
 	//TODO a mapear
-	if(contadorNegro > 1)
+	if(contadorNegro > kMapearPared)
 		iColor = 1;         // NEGRO
 
 	if(iColor != 1  && abs(real->sensarRampa()) < abs(kRampaLimit)) {
