@@ -47,7 +47,7 @@ const int kParedDeseadoDer = 52; // 105 mm
 
 const uint8_t kVelocidadBaseMenor = 100;
 
-uint8_t iAhora, iAntes;
+uint8_t iAhora, iAntes, contadorNegro;
 bool der[18];
 
 //////////////////////Define pins and motors//////////////////////////
@@ -840,7 +840,6 @@ void Movimiento::avanzar() {
 	case 'w': (*iCol)--; break;
 	}
 
-	uint8_t contadorNegro;
 	contadorIzq = contadorDer = bumperMin = bumperMax = contadorNegro = iColor = 0;
 
 	while(eCount1 + eCount2 < kEncoder30 && (distanciaEnfrente > kDistanciaEnfrente || distanciaEnfrente == -1)) {
@@ -862,8 +861,8 @@ void Movimiento::avanzar() {
 				tMapa[*iPiso][*iRow][*iCol].bumper(true);
 		}
 
-		if(cVictima & 0b00001000)
-			contadorNegro++;         // NEGRO
+		//if(cVictima & 0b00001000)
+		//	contadorNegro++;         // NEGRO
 
 		distanciaEnfrente = real->getDistanciaEnfrente();
 		real->escribirLCDabajo("     " + String(distanciaEnfrente));
@@ -889,8 +888,13 @@ void Movimiento::avanzar() {
 		}
 	}
 
+	stop();
+	real->escribirLCD(String(contadorNegro));
+	delay(400);
+
+
 	//TODO a mapear
-	if(contadorNegro > kMapearPared)
+	if(contadorNegro > 1)
 		iColor = 1;         // NEGRO
 
 	if(iColor != 1  && abs(real->sensarRampa()) < abs(kRampaLimit)) {
@@ -1083,6 +1087,8 @@ void Movimiento::checarVictima(bool caso) {
 	while(Serial2.available()) {
 		cVictima = (char)Serial2.read();
 	}
+	if(cVictima & 0b00001000)
+		contadorNegro++;
 	//Si está dando vuelta
 	if(!caso) {
 		//Si es posible victima de calor
