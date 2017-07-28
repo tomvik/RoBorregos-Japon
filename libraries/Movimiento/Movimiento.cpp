@@ -829,7 +829,7 @@ void Movimiento::avanzar() {
 				tMapa[*iPiso][*iRow][*iCol].bumper(true);
 		}
 		distanciaEnfrente = real->getDistanciaEnfrente();
-		real->escribirLCDabajo("     " + String(distanciaEnfrente));
+		// real->escribirLCDabajo("     " + String(distanciaEnfrente));
 	}
 
 	cuadrosSeguidos++;
@@ -865,7 +865,7 @@ void Movimiento::avanzar() {
 			contadorNegro++;         // NEGRO
 
 		distanciaEnfrente = real->getDistanciaEnfrente();
-		real->escribirLCDabajo("     " + String(distanciaEnfrente));
+		// real->escribirLCDabajo("     " + String(distanciaEnfrente));
 	}
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 		if(contadorIzq > kMapearPared)

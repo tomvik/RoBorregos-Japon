@@ -15,7 +15,7 @@
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR), mlxLeft = Adafruit_MLX90614(MlxL);
 //Variables para control de lecturas
 char cSendMega, cSendRaspD, cLeeRaspD, cLeeMega = 0;
-bool bID = true, bIoD;
+bool bID = true;
 //2 es checkpoint
 //1 es negro
 //0 es blanco
@@ -49,34 +49,34 @@ uint8_t sensarTemperatura() {
   return re;
 }
 
-void queDijo(char c, bool &b){
-  switch(c){
+void queDijo(){
+  switch(cLeeRaspD){
     case 'L':
-      b = true;
-      Serial.println("Letra");
+      bID = true;
+      // Serial.println("Letra");
       cSendMega |= 0b11100011;
       break;
     case 'H':
-      b = true;
-      Serial.println("H");
+      bID = true;
+      // Serial.println("H");
       cSendMega = 0b10000000;
       Serial3.print(cSendMega);
       break;
     case 'S':
-      b = true;
-      Serial.println("S");
+      bID = true;
+      // Serial.println("S");
       cSendMega = 0b01000000;
       Serial3.print(cSendMega);
       break;
     case 'U':
-      b = true;
-      Serial.println("U");
+      bID = true;
+      // Serial.println("U");
       cSendMega = 0b00100000;
       Serial3.print(cSendMega);
       break;
     case 'N':
-      b = true;
-      Serial.println("N");
+      bID = true;
+      // Serial.println("N");
       cSendMega = 0b00010000;
       Serial3.print(cSendMega);
       break;
@@ -103,7 +103,7 @@ void setup() {
   digitalWrite(S1, LOW);
   //Ponemos a las rasp en buscar (no es necesario)
   Serial2.println("Busca");
-  //Serial.println("porfas");
+  // Serial.println("porfas");
 }
 /*
 //Serial
@@ -124,7 +124,7 @@ void setup() {
   Mandar (M)
   Derecha:    Identifica (I), Busca (B);
   Izquierda:  Reconocer (R), Encuentra (E);
-///cLeeRasp
+///cLeeRaspD
   Letra (L), H, S, U, No hay letra (N), No recibió nada (W)
 //TODO duplicar todo para la otra rasp
 */
@@ -136,38 +136,36 @@ void loop() {
   //Si el mega le dice que identifique, identifica hasta nuevo aviso
   cLeeMega = (cLeeMega == 'I') ? 'I' : 'N';
   ////////////////////Lee Serial Mega
-  while(Serial3.available()){
+  while(Serial3.available()) {
     cLeeMega = (char)Serial3.read();
   }
-  ////////////////////Lee Serial Rasp Derecha
-  if(Serial2.available()){
-    cLeeRaspD = (char)Serial2.read();
+  if(sensorColor()){
+    cSendMega |= 0b00001000;
   }
-  ////////////////////Letra Derecha
-  queDijo(cLeeRaspD, bID);
-  ////////////////////Temperatura
-  switch(sensarTemperatura()) {
-    case 1:
-      //Serial.println("DER");
+  else{
+    ////////////////////Temperatura
+    int iTemp = sensarTemperatura();
+    if(iTemp == 1){
       cSendMega|=0b00000011;
-      break;
-    case 2:
-      //Serial.println("Izq");
+    }
+    else if(iTemp == 2){
       cSendMega|=0b00000110;
-      break;
-    case 3:
-      //Serial.println("Amb");
+    }
+    else if(iTemp == 3){
       cSendMega|=0b00000111;
-      break;
+    }
+    else{
+      if(!bID){
+        ////////////////////Lee Serial Rasp Derecha
+        unsigned long inicio = millis();
+        while(!bID && Serial2.available() && inicio + 50 > millis()){
+          cLeeRaspD = (char)Serial2.read();
+        }
+        ////////////////////Saber que dijo
+        queDijo();
+      }
+    }
   }
-  ////////////////////Color
-  switch(sensorColor()){
-    case 1:
-      //Serial.println("NEGRO");
-      cSendMega |= 0b00001000;
-      break;
-  }
-  ////////////////////Serial
   switch(cLeeMega){
     case 'I':
       bID = false;
