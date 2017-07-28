@@ -1121,16 +1121,8 @@ void Movimiento::checarVictima(bool caso) {
 				stop();
 				//Visual
 				if((iVisual < iCalor) && (cVictima & 0b00100000)) {
-					//Visual Derecha
-					if(iCase == 1) {
-						real->escribirLCD("Derecha", "VISUAL");
-						Serial2.print("I");
-					}
-					//Visual Izquierda
-					else{
-						real->escribirLCD("Izquierda", "VISUAL");
-						Serial2.print("R");
-					}
+					real->escribirLCD("Derecha", "VISUAL");
+					Serial2.print("I");
 					//Esperar a ver cuál es
 					real->escribirLCD("Cual", "Cual");
 					unsigned long start = millis();
@@ -1195,16 +1187,8 @@ void Movimiento::checarVictima(bool caso) {
 					else{
 						real->escribirLCD("SSSSLLLLOOW");
 					}
-					//Derecha Buscar
-					if(iCase == 1) {
-						Serial2.print("B");
-						Serial2.print("B");
-					}
-					//Izquierda Buscar
-					else{
-						Serial2.print("E");
-						Serial2.print("E");
-					}
+					Serial2.print("B");
+					Serial2.print("B");
 				}
 				//Calor
 				else if(!(cVictima & 0b00100000) && (cVictima & 0b00000010)) {
