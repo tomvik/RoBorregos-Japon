@@ -66,7 +66,7 @@ void setup() {
 
 	if(digitalRead(BOTON_B) == LOW) {
 		sensar->test();
-		sensar->escribirLCD("       K I T");
+		sensar->escribirLCD("      K I T");
 		delay(1000);
 		mover->dejarKit(1);
 		delay(1000);
