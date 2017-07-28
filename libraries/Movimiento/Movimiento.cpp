@@ -35,10 +35,10 @@ const double kP_Una_Pared = 0.7;
 const double kI_Una_Pared = 0.035;
 const double kD_Una_Pared = 2;
 
-const int kEncoder30 = 2326;
+const int kEncoder30 = 2330;
 const int kEncoder15 = kEncoder30 / 2;
 const double kP_Vueltas = 1.111;
-const int kDistanciaEnfrente = 45;
+const int kDistanciaEnfrente = 47;
 const int kDistanciaAtras = 55;
 const int kDistanciaLejos = 75;
 const int kMapearPared = 4;
@@ -48,7 +48,7 @@ const int kParedDeseadoDer = 52; // 105 mm
 const uint8_t kVelocidadBaseMenor = 100;
 
 uint8_t iAhora, iAntes;
-bool der[17];
+bool der[18];
 
 //////////////////////Define pins and motors//////////////////////////
 #define pin_Servo 10
@@ -373,7 +373,7 @@ void Movimiento::vueltaIzq(bool caso) {
 					back();
 					atras = true;
 				}
-				delay(200);
+				delay(275);
 				inicio = millis();
 				stop();
 			} else if(millis() >= inicio + 3000) {
@@ -406,7 +406,7 @@ void Movimiento::vueltaIzq(bool caso) {
 					back();
 					atras = true;
 				}
-				delay(200);
+				delay(275);
 				inicio = millis();
 				stop();
 			} else if(millis() >= inicio + 3000) {
@@ -471,7 +471,7 @@ void Movimiento::vueltaDer(bool caso) {
 					back();
 					atras = true;
 				}
-				delay(200);
+				delay(275);
 				inicio = millis();
 				stop();
 			} else if(millis() >= inicio + 3000) {
@@ -503,7 +503,7 @@ void Movimiento::vueltaDer(bool caso) {
 					back();
 					atras = true;
 				}
-				delay(200);
+				delay(275);
 				inicio = millis();
 				stop();
 			} else if(millis() >= inicio + 3000) {
@@ -562,8 +562,8 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
 	//Ponemos si hay pared o no y actualizamos el contador y true es pared
-	der[iAhora] = (distanciaDer <= 120 && distanciaDer >= 0);
-	iAhora = iAhora >= 16 ? 0 : iAhora + 1;
+	der[iAhora] = (distanciaDer < 90 && distanciaDer > 0);
+	iAhora = iAhora >= 17 ? 0 : iAhora + 1;
 
 	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
@@ -688,7 +688,7 @@ void Movimiento::dejarKit(uint8_t iCase) {
 			myservo.write(180);
 			break;
 		}
-		delay(1200);
+		delay(1600);
 		myservo.write(90);
 	}
 	while(Serial2.available())
@@ -1111,7 +1111,7 @@ void Movimiento::checarVictima(bool caso) {
 		//Valida que puede haber una victima
 		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
 			// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
-			iAntes = iAhora < 16 ? iAhora + 1 : iAhora - 16;
+			iAntes = iAhora < 17 ? iAhora + 1 : iAhora - 17;
 			if(der[iAntes]) {
 
 				real->escribirLCD("VICTIMAAAAA");
@@ -1357,7 +1357,7 @@ uint8_t Movimiento::getColor(){
 }
 
 void Movimiento::llenaArreglo(bool b){
-	for(int i = 0; i < 17; i++){
+	for(int i = 0; i < 18; i++){
 		der[i] = b;
 	}
 }

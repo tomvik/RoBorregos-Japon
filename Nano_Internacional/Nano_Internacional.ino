@@ -41,9 +41,9 @@ uint8_t sensorColor() {
 //3 = ambos
 uint8_t sensarTemperatura() {
   uint8_t re = 0;
-  if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 3)
+  if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 2.75)
     re++;
-  if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 3)
+  if (mlxLeft.readObjectTempC() > mlxLeft.readAmbientTempC() + 2.75)
     re+=2;
   //Serial.print("Derecha: "); Serial.print((mlxRight.readObjectTempC()); Serial.print("Izquierda: "); Serial.println((mlxLeft.readObjectTempC());
   return re;
