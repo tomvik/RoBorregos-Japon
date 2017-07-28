@@ -48,7 +48,7 @@ const int kParedDeseadoDer = 52; // 105 mm
 const uint8_t kVelocidadBaseMenor = 100;
 
 uint8_t iAhora, iAntes;
-bool der[15];
+bool der[17];
 
 //////////////////////Define pins and motors//////////////////////////
 #define pin_Servo 10
@@ -563,7 +563,7 @@ void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, ui
 	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
 	//Ponemos si hay pared o no y actualizamos el contador y true es pared
 	der[iAhora] = (distanciaDer <= 120 && distanciaDer >= 0);
-	iAhora = iAhora >= 14 ? 0 : iAhora + 1;
+	iAhora = iAhora >= 16 ? 0 : iAhora + 1;
 
 	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
 		contadorIzq++;
@@ -1110,8 +1110,8 @@ void Movimiento::checarVictima(bool caso) {
 	else{
 		//Valida que puede haber una victima
 		if(cVictima&0b00000010 && !tMapa[*iPiso][*iRow][*iCol].victima() && ( (cVictima&0b00000001 && !(real->caminoDerecha()) )  || (cVictima&0b00000100 && !(real->caminoIzquierda()) ) ) ) {
-			// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14
-			iAntes = iAhora < 11 ? iAhora + 4 : iAhora - 11;
+			// 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16
+			iAntes = iAhora < 16 ? iAhora + 1 : iAhora - 16;
 			if(der[iAntes]) {
 
 				real->escribirLCD("VICTIMAAAAA");
@@ -1357,7 +1357,7 @@ uint8_t Movimiento::getColor(){
 }
 
 void Movimiento::llenaArreglo(bool b){
-	for(int i = 0; i < 15; i++){
+	for(int i = 0; i < 17; i++){
 		der[i] = b;
 	}
 }
