@@ -669,7 +669,6 @@ void Movimiento::pasaRampa() {
 void Movimiento::dejarKit(uint8_t iCase) {
 	iKit++;
 	tMapa[*iPiso][*iRow][*iCol].victima(true);
-	if(real->sensarRampa() < kRampaLimit && real->sensarRampa() > -kRampaLimit) {
 		switch(iCase) {
 		case 1:
 			real->apantallanteLCD("VICTIMA con KIT", "derecha");
@@ -690,7 +689,6 @@ void Movimiento::dejarKit(uint8_t iCase) {
 		}
 		delay(1600);
 		myservo.write(90);
-	}
 	while(Serial2.available())
 		cVictima = (char)Serial2.read();
 }

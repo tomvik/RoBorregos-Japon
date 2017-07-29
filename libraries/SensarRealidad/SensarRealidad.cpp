@@ -65,19 +65,26 @@ SensarRealidad::SensarRealidad() {
 }
 
 void SensarRealidad::escribirLCDabajo(String sE1) {
+	delay(1);
 	lcd.setCursor(0, 1);
+	delay(1);
 	lcd.print(sE1);
 }
 
 void SensarRealidad::escribirLCD(String sE1, String sE2) {
+	delay(1);
 	lcd.clear();
+	delay(1);
 	lcd.print(sE1);
+	delay(1);
 	lcd.setCursor(0, 1);
+	delay(1);
 	lcd.print(sE2);
 }
 
 void SensarRealidad::apantallanteLCD(String sE1, String sE2) {
 	escribirLCD(sE1, sE2);
+	delay(1);
 	for (size_t i = 0; i < 4; i++) {
 		lcd.noBacklight();
 		delay(30);
@@ -118,21 +125,26 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 }
 
 int SensarRealidad::getDistanciaEnfrente() {
+	delay(2);
 	int distancia = sensor[0].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 20 ? distancia - 20 : 0);
 }
 
 int SensarRealidad::getDistanciaDerecha() {
+	delay(2);
 	int distancia = sensor[1].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 50 ? distancia - 50 : 0);
 }
 
 int SensarRealidad::getDistanciaAtras() {
+	delay(2);
 	int distancia = sensor[2].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 30 ? distancia - 30 : 0);
+
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
+	delay(2);
 	int distancia = sensor[3].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 55 ? distancia - 55 : 0);
 }
@@ -195,6 +207,7 @@ void SensarRealidad::calibracionIMU() {
 bool SensarRealidad::getAngulo(double &angle) {
 	double temp = lastAngle;
 	sensors_event_t event;
+	delay(2);
 	bno.getEvent(&event);
 	angle = event.orientation.x;
 
@@ -209,6 +222,7 @@ bool SensarRealidad::getAngulo(double &angle) {
 
 double SensarRealidad::sensarRampa() {
 	sensors_event_t event;
+	delay(2);
 	bno.getEvent(&event);
 	return event.orientation.y;
 }
@@ -237,7 +251,7 @@ uint8_t SensarRealidad::color() {
 	unsigned long inicio = millis();
   while(!Serial2.available() && !malo){
     escribirLCD("NO HAY NADA 2");
-    delay(1);
+    delay(2);
 
 		if(inicio + 1000 < millis())
 			malo = true;
