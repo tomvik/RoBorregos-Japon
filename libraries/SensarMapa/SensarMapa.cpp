@@ -1,34 +1,39 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * This class has all the functions to check the map, and the "hard" part of path finding.
+ * It's fun. And there are better ways to do it. Highly recommend A* algorithm, it's the best for this situation.
+ *
+ */
 #include <Arduino.h>
 #include <SensarMapa.h>
 
-// Esta clase usa mucho la clase Tile.h y es usada por la clase Movimiento.h
-
 /*
    cDir Dirección
-   n = norte
-   e = este
-   s = sur
-   w = oeste
+   n = north
+   e = east
+   s = south
+   w = west
    cCase Caso a verificar
    r = right = derecha
    u = up = arriba
    l = left = izquierda
    d = down = abajo
 */
-///////////Dimensiones///////////////////
+///////////Dimensions///////////////////
 const uint8_t kMapSize = 15;
 const uint8_t kMapFloors = 4;
-//////////Valor bumper//////////////////
+//////////Value of the bumper (The bumper is equal to 8 moves of the robot)//////////////////
 const uint8_t kBumper = 8;
 
-// Constructores, modificar el tamaño
+//A literal empty constructor... what a time to be alive.
 SensarMapa::SensarMapa() {
 }
 
-// Regresa TRUE si es que NO hay una pared a donde se quiere checar
 bool SensarMapa::sensa_Pared(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase) {
 	switch(cCase) {
-	case 'r':                       //Derecha
+	case 'r':                       //Right
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol].derecha());
@@ -39,7 +44,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return !(tMapa[iPiso][iRow][iCol].arriba());
 		}
-	case 'u':                       //Arriba
+	case 'u':                       //Up
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol].arriba());
@@ -50,7 +55,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return !(tMapa[iPiso][iRow][iCol].izquierda());
 		}
-	case 'l':                       //Izquierda
+	case 'l':                       //Left
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol].izquierda());
@@ -61,7 +66,7 @@ bool SensarMapa::sensa_Pared(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return !(tMapa[iPiso][iRow][iCol].abajo());
 		}
-	case 'd':                       //Abajo
+	case 'd':                       //Down
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol].abajo());
@@ -76,10 +81,9 @@ bool SensarMapa::sensa_Pared(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 	return false;
 }
 
-// Regresa TRUE si NO ha sido visitado
 bool SensarMapa::sensaVisitado(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase) {
 	switch(cCase) {
-	case 'r':                                       //Derecha
+	case 'r':                                       //Right
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol+1].visitado());
@@ -90,7 +94,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 		case 'w':
 			return !(tMapa[iPiso][iRow-1][iCol].visitado());
 		}
-	case 'u':                                       //Enfrente
+	case 'u':                                       //Front
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow-1][iCol].visitado());
@@ -101,7 +105,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 		case 'w':
 			return !(tMapa[iPiso][iRow][iCol-1].visitado());
 		}
-	case 'l':                                       //Izquierda
+	case 'l':                                       //Left
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow][iCol-1].visitado());
@@ -112,7 +116,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 		case 'w':
 			return !(tMapa[iPiso][iRow+1][iCol].visitado());
 		}
-	case 'd':                                       //Atras
+	case 'd':                                       //Up
 		switch(cDir) {
 		case 'n':
 			return !(tMapa[iPiso][iRow+1][iCol].visitado());
@@ -130,7 +134,7 @@ bool SensarMapa::sensaVisitado(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 // Regresa TRUE si EXISTE la coordenada
 bool SensarMapa::sensaExiste(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso,  char cCase) {
 	switch(cCase) {
-	case 'r':                                       //Derecha
+	case 'r':                                       //Right
 		switch(cDir) {
 		case 'n':
 			return (tMapa[iPiso][iRow][iCol+1].existe());
@@ -141,7 +145,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return (tMapa[iPiso][iRow-1][iCol].existe());
 		}
-	case 'u':                                       //Enfrente
+	case 'u':                                       //Front
 		switch(cDir) {
 		case 'n':
 			return (tMapa[iPiso][iRow-1][iCol].existe());
@@ -152,7 +156,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return (tMapa[iPiso][iRow][iCol-1].existe());
 		}
-	case 'l':                                       //Izquierda
+	case 'l':                                       //Left
 		switch(cDir) {
 		case 'n':
 			return (tMapa[iPiso][iRow][iCol-1].existe());
@@ -163,7 +167,7 @@ bool SensarMapa::sensaExiste(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		case 'w':
 			return (tMapa[iPiso][iRow+1][iCol].existe());
 		}
-	case 'd':                                       //Atras
+	case 'd':                                       //Up
 		switch(cDir) {
 		case 'n':
 			return (tMapa[iPiso][iRow+1][iCol].existe());
@@ -177,14 +181,35 @@ bool SensarMapa::sensaExiste(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 	}
 	return false;
 }
-
-// FUNCION RECURSIVA, USA ALGORITMO DEPTH FIRST SEARCH
+/*
+ Okay, this is the interesting part. We are using a kind of naive approach, using DFS search iteratively, the bad thing about it is that you can cause a stack overflow if the matrix is too big.
+ Therefore, I highly recommend to change the algorithm to A* and do it iteratively as much as possible.
+ The approach was the following: I can move to the next node ONLY IF:
+	1. It's possible (not out of bounds)
+	2. The node exists (I've sensed before there's a path to that node)
+	3. There no wall to interfere (Because a node may exist but THAT path is not the way to it)
+	4. Either the distance hasn't been calculated (infinity, in this case 0) or (my current distance + the moves I'll make) is less than the distance there currently is on that node.
+ And, once I move, I do the following:
+	1. If there's a bumper, add the weight of the bumper to the sum (In this way, if there's another path without the bumper, it'll take that one)
+	2. THIS IS THE PART THAT WAS BUGGY. Buckle up your seatbelts, that this is going to be a great trip:
+		So, I was trying to optimize the algorithm, and I thought "Well, when I'm filling up the map, I should be able to already know what the best path is, there's no need to go
+		recursively checking again all the possible ways like backtracking." And I was correct up to some point, that's why I have the char map, I was writing the instructions to follow
+		BUT BUT, the problem was when there were two paths of the same lenght and let's say the two paths were going from i to f:
+			1. Left->Forward->Left->Forward->Left->Forward
+			2. Right->Forward->Right->Forward->Right->Forward
+			|	|	|
+			| f | i |
+			|	|	|
+		This gives out two actual outcomes:
+			| l | l |	|   |   |
+			| r | i |	| l | i |
+			|   |   |	| r | r |
+		And this is mixed up, by following these instructions you would not get to the actual tile. I patched, didn't fixed, this on the getInstruction function with a goto.
+		It was an improvement on most cases what I did, but of course it wasn't the best solution. I strongly believe A* would be best.
+*/
 void SensarMapa::llenaMapa(uint8_t iMapa[kMapSize][kMapSize], char cMapa[kMapSize][kMapSize], Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t iPiso) {
-	//Si NO se sale del rango Y EXISTE el cuadro a verificar Y NO HAY PARED entra
-	//hay que poner primero el del rango, es como una "seguridad" para lo demás. Luego no sé si sería mejor poner el de la pared o existe (Cual es falso más seguido?)
-	//Verifica dependiendo hacia dónde está viendo el robot. Así sabe exactamente cuantos movimientos es para hacer cierta instrucción.
-	//También verifica si es 0 Ó mayor al numero en el que estoy. Y le suma lo correspondiente.
-	//Right, up, left, down, relativo al robot
+	//Right, Up, Left, and Down relative to the robot
+	//The time limit is just in case it gets stucked, never happened.
 	if(tInicio + 5000 >= millis()){
 		switch(cDir) {
 		case 'n':
@@ -295,18 +320,25 @@ void SensarMapa::llenaMapa(uint8_t iMapa[kMapSize][kMapSize], char cMapa[kMapSiz
 	}
 }
 
-//Compara las distancias de un NO VISITADO al inicio con los demás y modifica las variables iNCol e iNRow para indicar a dónde ir.
-//Esta función se puede modificar recibiendo un "caso" para decidir si busca No visitado ó Rampa ó Inicio ó lo que sea.
+//Compares the distances and saves only the minimum one.
+//This function return the position of the nearest not visited tile and returns true if there's an unvisited tile still (or possible ramp)
+//Also, by changing the case, it could look up for a ramp or the initial tile.
+//Never managed the case where there's a loop between the floors. Happened on the last round of the international.
 bool SensarMapa::comparaMapa(uint8_t iMapa[kMapSize][kMapSize], Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD, uint8_t iCol, uint8_t iRow, uint8_t &iNCol, uint8_t &iNRow, uint8_t iPiso) {
-	//Lo declaré en un 255 porque es casi imposible que haya uno mayor a eso.
+	//Just a big number
 	uint8_t iC = 255;
-	//Esto es por si ya no hay ningun NO Visitado o un Inicio en el piso actual. Para buscar así la rampa que lo lleve a un piso pasado.
 	bool bT = false;
-	//Loop por toda la matriz de numeros
+	/*
+	In here the logic is as follows:
+	The case will ALWAYS be 'n' except when you have finished the whole map. So, when in a floor there are no more unvisited tiles,
+	You'll look instead for a ramp that connects to the previous floor (Because on that floor is the only place where a non visited tile can be)
+	IF you didn't find any ramp that connects to a previous floor, it means you're on the initial floor and that you have finished to go through the whole map
+	So, it returns false and in that way, we exit the main loop to now go to the beginning. That's the boolean bT for.
+	*/
 	if(cD == 'n') {
 		for (uint8_t i = 0; i < kMapSize; ++i)
 			for (uint8_t j = 0; j < kMapSize; ++j)
-				if(iMapa[i][j] != 0 && iC >= iMapa[i][j] && !tMapa[iPiso][i][j].visitado()) { //Aquí es donde sólo verifica si NO ha sido visitado y compara el numero para ver que es menor Ó 0
+				if(iMapa[i][j] != 0 && iC >= iMapa[i][j] && !tMapa[iPiso][i][j].visitado()) {
 					iC = iMapa[i][j];
 					iNCol = j;
 					iNRow = i;
@@ -316,7 +348,7 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[kMapSize][kMapSize], Tile tMapa[kMapF
 	else if(cD == 'i') {
 		for (uint8_t i = 0; i < kMapSize; ++i)
 			for (uint8_t j = 0; j < kMapSize; ++j)
-				if(iMapa[i][j] != 0 && iC >= iMapa[i][j] && tMapa[iPiso][i][j].inicio()) { //Aquí es donde sólo verifica si ES inicio y compara el numero para ver que es menor Ó 0
+				if(iMapa[i][j] != 0 && iC >= iMapa[i][j] && tMapa[iPiso][i][j].inicio()) {
 					iC = iMapa[i][j];
 					iNCol = j;
 					iNRow = i;
@@ -327,7 +359,6 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[kMapSize][kMapSize], Tile tMapa[kMapF
 		for (uint8_t i = 0; i < kMapSize; ++i)
 			for (uint8_t j = 0; j < kMapSize; ++j)
 				if(iMapa[i][j] != 0 && ( tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba() ) && tMapa[iPiso][i][j].piso() < iPiso) {
-					//Aquí se verifica que NO sea 0, que SEA MENOR al numero en donde estoy, que SEA UNA RAMPA y QUE CONECTE A UN PISO MENOR
 					iC = iMapa[i][j];
 					iNCol = j;
 					iNRow = i;
@@ -337,19 +368,18 @@ bool SensarMapa::comparaMapa(uint8_t iMapa[kMapSize][kMapSize], Tile tMapa[kMapF
 	return bT;
 }
 
-//Con el resultado de la función anterior, crea las instrucciones de cómo llegar hasta ese punto yendose en reversa.
-//También para simplicidad, todo lo hace viendo a su "norte"
+//In here we iterate backwards, from the goal node to the one in which I am following the instructions on cMapa.
 String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMapa[kMapSize][kMapSize], Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t iNCol, uint8_t iNRow, uint8_t iPiso) {
 	uint8_t iNRSave = iNRow, iNCSave = iNCol;
 	bool b1 = true, b2 = true, b3 = true, b4 = true;
-	///////////FIX
+	///////////PATCH :(
 	fix:
 	iNRow = iNRSave, iNCol = iNCSave;
 	String sIns = "";
 	sIns += cMapa[iNRow][iNCol];
 	uint8_t iR, iU, iL, iD;
 	char cDir;
-	//Sacar la distancia de cada una
+	//Get's the distance from each one (Beginning at the last node, the one we want to visit)
 	iR = iU = iL = iD = 255;
 	if(sensa_Pared(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && sensaExiste(tMapa, 'n', iNCol, iNRow, iPiso, 'r') && iMapa[iNRow][iNCol+1] != 0)
 		iR = iMapa[iNRow][iNCol+1];
@@ -363,7 +393,7 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 	iU = b2 ? iU : 255;
 	iL = b3 ? iL : 255;
 	iD = b4 ? iD : 255;
-	//Compararlas
+	//Comparing
 	if(b1 && iR <= iU && iR <= iL && iR <= iD) {
 		b1 = false;
 		switch(cMapa[iNRow][iNCol]) {
@@ -437,12 +467,12 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 		iNRow++;
 	}
 	else{
-		//TODO que nada jalo
+		//TODO that nothing worked, never implemented what would happen if none would work. Can't think of a case where that would happen.
 		return "K";
 	}
-	//Loop hasta que llegue a donde en realidad está
+	//Loop until it is where the robot is
 	while(cMapa[iNRow][iNCol] != 'i') {
-		//FIXME
+		//Patch, if I'm out of bounds, try another way.
 		if(cMapa[iNRow][iNCol] == 'n' || iNRow > kMapSize || iNCol > kMapSize){
 			goto fix;
 		}
@@ -521,7 +551,7 @@ String SensarMapa::getInstrucciones(uint8_t iMapa[kMapSize][kMapSize], char cMap
 	return sIns;
 }
 
-//Pone el tiempo de inicio para la funcion recursiva
+//Sets the initial time to the recursive function
 void SensarMapa::tiempoI(unsigned long ul){
 	tInicio = ul;
 }

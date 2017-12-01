@@ -1,22 +1,24 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * This is the core of the code, this is the class of how we save the data and manage it.
+ * 
+ * We used bitwise in here, this so instead of having a possibility on a boolean (a byte), we have 8 possibilities on a char or int (8 bits).
+ * The operations are simple, pure | (or) and & (and) to assign or compare the data.
+ *
+ */
 #include <Arduino.h>
 #include <Tile.h>
 
 //Constructor
+//For more reference, check the Tile.h file
 Tile::Tile() {
-	dato1 = dato2 = /*dato3 =*/ 0;
+	dato1 = dato2 = 0;
 }
 
-// dato1: arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
-// dato2: 0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper (Primeros 3 usados para enumeración de piso)
-// dato3: vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
-
-
-// Getters
-/*
-   Con & and comprobamos si es 0 o 1
-   Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
-   Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ASCII
- */
+// dato1: up, right, down, left, victim, black tile, checkpoint, visited
+// dato2: (First tree used to assign the floor number), Down ramp, Exists, Beginning, UpRamp, Bumper
 
 bool Tile::arriba() {
 	return dato1 & '\x80'; // 0b10000000;
@@ -62,12 +64,12 @@ uint8_t Tile::piso() {
 	return 0;
 }
 
-bool Tile::existe() {
-	return dato2 & '\x8'; // 0b00001000;
-}
-
 bool Tile::rampaAbajo() {
 	return dato2 & '\x10'; // 0b00010000;
+}
+
+bool Tile::existe() {
+	return dato2 & '\x8'; // 0b00001000;
 }
 
 bool Tile::inicio() {
@@ -82,44 +84,7 @@ bool Tile::bumper() {
 	return dato2 & '\x1'; // 0b00000001;
 }
 
-
-/*
-   bool Tile::victimaArriba() {
-        return dato3 & '\x80';
-   }
-
-   bool Tile::victimaDerecha() {
-        return dato3 & '\x40';
-   }
-
-   bool Tile::victimaAbajo() {
-        return dato3 & '\x20';
-   }
-
-   bool Tile::victimaIzquierda() {
-        return dato3 & '\x10';
-   }
-
-   bool Tile::visualArriba() {
-        return dato3 & '\x8';
-   }
-   bool Tile::visualDerecha() {
-        return dato3 & '\x4';
-   }
-   bool Tile::visualAbajo() {
-        return dato3 & '\x2';
-   }
-   bool Tile::visualIzquierda() {
-        return dato3 & '\x1';
-   }
- */
-
-
 //Setters
-/*
-   Nota: Los datos booleanos si true=1
-   Con | or ponemos el 1 que manden,  & and ponemos 0
- */
 void Tile::victima(const bool &b) {
 	dato1 |= (b<<3);
 }
@@ -201,35 +166,3 @@ void Tile::izquierda(const bool &b, Tile *laDeIzquierda) {
 void Tile::existe(const bool &b) {
 	dato2 |= (b<<3);
 }
-
-
-/*
-void Tile::victimaArriba(const bool &b) {
-	dato3 |= (b<<7);
-}
-
-void Tile::victimaDerecha(const bool &b) {
-	dato3 |= (b<<6);
-}
-
-void Tile::victimaAbajo(const bool &b) {
-	dato3 |= (b<<5);
-}
-
-void Tile::victimaIzquierda(const bool &b) {
-	dato3 |= (b<<4);
-}
-
-void Tile::visualArriba(const bool &b) {
-	dato3 |= (b<<3);
-}
-void Tile::visualDerecha(const bool &b) {
-	dato3 |= (b<<2);
-}
-void Tile::visualAbajo(const bool &b) {
-	dato3 |= (b<<1);
-}
-void Tile::visualIzquierda(const bool &b) {
-	dato3 |= b;
-}
-*/

@@ -1,24 +1,42 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ * 
+ * This approach for the raspberry didn't work:
+ * Master (Arduino Mega) <-> Slave (this arduino) <-> 2 Rapsberry's
+ * 
+ * We highly recommend this configuration:
+ * Rapsberry (Only one, use mirrors) <-> Master (Arduino Mega) <-> Slave (this arduino)
+ * 
+ * Or another option is:
+ * Slave (Arduino Mega and this arduino as in one) <-> Master (Raspberry)
+ * The problem with this last configuration is that we have a lot of sensors, and they take A LOT OF TIME to read, 
+ * so 2 microcontrollers and the rasp may be the perfect option (configuration 2)
+ * 
+ * Also, Serial communication may not be the best option. Some digital pins may be good enough, and in coding may be easier and faster
+ */
+/////////// Libraries ///////////
 #include <Wire.h>
 #include <Adafruit_MLX90614.h>
 
-//Pines sensor y led
+/////////// Defining the constants of the pins ///////////
 #define sensorOut 2
 #define S0 3
 #define S1 4
 #define S2 5
 #define S3 6
 #define LED 13
-//MLX adress
+/////////// Address of MLX's ///////////
 #define MlxL 0x1C
 #define MlxR 0x5C
-//Declaramos los objetos
+/////////// Objects of the MLX's ///////////
 Adafruit_MLX90614 mlxRight = Adafruit_MLX90614(MlxR), mlxLeft = Adafruit_MLX90614(MlxL);
-//Variables para control de lecturas
+/////////// Variables to control the lecture ///////////
 char cSendMega, cSendRaspD, cLeeRaspD, cLeeMega = 0;
 bool bID = true, bIoD;
-//2 es checkpoint
-//1 es negro
-//0 es blanco
+
+/////////// Function that returns a number depending on the color ///////////
+//2 is checkpoint, 1 is black, 0 is white
 uint8_t sensorColor() {
   int frequency = 0;
   uint8_t iR = 0;
@@ -35,10 +53,8 @@ uint8_t sensorColor() {
     iR = 1;
   return iR;
 }
-//0 = nada
-//1 = derecha
-//2 = izq
-//3 = ambos
+/////////// Function that returns a number depending on where is the heat victim ///////////
+//0 = nothing, 1 = right, 2 = left, 3 = both
 uint8_t sensarTemperatura() {
   uint8_t re = 0;
   if (mlxRight.readObjectTempC() > mlxRight.readAmbientTempC() + 2.75)
@@ -48,7 +64,8 @@ uint8_t sensarTemperatura() {
   //Serial.print("Derecha: "); Serial.print((mlxRight.readObjectTempC()); Serial.print("Izquierda: "); Serial.println((mlxLeft.readObjectTempC());
   return re;
 }
-
+/////////// Function to know that to send to the arduino regarding that said the Raspberry ///////////
+//Couldn't really get it to work on round... it's a mess the serial communication
 void queDijo(char c, bool &b){
   switch(c){
     case 'L':
@@ -84,68 +101,81 @@ void queDijo(char c, bool &b){
 }
 
 void setup() {
-  //Serial
+  //Serial ports
   Serial.begin(9600);
   Serial2.begin(9600);
   Serial3.begin(9600);
-  //Iniciamos mlx
+  //Initialize the MLX's
   mlxRight.begin();
   mlxLeft.begin();
-  //Definimos pines
+  //Defining the pins
   pinMode(S0, OUTPUT);
   pinMode(S1, OUTPUT);
   pinMode(S2, OUTPUT);
   pinMode(S3, OUTPUT);
   pinMode(sensorOut, INPUT);
   pinMode(LED, OUTPUT);
-  //Los ponemosen un estado
+  //This are always this way, so it's the right filter
   digitalWrite(S0, HIGH);
   digitalWrite(S1, LOW);
-  //Ponemos a las rasp en buscar (no es necesario)
+  //We tell the rasoberry to start looking for a letter
   Serial2.println("Busca");
-  //Serial.println("porfas");
 }
 /*
 //Serial
   0     compu
-  1     rasp izquierda
-  2     rasp derecha
+  1     rasp left
+  2     rasp right
   3     mega
 //Color
-  0 si es blanco
-  1 si es negro
+  0 if it's white
+  1 if it's black
 //Temp
-  0 si no hay
-  1 si está a la derecha
-  2 si está a la izquierda
-//cSendMega   //   H/Letra, S/Letra, U/Letra, NADA,  color, izq, victima/Letra, der
-///cSendRaspD e I   //   Busca, Identifica
-///cLeeMega    //////
-  Mandar (M)
-  Derecha:    Identifica (I), Busca (B);
-  Izquierda:  Reconocer (R), Encuentra (E);
-///cLeeRasp
-  Letra (L), H, S, U, No hay letra (N), No recibió nada (W)
-//TODO duplicar todo para la otra rasp
+  0 if there's none
+  1 if it's on the right
+  2 if it's on the left
+//cSendMega (This is the byte of data we sent to the mega)
+  H/Letter
+  S/Letter
+  U/Letter
+  NADA
+  color
+  Left
+  Victim/Letter
+  Right
+///cSendRaspD e I (Info sent to the rasp)
+  Busca (Search)
+  Identifica (Identify)
+///cLeeMega
+  Send (M)
+  Right:    Identify (I), Search (B);
+  Left:  Identify (R), Search (E);
+///cLeeRasp (info recieved by the rasp)
+  Letter (L)
+  H
+  S
+  U
+  No letter (N)
+  Didn't recieve anything (W)
 */
 void loop() {
-  //Ponemos en 0 lo que enviaremos al mega
+  //We always clear the data we're going to send
   cSendMega = 0;
-  //Si detectó una letra, no se calla hasta que lo escuchen
+  //If it detected a letter, it doesn't shut up until the mega realizes it. This is part of the problem of the communication
   cLeeRaspD = bID ? cLeeRaspD : 'W';
-  //Si el mega le dice que identifique, identifica hasta nuevo aviso
+  //If the mega says to Identify which letter it is, it does so until the mega says another thing. This is part of the problem of the communication
   cLeeMega = (cLeeMega == 'I') ? 'I' : 'N';
-  ////////////////////Lee Serial Mega
+  ////////////////////Read Serial Mega
   while(Serial3.available()){
     cLeeMega = (char)Serial3.read();
   }
-  ////////////////////Lee Serial Rasp Derecha
+  ////////////////////Read Serial Rasp Right
   if(Serial2.available()){
     cLeeRaspD = (char)Serial2.read();
   }
-  ////////////////////Letra Derecha
+  ////////////////////Read Right
   queDijo(cLeeRaspD, bID);
-  ////////////////////Temperatura
+  ////////////////////Temperature
   switch(sensarTemperatura()) {
     case 1:
       //Serial.println("DER");
@@ -167,7 +197,7 @@ void loop() {
       cSendMega |= 0b00001000;
       break;
   }
-  ////////////////////Serial
+  ////////////////////Serial, case of instructions. Big part of the problem
   switch(cLeeMega){
     case 'I':
       bID = false;

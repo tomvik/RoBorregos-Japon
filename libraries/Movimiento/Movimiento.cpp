@@ -1,9 +1,10 @@
-/*
-        TODO
-                - Comunicacion 2 rasps -> nano -> mega
-                - Victima visual pared no pared
- */
-
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * This class has all the functions related to movement. Oh boi, this is the funniest one.
+ * For more info, check the Movimiento.h file
+*/
 #include <Arduino.h>
 #include <Movimiento.h>
 #include <Servo.h>
@@ -12,11 +13,11 @@
 #include <utility/Adafruit_MS_PWMServoDriver.h>
 #include <PID_v1.h>
 
-/////////// Dimensiones ///////////////////
+/////////// Dimensions ///////////////////
 const uint8_t kMapSize = 15;
 const uint8_t kMapFloors = 4;
 
-////////// Mapas para algoritmo /////////////
+////////// Maps for the path finding and test /////////////
 uint8_t iMapa[kMapSize][kMapSize];
 char cMapa[kMapSize][kMapSize];
 //char cMapaImprime[(kMapSize*2)+1][(kMapSize*2)+1];
@@ -71,32 +72,31 @@ PID PID_IMU_der(&inDerIMU, &outDerIMU, &fSetPoint, 1.25, 0, 0, REVERSE);
 
 /*
    cDir (dirección)
-   n = norte
-   e = este
-   s = sur
-   w = oeste
+   n = north
+   e = east
+   s = south
+   w = west
    sMov
-   d = derecha
-   e = enfrente
-   i = izquierda
-   a = atrás
+   d = right
+   e = front
+   i = left
+   a = behind
  */
 Movimiento::Movimiento(uint8_t iPowd, uint8_t iPowi, SensarRealidad *r, char *c, uint8_t *ic, uint8_t *ir, uint8_t *ip, Tile (*tM)[kMapSize][kMapSize], uint8_t *iPM) {
-	//////////////////Inicializamos variables en 0////////////////////////////////
+	/// Initialize variables
 	iAhora = iAntes = eCount1 = eCount2 = cVictima = cParedes = iTerm = fSetPoint = iColor = resetIMU = iVisual = iKit = iCalorD = bBoton1 = 0;
 	iCalor = 5;
 	cuadrosSeguidos = -100;
-	//////////////////////////Inicializamos el apuntador a los sensores, posición y LED//////////////////////
 	real = r, iCol = ic, iRow = ir, iPiso = ip, cDir = c, tMapa = tM, iPisoMax = iPM;
 
-	////////////////////////Inicializamos los motores y Servo/////////////////////////
+	/// Initialize motors and servo
 	iPowI = iPowi;
 	iPowD = iPowd;
 	AFMS.begin();
 	velocidad(iPowI, iPowD);
 	myservo.attach(pin_Servo);
 	myservo.write(90);
-	//////////////////////////Inicializamos del PID de irse derecho
+	/// Initialize PID for IMU
 	PID_IMU_izq.SetMode(AUTOMATIC);
 	PID_IMU_der.SetMode(AUTOMATIC);
 }
@@ -113,8 +113,9 @@ void Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 	myMotorRightF->setSpeed(powDer);
 	myMotorRightB->setSpeed(powDer);
 
+	//This was to make a lack of progress and not lose all the data, never had time to implement it
+	//Correctly, instead, because of some electrical issues, we had to stop the motors and the initialize it.
 	if(bBoton1) {
-		//TODO
 		stop();
 		delay(10000);
 	}
@@ -122,7 +123,6 @@ void Movimiento::velocidad(uint8_t powIzq, uint8_t powDer) {
 
 
 void Movimiento::stop() {
-	// velocidad(255, 255);
 
 	myMotorLeftF->run(BREAK);
 	myMotorLeftB->run(BREAK);
@@ -175,7 +175,7 @@ void Movimiento::left() {
 
 void Movimiento::alinear() {
 	// Caso 0 = normal
-	// Caso 1 = vuelta
+	// Caso 1 = turn
 
 	if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
 		double posInicial, limInf, limSup;
@@ -289,6 +289,49 @@ void Movimiento::alinear() {
 	}
 }
 
+void Movimiento::acomodaChoque(uint8_t switchCase) {
+	double basura;
+	real->escribirLCD("     LIMIT");
+	int encoderTemp1 = eCount1;
+	int encoderTemp2 = eCount2;
+	stop();
+	unsigned long inicio = millis();
+	back();
+	switch(switchCase) {
+	case 1:
+		velocidad(iPowI, 0);
+		while(millis() - inicio < 375)
+			real->getAngulo(basura);
+
+		inicio = millis();
+		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
+		while(millis() - inicio < 250)
+			real->getAngulo(basura);
+		vueltaDer(false);
+		break;
+
+	case 2:
+		velocidad(0, iPowD);
+		while(millis() - inicio < 375)
+			real->getAngulo(basura);
+
+		inicio = millis();
+		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
+		while(millis() - inicio < 250)
+			real->getAngulo(basura);
+		vueltaIzq(false);
+		break;
+	}
+	stop();
+	if(encoderTemp1 < 450)
+		encoderTemp1 = 450;
+	if(encoderTemp2 < 450)
+		encoderTemp2 = 450;
+	eCount1 = encoderTemp1 - 450;
+	eCount2 = encoderTemp2 - 450;
+	front();
+}
+
 void Movimiento::corregirIMU() {
 	if(!(real->caminoAtras()) && resetIMU > 10) {
 		real->escribirLCD("corregir IMU");
@@ -322,6 +365,125 @@ void Movimiento::corregirIMU() {
 	}
 }
 
+void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso) {
+	double angle;
+
+	if(!real->getAngulo(angle)) {
+		fSetPoint = angle;
+	} else if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
+		if(angle < 20 && fSetPoint > 340) {
+			if(angle - fSetPoint + 360 > 20) {
+				acomodaChoque(2);
+			}
+			else if(angle - fSetPoint + 360 < -20) {
+				acomodaChoque(1);
+			}
+		} else if(fSetPoint < 20 && angle > 340) {
+			if(angle - fSetPoint - 360 > 20) {
+				acomodaChoque(2);
+			}
+			else if(angle - fSetPoint - 360 < -20) {
+				acomodaChoque(1);
+			}
+		} else if(angle - fSetPoint > 20) {
+			acomodaChoque(2);
+		} else if(angle - fSetPoint < -20) {
+			acomodaChoque(1);
+		}
+	}
+
+	if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
+		inIzqIMU = angle - 360;
+		inDerIMU = angle - 360;
+	} else if((*cDir) == 'n' && angle < 90 && fSetPoint > 270) {
+		inIzqIMU = angle + 360;
+		inDerIMU = angle + 360;
+	} else {
+		inIzqIMU = angle;
+		inDerIMU = angle;
+	}
+	PID_IMU_izq.Compute();
+	PID_IMU_der.Compute();
+
+	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
+
+	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
+	//Ponemos si hay pared o no y actualizamos el contador y true es pared
+	der[iAhora] = (distanciaDer < 90 && distanciaDer > 0);
+	iAhora = iAhora >= 17 ? 0 : iAhora + 1;
+
+	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
+		contadorIzq++;
+		contadorDer++;
+
+		iError = distanciaDer - distanciaIzq;
+		if(-5 < iError && iError < 5) iError = 0;
+
+		iTerm += iError;
+		if(iTerm > kLimITerm) iTerm = kLimITerm;
+		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
+
+		iParaD = lastInput - iError;
+		if(-4 < iParaD && iParaD < 4) iParaD = 0;
+
+		// Se tiene que mover a la izquierda si iError < 0
+		// Se tiene que mover a la derecha si iError > 0
+		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
+		outDerPARED *= -1;
+
+	} else if(distanciaIzq < 120 && distanciaIzq > 0) {
+		contadorIzq++;
+		iError = kParedDeseadoIzq - distanciaIzq;
+		if(caso == 1 || caso == 2) iError -= 20;
+		if(-5 < iError && iError < 5) iError = 0;
+
+		// debe ser negativo, creo
+		iTerm -= iError;
+		if(iTerm > kLimITerm) iTerm = kLimITerm;
+		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
+
+		iParaD = lastInput - iError;
+		if(-4 < iParaD && iParaD < 4) iParaD = 0;
+
+		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
+		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
+	} else if(distanciaDer < 120 && distanciaDer > 0) {
+		contadorDer++;
+		iError = kParedDeseadoDer - distanciaDer;
+		if(caso == 1 || caso == 2) iError -= 20;
+		if(-5 < iError && iError < 5) iError = 0;
+
+		iTerm += iError;
+		if(iTerm > kLimITerm) iTerm = kLimITerm;
+		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
+
+		iParaD = lastInput - iError;
+		if(-4 < iParaD && iParaD < 4) iParaD = 0;
+
+		outIzqPARED = -iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
+		outDerPARED = iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
+	} else {
+		outIzqPARED = outDerPARED = iTerm = 0;
+	}
+
+	potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
+	potenciaDer = iPowD + outDerIMU + outDerPARED;
+
+	if(caso == 2) {
+		potenciaIzq *= 1.129;
+		potenciaDer *= 1.129;
+	} else if(caso == 3) {
+		potenciaIzq *= 0.89;
+		potenciaDer *= 0.89;
+	}
+
+	if(potenciaIzq < kVelocidadBaseMenor) potenciaIzq = kVelocidadBaseMenor;
+	if(potenciaDer < kVelocidadBaseMenor) potenciaDer = kVelocidadBaseMenor;
+	lastInput = iError;
+
+	real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
+	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
+}
 
 void Movimiento::vueltaIzq(bool caso) {
 	real->escribirLCD("Vuelta IZQ");
@@ -518,278 +680,6 @@ void Movimiento::vueltaDer(bool caso) {
 	stop();
 }
 
-void Movimiento::potenciasDerecho(uint8_t &potenciaIzq, uint8_t &potenciaDer, uint8_t caso) {
-	double angle;
-
-	if(!real->getAngulo(angle)) {
-		fSetPoint = angle;
-	} else if(!(tMapa[*iPiso][*iRow][*iCol].bumper())) {
-		if(angle < 20 && fSetPoint > 340) {
-			if(angle - fSetPoint + 360 > 20) {
-				acomodaChoque(2);
-			}
-			else if(angle - fSetPoint + 360 < -20) {
-				acomodaChoque(1);
-			}
-		} else if(fSetPoint < 20 && angle > 340) {
-			if(angle - fSetPoint - 360 > 20) {
-				acomodaChoque(2);
-			}
-			else if(angle - fSetPoint - 360 < -20) {
-				acomodaChoque(1);
-			}
-		} else if(angle - fSetPoint > 20) {
-			acomodaChoque(2);
-		} else if(angle - fSetPoint < -20) {
-			acomodaChoque(1);
-		}
-	}
-
-	if((*cDir) == 'n' && angle > 270 && fSetPoint < 90) {
-		inIzqIMU = angle - 360;
-		inDerIMU = angle - 360;
-	} else if((*cDir) == 'n' && angle < 90 && fSetPoint > 270) {
-		inIzqIMU = angle + 360;
-		inDerIMU = angle + 360;
-	} else {
-		inIzqIMU = angle;
-		inDerIMU = angle;
-	}
-	PID_IMU_izq.Compute();
-	PID_IMU_der.Compute();
-
-	//real->escribirLCD(String(angle) + " " + String(inIzqIMU) + " " + String(fSetPoint), String(outDerIMU) + "    " + String(outIzqIMU));
-
-	int distanciaIzq = real->getDistanciaIzquierda(), distanciaDer = real->getDistanciaDerecha(), iError, iParaD;
-	//Ponemos si hay pared o no y actualizamos el contador y true es pared
-	der[iAhora] = (distanciaDer < 90 && distanciaDer > 0);
-	iAhora = iAhora >= 17 ? 0 : iAhora + 1;
-
-	if(distanciaIzq < 120 && distanciaDer < 120 && distanciaIzq > 0 && distanciaDer > 0) {
-		contadorIzq++;
-		contadorDer++;
-
-		iError = distanciaDer - distanciaIzq;
-		if(-5 < iError && iError < 5) iError = 0;
-
-		iTerm += iError;
-		if(iTerm > kLimITerm) iTerm = kLimITerm;
-		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
-
-		iParaD = lastInput - iError;
-		if(-4 < iParaD && iParaD < 4) iParaD = 0;
-
-		// Se tiene que mover a la izquierda si iError < 0
-		// Se tiene que mover a la derecha si iError > 0
-		outDerPARED = outIzqPARED = iError * kP_Ambas_Pared - iTerm * kI_Ambas_Pared - iParaD * kD_Ambas_Pared;
-		outDerPARED *= -1;
-
-	} else if(distanciaIzq < 120 && distanciaIzq > 0) {
-		contadorIzq++;
-		iError = kParedDeseadoIzq - distanciaIzq;
-		if(caso == 1 || caso == 2) iError -= 20;
-		if(-5 < iError && iError < 5) iError = 0;
-
-		// debe ser negativo, creo
-		iTerm -= iError;
-		if(iTerm > kLimITerm) iTerm = kLimITerm;
-		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
-
-		iParaD = lastInput - iError;
-		if(-4 < iParaD && iParaD < 4) iParaD = 0;
-
-		outIzqPARED = iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
-		outDerPARED = -iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else if(distanciaDer < 120 && distanciaDer > 0) {
-		contadorDer++;
-		iError = kParedDeseadoDer - distanciaDer;
-		if(caso == 1 || caso == 2) iError -= 20;
-		if(-5 < iError && iError < 5) iError = 0;
-
-		iTerm += iError;
-		if(iTerm > kLimITerm) iTerm = kLimITerm;
-		else if(iTerm < -kLimITerm) iTerm = -kLimITerm;
-
-		iParaD = lastInput - iError;
-		if(-4 < iParaD && iParaD < 4) iParaD = 0;
-
-		outIzqPARED = -iError * kP_Una_Pared - iTerm * kI_Una_Pared - iParaD * kD_Una_Pared;
-		outDerPARED = iError * kP_Una_Pared + iTerm * kI_Una_Pared + iParaD * kD_Una_Pared;
-	} else {
-		outIzqPARED = outDerPARED = iTerm = 0;
-	}
-
-	potenciaIzq = iPowI + outIzqIMU + outIzqPARED;
-	potenciaDer = iPowD + outDerIMU + outDerPARED;
-
-	if(caso == 2) {
-		potenciaIzq *= 1.129;
-		potenciaDer *= 1.129;
-	} else if(caso == 3) {
-		potenciaIzq *= 0.89;
-		potenciaDer *= 0.89;
-	}
-
-	if(potenciaIzq < kVelocidadBaseMenor) potenciaIzq = kVelocidadBaseMenor;
-	if(potenciaDer < kVelocidadBaseMenor) potenciaDer = kVelocidadBaseMenor;
-	lastInput = iError;
-
-	real->escribirLCD(String(distanciaDer) + "     " + String(distanciaIzq));
-	// real->escribirLCD(String(outDerIMU) + "     " + String(outIzqIMU), String(outDerPARED) + "     " + String(outIzqPARED));
-}
-
-void Movimiento::pasaRampa() {
-	front();
-	resetIMU += 10;
-	while(Serial2.available())
-		cVictima = (char)Serial2.read();
-	real->apantallanteLCD("Rampa");
-	uint8_t iPowII, iPowDD;
-	// bajando
-	while(real->sensarRampa() < -kRampaLimit) {
-		checarVictima();
-		potenciasDerecho(iPowII, iPowDD, 1);
-		front();
-		velocidad(iPowII, iPowDD);
-	}
-	// subiendo
-	while(real->sensarRampa() > kRampaLimit) {
-		checarVictima();
-		potenciasDerecho(iPowII, iPowDD, 2);
-		velocidad(iPowII, iPowDD);
-		front();
-	}
-	cParedes = 0;
-	velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-	delay(1500);
-	stop();
-	alinear();
-}
-
-void Movimiento::dejarKit(uint8_t iCase) {
-	iKit++;
-	tMapa[*iPiso][*iRow][*iCol].victima(true);
-		switch(iCase) {
-		case 1:
-			real->apantallanteLCD("VICTIMA con KIT", "derecha");
-			myservo.write(70);
-			delay(400);
-			myservo.write(110);
-			delay(400);
-			myservo.write(0);
-			break;
-		case 2:
-			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
-			myservo.write(110);
-			delay(400);
-			myservo.write(70);
-			delay(400);
-			myservo.write(180);
-			break;
-		}
-		delay(1600);
-		myservo.write(90);
-	while(Serial2.available())
-		cVictima = (char)Serial2.read();
-}
-
-void Movimiento::noKit(uint8_t iCase) {
-	real->apantallanteLCD("VICTIMA sin KIT", String(iCase));
-	tMapa[*iPiso][*iRow][*iCol].victima(true);
-	if(iKit < 16) {
-		myservo.write(70);
-		delay(400);
-		myservo.write(110);
-		delay(400);
-		myservo.write(0);
-		delay(1200);
-		myservo.write(90);
-		delay(400);
-		myservo.write(110);
-		delay(400);
-		myservo.write(70);
-		delay(400);
-		myservo.write(180);
-	} else {
-		delay(3500);
-	}
-	delay(1200);
-	myservo.write(90);
-	real->apantallanteLCD("There should be", "more kits allowed");
-}
-
-
-void Movimiento::retroceder() {
-	real->escribirLCD("CUADRO NEGRO");
-	uint8_t iPowII = kVelocidadBaseMenor, iPowDD = kVelocidadBaseMenor;
-	switch(*cDir) {
-	case 'n':
-		(*iRow)++;
-		break;
-	case 'e':
-		(*iCol)--;
-		break;
-	case 's':
-		(*iRow)--;
-		break;
-	case 'w':
-		(*iCol)++;
-		break;
-	}
-	cuadrosSeguidos = -100;
-	back();
-	while(eCount1 + eCount2 < kEncoder30) {
-		potenciasDerecho(iPowDD, iPowII, 3);
-		velocidad(iPowII, iPowDD);
-		real->escribirLCD(String(iPowII), String(iPowDD));
-	}
-	stop();
-	alinear();
-}
-
-void Movimiento::acomodaChoque(uint8_t switchCase) {
-	double basura;
-	real->escribirLCD("     LIMIT");
-	int encoderTemp1 = eCount1;
-	int encoderTemp2 = eCount2;
-	stop();
-	unsigned long inicio = millis();
-	back();
-	switch(switchCase) {
-	case 1:
-		velocidad(iPowI, 0);
-		while(millis() - inicio < 375)
-			real->getAngulo(basura);
-
-		inicio = millis();
-		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 250)
-			real->getAngulo(basura);
-		vueltaDer(false);
-		break;
-
-	case 2:
-		velocidad(0, iPowD);
-		while(millis() - inicio < 375)
-			real->getAngulo(basura);
-
-		inicio = millis();
-		velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
-		while(millis() - inicio < 250)
-			real->getAngulo(basura);
-		vueltaIzq(false);
-		break;
-	}
-	stop();
-	if(encoderTemp1 < 450)
-		encoderTemp1 = 450;
-	if(encoderTemp2 < 450)
-		encoderTemp2 = 450;
-	eCount1 = encoderTemp1 - 450;
-	eCount2 = encoderTemp2 - 450;
-	front();
-}
-
 void Movimiento::avanzar() {
 	resetIMU++;
 	cParedes = cVictima = eCount1 = eCount2 = 0;
@@ -895,8 +785,7 @@ void Movimiento::avanzar() {
 	}
 }
 
-//Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
-void Movimiento::derecha() {                                                                                                              //Modificarse en realidad
+void Movimiento::derecha() {
 	//real->escribirLCD("DER");
 	checarVictima();
 	switch(*cDir) {
@@ -917,7 +806,6 @@ void Movimiento::derecha() {                                                    
 	alinear();
 }
 
-//Aquí obviamente hay que poner las cosas de moverse con los motores, hasta ahorita es solamente modificar mapa
 void Movimiento::izquierda() {
 	//real->escribirLCD("IZQ");
 	checarVictima();
@@ -939,139 +827,97 @@ void Movimiento::izquierda() {
 	alinear();
 }
 
-//Recibe el string de a dónde moverse y ejecuta las acciones llamando a las funciones de arriba
-void Movimiento::hacerInstrucciones(String sMov) {
-	real->escribirLCD("PATH");
-	// delay(1000);
-	///////////////////////////TEST/////////////////////////////////
-	/*for(int i = sMov.length()-1; i >= 0; i--) {
-	        Serial.print(sMov[i]);
-	   }
-	   Serial.println(" ");
-	   delay(5000);
-	   cDir = (char)Serial.read();*/
-	for(int i = sMov.length()-1; i >= 0; i--) {
-		switch(sMov[i]) {
-		case 'r':
-			derecha();
-			avanzar();
+void Movimiento::retroceder() {
+	real->escribirLCD("CUADRO NEGRO");
+	uint8_t iPowII = kVelocidadBaseMenor, iPowDD = kVelocidadBaseMenor;
+	switch(*cDir) {
+	case 'n':
+		(*iRow)++;
+		break;
+	case 'e':
+		(*iCol)--;
+		break;
+	case 's':
+		(*iRow)--;
+		break;
+	case 'w':
+		(*iCol)++;
+		break;
+	}
+	cuadrosSeguidos = -100;
+	back();
+	while(eCount1 + eCount2 < kEncoder30) {
+		potenciasDerecho(iPowDD, iPowII, 3);
+		velocidad(iPowII, iPowDD);
+		real->escribirLCD(String(iPowII), String(iPowDD));
+	}
+	stop();
+	alinear();
+}
+
+void Movimiento::pasaRampa() {
+	front();
+	resetIMU += 10;
+	while(Serial2.available())
+		cVictima = (char)Serial2.read();
+	real->apantallanteLCD("Rampa");
+	uint8_t iPowII, iPowDD;
+	// bajando
+	while(real->sensarRampa() < -kRampaLimit) {
+		checarVictima();
+		potenciasDerecho(iPowII, iPowDD, 1);
+		front();
+		velocidad(iPowII, iPowDD);
+	}
+	// subiendo
+	while(real->sensarRampa() > kRampaLimit) {
+		checarVictima();
+		potenciasDerecho(iPowII, iPowDD, 2);
+		velocidad(iPowII, iPowDD);
+		front();
+	}
+	cParedes = 0;
+	velocidad(kVelocidadBaseMenor, kVelocidadBaseMenor);
+	delay(1500);
+	stop();
+	alinear();
+}
+
+void Movimiento::dejarKit(uint8_t iCase) {
+	iKit++;
+	tMapa[*iPiso][*iRow][*iCol].victima(true);
+		switch(iCase) {
+		case 1:
+			real->apantallanteLCD("VICTIMA con KIT", "derecha");
+			myservo.write(70);
+			delay(400);
+			myservo.write(110);
+			delay(400);
+			myservo.write(0);
 			break;
-		case 'u':
-			avanzar();
-			break;
-		case 'l':
-			izquierda();
-			avanzar();
-			break;
-		case 'd':
-			derecha();
-			derecha();
-			avanzar();
+		case 2:
+			real->apantallanteLCD("VICTIMA con KIT", "izquierda");
+			myservo.write(110);
+			delay(400);
+			myservo.write(70);
+			delay(400);
+			myservo.write(180);
 			break;
 		}
-	}
+		delay(1600);
+		myservo.write(90);
+	while(Serial2.available())
+		cVictima = (char)Serial2.read();
 }
 
-//Busca dónde está el no visitado usando funciones de aquí y de sensar mapa.
-//Aquí imprime el mapa de int
-//La funcion comparaMapa se podría modificar para depender si quiero ir al inicio o a un cuadro no visitado
-bool Movimiento::goToVisitado(char cD) {
-	//Llena el mapa de 0
-	for (uint8_t i = 0; i < kMapSize; i++)
-		for(uint8_t j = 0; j < kMapSize; j++) {
-			iMapa[i][j] = 0;
-			cMapa[i][j] = 'n';
-		}
-	//Pone 1 en donde vamos a iniciar
-	iMapa[*iRow][*iCol] = 1;
-	cMapa[*iRow][*iCol] = 'i';
-	//LA FUNCION RECURSIVA
-	real->escribirLCD("   LLENA", "   MAPA");
-	mapa.tiempoI(millis());
-	mapa.llenaMapa(iMapa, cMapa, tMapa, *cDir, *iCol, *iRow, *iPiso);
-	///////////////Imprime el mapa//////////////////////////////
-	/*for (uint8_t i = 0; i < kMapSize; ++i) {
-	        for(uint8_t j=0; j<kMapSize; j++) {
-	                Serial.print(iMapa[i][j]); Serial.print(" ");
-	        }
-	        Serial.println();
-	   }
-	   Serial.println();
-	   Serial.println();
-	   for (uint8_t i = 0; i < kMapSize; ++i) {
-	        for(uint8_t j=0; j<kMapSize; j++) {
-	                Serial.print(cMapa[i][j]); Serial.print(" ");
-	        }
-	        Serial.println();
-	   }
-	   delay(5000);*/
-	//Nuevas coordenadas a dónde moverse
-	uint8_t iNCol = 100, iNRow = 100;
-	//Compara las distancias para escoger la más pequeña
-	real->escribirLCD("   COMPARA", "   HACER");
-	if(mapa.comparaMapa(iMapa, tMapa, cD, *iCol, *iRow, iNCol, iNRow, *iPiso)) { //Hace las instrucciones que recibe de la función en forma de string
-		hacerInstrucciones(mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, *iPiso));
-		//TODO comentarlo?
-		*iCol = iNCol, *iRow = iNRow;
-		return true;
-	}
-	return false;
+void Movimiento::noKit(uint8_t iCase) {
+	real->apantallanteLCD("VICTIMA sin KIT", String(iCase));
+	tMapa[*iPiso][*iRow][*iCol].victima(true);
+	delay(3500);
+	real->apantallanteLCD("There should be", "more kits allowed");
+	delay(1500);
 }
 
-
-//La hice bool para que de una forma estuviera como condición de un loop, pero aún no se me ocurre cómo
-bool Movimiento::decidir() {
-	bLack = false;
-	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
-		retroceder();
-	}
-	checarVictima();
-	//Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
-	tMapa[*iPiso][*iRow][*iCol].existe(true);
-	//Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
-	tMapa[*iPiso][*iRow][*iCol].visitado(true);
-	//Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
-	//Si HAY BUMPER y ESTA LIBRE ENFRENTE, mejor haz eso
-	if(tMapa[*iPiso][*iRow][*iCol].bumper() && mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
-		avanzar();
-		stop();
-		return true;
-	}
-	//Si no hay pared a la derecha Y no está visitado, muevete hacia allá
-	if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r')) {
-		derecha();
-		avanzar();
-		stop();
-		return true;
-	}
-	//Si no hay pared enfrente Y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
-		avanzar();
-		stop();
-		return true;
-	}
-	//Si no hay pared a la izquierda y no está visitado, muevete hacia allá
-	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'l') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'l')) {
-		izquierda();
-		avanzar();
-		stop();
-		return true;
-	}
-	//Si no hay pared atrás y no está visitado, muevete hacia allá
-	//Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
-	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'd') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'd')) {
-		derecha();
-		derecha();
-		avanzar();
-		stop();
-		return true;
-	}
-	//Aquí es cuando entra a lo recursivo
-	else{
-		//Llama la función recursiva
-		return goToVisitado( 'n');
-	}
-}
 void Movimiento::checarVictima(bool caso) {
 	//Lee Serial
 	cVictima = 0;
@@ -1227,111 +1073,139 @@ void Movimiento::checarVictima(bool caso) {
 	}
 }
 
-/*bool Movimiento::decidir_Prueba() {
-        //Esto ya no debe de ser necesario con la clase Mapear y SensarRealidad
-        tMapa[*iPiso][*iRow][*iCol].existe(true);
-        //Esto, no sé si sea mejor tenerlo aquí o en la clase Mapear
-        tMapa[*iPiso][*iRow][*iCol].visitado(true);
-        //Todos estos sensados los hace con el mapa virtual, por eso dependemos en que el robot sea preciso.
-        //Si no hay pared a la derecha Y no está visitado, muevete hacia allá
-        if(mapa.sensa_Pared( *cDir, *iCol, *iRow, *iPiso, 'r') && mapa.sensaVisitado( *cDir, *iCol, *iRow, *iPiso, 'r')) {
-                Serial.println("DER");
-                switch(*cDir) {
-                case 'n':
-                        (*iCol)++;
-                        (*cDir) = 'e';
-                        break;
-                case 'e':
-                        (*iRow)++;
-                        (*cDir) = 's';
-                        break;
-                case 's':
-                        (*iCol)--;
-                        (*cDir) = 'w';
-                        break;
-                case 'w':
-                        (*iRow)--;
-                        (*cDir) = 'n';
-                        break;
-                }
-                return true;
-        }
-        //Si no hay pared enfrente Y no está visitado, muevete hacia allá
-        else if(mapa.sensa_Pared( *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado( *cDir, *iCol, *iRow, *iPiso, 'u')) {
-                Serial.println("ENF");
-                switch(*cDir) {
-                case 'n':
-                        (*iRow)--;
-                        (*cDir) = 'n';
-                        break;
-                case 'e':
-                        (*iCol)++;
-                        (*cDir) = 'e';
-                        break;
-                case 's':
-                        (*iRow)++;
-                        (*cDir) = 's';
-                        break;
-                case 'w':
-                        (*iCol)--;
-                        (*cDir) = 'w';
-                        break;
-                }
-                return true;
-        }
-        //Si no hay pared a la izquierda y no está visitado, muevete hacia allá
-        else if(mapa.sensa_Pared( *cDir, *iCol, *iRow, *iPiso, 'l') && mapa.sensaVisitado( *cDir, *iCol, *iRow, *iPiso, 'l')) {
-                Serial.println("IZQ");
-                switch(*cDir) {
-                case 'n':
-                        (*iCol)--;
-                        (*cDir) = 'w';
-                        break;
-                case 'e':
-                        (*iRow)--;
-                        (*cDir) = 'n';
-                        break;
-                case 's':
-                        (*iCol)++;
-                        (*cDir) = 'e';
-                        break;
-                case 'w':
-                        (*iRow)++;
-                        (*cDir) = 's';
-                        break;
-                }
-                return true;
-        }
-        //Si no hay pared atrás y no está visitado, muevete hacia allá
-        //Sólo entraría a este caso en el primer movimiento de la ronda (si queda mirando a un deadend)
-        else if(mapa.sensa_Pared( *cDir, *iCol, *iRow, *iPiso, 'd') && mapa.sensaVisitado( *cDir, *iCol, *iRow, *iPiso, 'd')) {
-                Serial.println("ATR");
-                switch(*cDir) {
-                case 'n':
-                        (*iRow)++;
-                        (*cDir) = 's';
-                        break;
-                case 'e':
-                        (*iCol)--;
-                        (*cDir) = 'w';
-                        break;
-                case 's':
-                        (*iRow)--;
-                        (*cDir) = 'n';
-                        break;
-                case 'w':
-                        (*iCol)++;
-                        (*cDir) = 'e';
-                        break;
-                }
-                return true;
-        }
-        //Aquí es cuando entra a lo recursivo
-        else{
-                //Llama la función recursiva
-                return goToVisitado( 'n');
-        }
-   }*/
+void Movimiento::hacerInstrucciones(String sMov) {
+	real->escribirLCD("PATH");
+	// delay(1000);
+	///////////////////////////TEST/////////////////////////////////
+	/*for(int i = sMov.length()-1; i >= 0; i--) {
+	        Serial.print(sMov[i]);
+	   }
+	   Serial.println(" ");
+	   delay(5000);
+	   cDir = (char)Serial.read();*/
+	for(int i = sMov.length()-1; i >= 0; i--) {
+		switch(sMov[i]) {
+		case 'r':
+			derecha();
+			avanzar();
+			break;
+		case 'u':
+			avanzar();
+			break;
+		case 'l':
+			izquierda();
+			avanzar();
+			break;
+		case 'd':
+			derecha();
+			derecha();
+			avanzar();
+			break;
+		}
+	}
+}
+
+bool Movimiento::goToVisitado(char cD) {
+	//Fills up the map with infinites
+	for (uint8_t i = 0; i < kMapSize; i++)
+		for(uint8_t j = 0; j < kMapSize; j++) {
+			iMapa[i][j] = 0;
+			cMapa[i][j] = 'n';
+		}
+	//Gives a one to where we begin
+	iMapa[*iRow][*iCol] = 1;
+	cMapa[*iRow][*iCol] = 'i';
+	//Recursive function
+	real->escribirLCD("   LLENA", "   MAPA");
+	mapa.tiempoI(millis());
+	mapa.llenaMapa(iMapa, cMapa, tMapa, *cDir, *iCol, *iRow, *iPiso);
+	///////////////Prints the map//////////////////////////////
+	/*for (uint8_t i = 0; i < kMapSize; ++i) {
+	        for(uint8_t j=0; j<kMapSize; j++) {
+	                Serial.print(iMapa[i][j]); Serial.print(" ");
+	        }
+	        Serial.println();
+	   }
+	   Serial.println();
+	   Serial.println();
+	   for (uint8_t i = 0; i < kMapSize; ++i) {
+	        for(uint8_t j=0; j<kMapSize; j++) {
+	                Serial.print(cMapa[i][j]); Serial.print(" ");
+	        }
+	        Serial.println();
+	   }
+	   delay(5000);*/
+	uint8_t iNCol = 100, iNRow = 100;
+	real->escribirLCD("   COMPARA", "   HACER");
+	if(mapa.comparaMapa(iMapa, tMapa, cD, *iCol, *iRow, iNCol, iNRow, *iPiso)) {
+		hacerInstrucciones(mapa.getInstrucciones(iMapa, cMapa, tMapa, iNCol, iNRow, *iPiso));
+		*iCol = iNCol, *iRow = iNRow;
+		return true;
+	}
+	return false;
+}
+
+/*
+It's a bool so it can be a condition on the main loop
+The algorithm is simple: Go Right, if not Go Front, if not Go Left, if not Go Backwards, if none is possible, look up
+for the nearest non visited tile. If there's none on this floor, go back to the previous floor, if this isn't possible, return false
+and then look up for the initial point.
+The conditions to move to another tile is: 
+	1. Can I move there? (there's no wall)
+	2. Have I not been there? (It hasn't been visited)
+Special case: If you already know there's a bumper, just go forward, it's the safest path.
+
+NOTE: All these "sensing" is with the virtual map, that's why it's important that the robot is mapping correctly
+*/
+bool Movimiento::decidir() {
+	bLack = false;
+	if(tMapa[*iPiso][*iRow][*iCol].cuadroNegro()) {
+		retroceder();
+	}
+	checarVictima();
+	tMapa[*iPiso][*iRow][*iCol].existe(true);
+	tMapa[*iPiso][*iRow][*iCol].visitado(true);
+	if(tMapa[*iPiso][*iRow][*iCol].bumper() && mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
+		avanzar();
+		stop();
+		return true;
+	}
+	if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'r')) {
+		derecha();
+		avanzar();
+		stop();
+		return true;
+	}
+	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'u')) {
+		avanzar();
+		stop();
+		return true;
+	}
+	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'l') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'l')) {
+		izquierda();
+		avanzar();
+		stop();
+		return true;
+	}
+	else if(mapa.sensa_Pared(tMapa, *cDir, *iCol, *iRow, *iPiso, 'd') && mapa.sensaVisitado(tMapa, *cDir, *iCol, *iRow, *iPiso, 'd')) {
+		derecha();
+		derecha();
+		avanzar();
+		stop();
+		return true;
+	}
+	else{
+		return goToVisitado( 'n');
+	}
+}
+
+char Movimiento::getParedes() {
+	return cParedes;
+}
+
+uint8_t Movimiento::getColor(){
+	return iColor;
+}
 
 void Movimiento::encoder1() {
 	eCount1++;
@@ -1343,14 +1217,6 @@ void Movimiento::encoder2() {
 
 void Movimiento::boton1() {
 	bBoton1 = true;
-}
-
-char Movimiento::getParedes() {
-	return cParedes;
-}
-
-uint8_t Movimiento::getColor(){
-	return iColor;
 }
 
 void Movimiento::llenaArreglo(bool b){
@@ -1423,6 +1289,7 @@ void Movimiento::llenaArreglo(bool b){
 
 
 /*
+This was my first function for the erros on the angles, I still don't give up on it :( so simple and beautiful
    void Movimiento::ErrorGradosVuelta(double &grados) {
         int iM;
         grados = real->getAngulo(angle);

@@ -1,3 +1,12 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * This class has all the functions to check all the sensors and return the data in a way
+ * it can be easily used. It also recieves the communication with the nano
+ *
+ * For more information, check the SensarRealidad.h file
+ */
 #include <Arduino.h>
 #include <SensarRealidad.h>
 #include <Wire.h>
@@ -8,83 +17,82 @@
 #include <utility/imumaths.h>
 #include <LiquidCrystal_I2C.h>
 
-// VL53L0X
+// Quantity of VL53L0X sensors
 const uint8_t kCantVL53 = 4;
-
+//Array of the sensors
 VL53L0X sensor[kCantVL53];
+//Array of the xSHUT pin of each sensor
 const uint8_t kXSHUT[kCantVL53] = {27, 25, 23, 29};
+//Threshold to say if there's a wall
 const int kMEDIDA_PARED_MM = 150;
+
+//Don't remember what where these for. Unused variables apparently.
+/*
 const int kDistanciaMinimaVertical = 40;
 const int kDistanciaMinimaLados = 60;
-
+*/
+//Pin of the button
 #define BOTON_B 31
 
-// LCD
+// LCD Adress and initialization
 #define I2C_ADDR  0x3F
 LiquidCrystal_I2C lcd(I2C_ADDR, 16, 2);
 
-// IMU
+// IMU Initialization with it's operational mode
 Adafruit_BNO055 bno = Adafruit_BNO055(Adafruit_BNO055::OPERATION_MODE_NDOF_FMC_OFF);
 
+//Tolerance for the IMU
 #define toleranciaSwitchIMU 5
 
-// SWITCH
+//Physical switch pins
 #define switchIzquierda 39
 #define switchDerecha 41
-
-// COLOR
-#define colorIn 2
-/*
-   out 2
-   s0 3
-   s1 4
-   s2 5
-   s3 6 */
 
 SensarRealidad::SensarRealidad() {
 	if(!bno.begin())
 		lcd.print("Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!");
 	bno.setExtCrystalUse(true);
+	//Here is where I think we could calibrate the IMU until it's good enough, or a certain time has passed.
 	Serial.println("A CALIBRAR");
 	while(getIMUCalibrationStatus() <= 0) ;
 	Serial.println("TERMINE");
-	//Todos los pines declarados
 
 	pinMode(switchIzquierda, INPUT);
 	pinMode(switchDerecha, INPUT);
-	pinMode(colorIn, INPUT);
 
 	lcd.begin();
 	lcd.backlight();
 	Wire.begin();
 	escribirLCD("LCD lista");
+	//Sometimes it would crash in here... I2C issues.
 	inicializarSensoresDistancia(4);
-	escribirLCD("senores listos");
 	lastAngle = 0.0;
 	malo = false;
 }
 
+//One thing we did to try and solve the i2c problem was to put a small delay between each function that used it.
+//Because one possibility was that there was a problem of syncronization. Didn't work at all.
 void SensarRealidad::escribirLCDabajo(String sE1) {
-	delay(1);
+	//delay(1);
 	lcd.setCursor(0, 1);
-	delay(1);
+	//delay(1);
 	lcd.print(sE1);
 }
 
 void SensarRealidad::escribirLCD(String sE1, String sE2) {
-	delay(1);
+	//delay(1);
 	lcd.clear();
-	delay(1);
+	//delay(1);
 	lcd.print(sE1);
-	delay(1);
+	//delay(1);
 	lcd.setCursor(0, 1);
-	delay(1);
+	//delay(1);
 	lcd.print(sE2);
 }
 
 void SensarRealidad::apantallanteLCD(String sE1, String sE2) {
 	escribirLCD(sE1, sE2);
-	delay(1);
+	//delay(1);
 	for (size_t i = 0; i < 4; i++) {
 		lcd.noBacklight();
 		delay(30);
@@ -123,28 +131,29 @@ void SensarRealidad::inicializarSensoresDistancia(const uint8_t kINICIO_I2C) {
 		sensor[i].startContinuous();
 	}
 }
-
+//We return a -1 when it's out of reach (around 100cm), because at farther distances weird things happened.
+//This sensors are really tricky
 int SensarRealidad::getDistanciaEnfrente() {
-	delay(2);
+	//delay(2);
 	int distancia = sensor[0].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 20 ? distancia - 20 : 0);
 }
 
 int SensarRealidad::getDistanciaDerecha() {
-	delay(2);
+	//delay(2);
 	int distancia = sensor[1].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 50 ? distancia - 50 : 0);
 }
 
 int SensarRealidad::getDistanciaAtras() {
-	delay(2);
+	//delay(2);
 	int distancia = sensor[2].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 30 ? distancia - 30 : 0);
 
 }
 
 int SensarRealidad::getDistanciaIzquierda() {
-	delay(2);
+	//delay(2);
 	int distancia = sensor[3].readRangeContinuousMillimeters();
 	return distancia > 1000 ? -1 : (distancia > 55 ? distancia - 55 : 0);
 }
@@ -245,35 +254,31 @@ uint8_t SensarRealidad::switches() {
 //2 = checkpoint 1 = negro 0 = blanco
 uint8_t SensarRealidad::color() {
 	char cc = 0;
-  uint8_t iR = 0;
+	uint8_t iR = 0;
 
-  Serial2.print("M");
+	Serial2.print("M");
 	unsigned long inicio = millis();
-  while(!Serial2.available() && !malo){
-    escribirLCD("NO HAY NADA 2");
-    delay(2);
-
+  	while(!Serial2.available() && !malo){
+    	escribirLCD("NO HAY NADA 2");
+    	delay(2);
 		if(inicio + 1000 < millis())
 			malo = true;
-  }
+	}
+  	while(Serial2.available())
+    	cc = (char)Serial2.read();
 
-  while(Serial2.available())
-    cc = (char)Serial2.read();
-
-
-  if(cc&0b00001000)
-    iR = 1;
-  else if(cc&0b00010000)
-    iR = 2;
-
-  return iR;
+  	if(cc&0b00001000)
+    	iR = 1;
+  	else if(cc&0b00010000)
+    	iR = 2;
+  	return iR;
 }
 
 bool SensarRealidad::visual(){
-  char cc = 0;
-  while(Serial2.available())
-    cc = (char)Serial2.read();
-  return cc&0b00100000;
+	char cc = 0;
+	while(Serial2.available())
+  		cc = (char)Serial2.read();
+  	return cc&0b00100000;
 }
 
 void SensarRealidad::test() {
@@ -315,8 +320,8 @@ void SensarRealidad::test() {
 			cVictima = (char)Serial2.read();
 		}
 		if(cVictima&0b00000010)
-      uint8_t mo = (cVictima&0b00000001) ? 1 : 2;
-			escribirLCD(String(mo));
+    		uint8_t mo = (cVictima&0b00000001) ? 1 : 2;
+		escribirLCD(String(mo));
     delay(100);
 	}
 }

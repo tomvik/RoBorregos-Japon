@@ -1,11 +1,26 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * This is the core of the code, this is the class of how we save the data and manage it.
+ * 
+ * We used bitwise in here, this so instead of having a possibility on a boolean (a byte), we have 8 possibilities on a char or int (8 bits).
+ * The operations are simple, pure | (or) and & (and) to assign or compare the data.
+ *
+ */
 #ifndef Tile_h
 #define Tile_h
 
 #include <Arduino.h>
 
 /*
-  IDEA Podria considerarse usar bitset, hace en automatico todo esto... #optimizacion
-  Usar Macros para evitar el if en los Setters
+  IDEA We could use bitset, it could be a microoptimization.
+  Didn't implement the possibility to change a data, could work later on.
+  Also, didn't implement at the end the possibility of having several victims, maybe a thing to do later.
+  Also, didn't implement the size of a bumper (Magnitud of how "bad" is the bumper)
+
+  Using macros to don't have to use an if on the setters could be better:
+
   #define victima(true) dato1|='\xnn'
   #define victima(false) dato1&='\xnn'
 */
@@ -16,101 +31,69 @@ class Tile {
     Tile();
 
     //Getters
-    /*
-       Con & and comprobamos si es 0 o 1
-       Ponemos un valor literal ' ' de char para evitar conversiones inecesarias
-       Poniendo '\xhhh' se puede especificar el valor en hexadecimal del char ascii
-     */
-    //Regresa true si hay pared arriba
+    //Returns true if there's a wall up
     bool arriba();
-    //Regresa true si hay pared a la derecha
+    //Returns true if there's a wall on the right
     bool derecha();
-    //Regresa true si hay pared abajo
+    //Returns true if there's a wall down
     bool abajo();
-    //Regresa true si hay pared a la izquierda
+    //Returns true if there's a wall on the left
     bool izquierda();
-    //Regresa true si hay victima en el cuadro
+    //Returns true if there's a victim somewhere
     bool victima();
-    //Regresa true si es cuadro negro
+    //Returns true if there tile is black
     bool cuadroNegro();
-    //Regresa true si es checkpoint
+    //Returns true if there tile is a checkpoint
     bool checkpoint();
-    //Regresa true si ha sido visitado
+    //Returns true if that tile has been visited
     bool visitado();
-    //Regresa el piso al que conecta
+    //Returns the number of the floor it connects to
     uint8_t piso();
-    //Regresa true si es rampa hacia abajo
+    //Returns true if that tile is going down the ramp
     bool rampaAbajo();
-    //Regresa true si es rampa hacia arriba
+    //Returns true if that tile is going down the ramp
     bool rampaArriba();
-    //Regresa true si existe el cuadro
+    //Returns true if that tile exists (It exists if you have sensed there's a path to there)
     bool existe();
-    //Regresa true si es inicio
+    //Returns true if that tile is the initial point
     bool inicio();
-    //Regresa true si hay un bumper
+    //Returns true if there's a bumper on that tile
     bool bumper();
 
-    /*
-    bool victimaArriba();
-    bool victimaDerecha();
-    bool victimaAbajo();
-    bool victimaIzquierda();
-    bool visualArriba();
-    bool visualDerecha();
-    bool visualAbajo();
-    bool visualIzquierda();
-    */
-
-    //Setters
-    /*
-       Nota: Los datos booleanos si true=1
-       Con | or ponemos el 1 que manden, &and ponemos 0
-     */
-    //Asigna pared arriba al actual y abajo al de arriba
+    //Setters¿
+    //Assign the upper wall and the lower one of the upper tile
     void arriba(const bool &b, Tile *laDeArriba);
-    //Asigna pared derecha al actual e izquierda al de la derecha
+    //Assign the wall on the right and the one on the left of the right tile
     void derecha(const bool &b, Tile *laDeDerecha);
-    //Asigna pared abajo al actual y arriba al de abajo
+    //Assign the lower wall and the upper one of the lower tile
     void abajo(const bool &b, Tile *laDeAabajo);
-    //Asigna pared izquierda al actual y derecha a la izquierda
+    //Assign the wall on the left and the one on the right of the left tile
     void izquierda(const bool &b, Tile *laDeIzquierda);
-    //Asigna victima al cuadro actual
+    //Assign a victim to the tile
     void victima(const bool &b);
-    //Asigna cuadro negro al tile actual
+    //Assign as a black tile the actual tile
     void cuadroNegro(const bool &b);
-    //Asigna checkpoint al tile actual
+    //Assign as a checkpoint the actual tile
     void checkpoint(const bool &b);
-    //Asigna al tile actual como visitado
+    //Assign as visited the actual tile
     void visitado(const bool &b);
-    //Asigna a cuál piso conecta
+    //Assign the floor to which it connects
     void piso(const int &i);
-    //Asigna que es rampa hacia abajo
+    //Assign that it's a ramp going down
     void rampaAbajo(const bool &b);
-    //Asigna que el tile es existente
+    //Assign that the tile exists
     void existe(const bool &b);
-    //Asigna que el tile actual es el inicial
+    //Assign the actual tile as the beginning
     void inicio(const bool &b);
-    //Asigna que es rampa hacia arriba
+    //Assign that it's a ramp going up
     void rampaArriba(const bool &b);
-    //Asigna que hay un bumper
+    //Assign that there's a bumper on the tile
     void bumper(const bool &b);
-
-    /*
-    void victimaArriba(const bool &b);
-    void victimaDerecha(const bool &b);
-    void victimaAbajo(const bool &b);
-    void victimaIzquierda(const bool &b);
-    void visualArriba(const bool &b);
-    void visualDerecha(const bool &b);
-    void visualAbajo(const bool &b);
-    void visualIzquierda(const bool &b);
-    */
 
   private:
     char dato1, dato2;
-    // dato1: arr, der, aba, izq, victima, cuadro negro, checkpoint, visitada
-    // dato2: 0, 0, 0, Rampabajo, existe, inicio, rampaArriba, bumper (Primeros 3 usados para enumeración de piso)
-    // dato3: vicArr, vicDer, vicAba, vicIzq, visualArr, visualDer, visualAba, visualIzq
+    // dato1: up, right, down, left, victim, black tile, checkpoint, visited
+    // dato2: (First tree used to assign the floor number), Down ramp, Exists, Beginning, UpRamp, Bumper
 };
 
 #endif

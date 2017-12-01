@@ -1,29 +1,43 @@
+/* Code made by the RoBorregos team in 2017 for the RoboCup JR. Rescue Maze category.
+ * Tomás Lugo, Sebastián Esquer, Ernesto Cervantez, and Alexis Virgen.
+ * "El Mariachi" Achieved a third place on the international RoboCup.
+ *
+ * Since the size of the matrix is fixed, sometimes we need to shift the data
+ * So we don't get out of bounds. Also, we have two modes of mapping.
+ * The "normal" being with the sensors: The procedure is: Reach destination -> stop -> sense all at once (one or two times) -> map
+ *
+ * The other one (Which I prefer but doesn't apply always. See special cases below) is way faster and is redundant (that is good)
+ * The procedure is: While reaching the destination, mark how many times there was a wall -> if n > threshold, there's a wall -> map with variables
+ *
+ * Special cases: When the robot doesn't move (first tile), or finishes going through a ramp (bug fixed)
+ *
+ * Also... once you say there's a wall, there's no way to say you were wrong (never implemented that on class Tile), sometimes it was needed, but it was rarely.
+ */
 #include <Arduino.h>
 #include <Mapear.h>
 
-///////////Dimensiones///////////////////
+///////////Dimensions///////////////////
 const uint8_t kMapSize = 15;
 const uint8_t kMapFloors = 4;
-//////////Constant Rampa////////////////
+//////////Constant Limit of inclination for the ramp////////////////
 const uint8_t kRampaLimit = 17;
 
 /*
-   cDir Direccion
-   n = norte
-   e = este
-   s = sur
-   w = oeste
-   cCase Caso
-   e = enfrente
-   d = derecha
-   i = izquierdo
-   NUNCA va a haber un caso atras
+   cDir Direction
+   n = North
+   e = East
+   s = South
+   w = West
+   cCase Case
+   e = Front
+   d = Right
+   i = Left
+   There's NEVER goint to be a "Back" case
 */
+// I don't know if I should have a function "Fill visited" or that's better on the class "Movimiento"... In there is more practical, but in here
+// it should be... hmmm...
 
-// No sé si aquí crear una función que sea "Llena visitado" o eso mejor que sea para la clase moverse... Creo que en la clase moverse es más práctico, aunque realmente
-// Por el nombre debería estar aquí... hmmm...
-
-// Constructores
+///////////Constructors///////////////////
 Mapear::Mapear() {
 	iColor = 0;
 }
@@ -35,24 +49,9 @@ Mapear::Mapear(SensarRealidad *ma, Movimiento *ro, uint8_t *iPM) {
 	iPisoMax = iPM;
 }
 
-void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow) {
-	switch(cDir) {
-	case 'n':
-		iRow--;
-		break;
-	case 'e':
-		iCol++;
-		break;
-	case 's':
-		iRow++;
-		break;
-	case 'w':
-		iCol--;
-		break;
-	}
-}
-
-// Regresa TRUE si HAY espacio para llenar el dato
+////////////////Shifting the data of the matrix//////////////////
+//Returns true if there's space on the matrix (If you're on map[0][14] and want to put something on the right, there's no space)
+// Micro-optimization, declare a constant for "kMapSize-1"
 bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase) {
 	switch(cDir) {
 	case 'n':
@@ -95,7 +94,7 @@ bool Mapear::espacio(char cDir, uint8_t iCol, uint8_t iRow, char cCase) {
 	return false;
 }
 
-// Desplaza los datos HACIA ABAJO
+//Downwards
 void Mapear::moverRowAbajo(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
 	for (int iCol = 0; iCol < kMapSize; ++iCol){
@@ -112,7 +111,7 @@ void Mapear::moverRowAbajo(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &
 	}
 }
 
-// Desplaza los datos HACIA ARRIBA
+//Upwards
 void Mapear::moverRowArr(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
 	for (int iCol = 0; iCol < kMapSize; ++iCol){
@@ -129,7 +128,7 @@ void Mapear::moverRowArr(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iP
 	}
 }
 
-// Desplaza los datos HACIA LA IZQUIERDA
+//Left
 void Mapear::moverColIzq(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
 	for (int iRow = 0; iRow < kMapSize; ++iRow){
@@ -146,7 +145,7 @@ void Mapear::moverColIzq(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iP
 	}
 }
 
-// Desplaza los datos HACIA LA DERECHA
+//Right
 void Mapear::moverColDer(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iPiso) {
 	Tile tTemp1, tTemp2;
 	for (int iRow = 0; iRow < kMapSize; ++iRow){
@@ -163,7 +162,7 @@ void Mapear::moverColDer(Tile tMapa[kMapFloors][kMapSize][kMapSize], uint8_t &iP
 	}
 }
 
-// Llama a las cuatro funciones anteriores y decide cuál hacer y modifica la posición para que concuerde con el nuevo mapa->
+//Calls the above functions and updates the position
 void Mapear::desplazaDatos(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso, char cCase) {
 	switch(cDir) {
 	case 'n':
@@ -232,9 +231,26 @@ void Mapear::desplazaDatos(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir
 		break;
 	}
 }
+//Handles the new position after the ramp
+void Mapear::afterRampa(char cDir, uint8_t &iCol, uint8_t &iRow) {
+	switch(cDir) {
+	case 'n':
+		iRow--;
+		break;
+	case 'e':
+		iCol++;
+		break;
+	case 's':
+		iRow++;
+		break;
+	case 'w':
+		iCol--;
+		break;
+	}
+}
 
-// Si es true, pone a ese cuadro como existente, si es false, le pone pared.
-// Lo unico es que EL PRIMER CUADRO donde empiece el robot, debe ser marcado como existente manualmente
+//Depending on the boolean, writes if there's a wall or not. If true, there's a path. If false, there's a wall
+//Only the FIRST TILE must be modified manually
 void Mapear::escribeMapaLoP(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t iCol, uint8_t iRow, uint8_t &iPiso, char cCase, bool bLoP) {
 	switch(cDir) {
 	case 'n':
@@ -416,8 +432,8 @@ void Mapear::escribeMapaLoP(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDi
 	}
 }
 
-// Llena el mapa dependiendo de los valores que mande la clase SensarMapa. Y en dado caso, desplaza los datos.
-// Como sólo sensa derecha, enfrente y atrás, es necesario en el primer cuadro dar una vuelta de 90 para sensar el cuadro de atrás.
+//Fills the map with the variables sent by the object robot. It also handles the ramp thing, should be another function called "Before ramp"
+//Only senses Left, Right and Forward. On the firs tile we need to manually check the sensor on the back.
 void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
@@ -429,7 +445,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 				j = 0;
 				while(j < kMapSize && !bT) {
 					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp) {
-						// Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
+						// I look where the ramp is and map it.
 						iCol = j;
 						iRow = i;
 						bT = true;
@@ -441,7 +457,7 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 			afterRampa(cDir, iCol, iRow);
 		}
 		else{
-			// Modifica el piso maximo
+			// Modifies the max floor
 			(*iPisoMax)++;
 			if(mapa->sensarRampa() > kRampaLimit) {
 				tMapa[iPiso][iRow][iCol].rampaArriba(true);
@@ -451,66 +467,63 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 				tMapa[iPiso][iRow][iCol].rampaAbajo(true);
 				tMapa[(*iPisoMax)][4][4].rampaArriba(true);
 			}
-			// Pone a qué piso conectan
+			// IT maps where it connects
 			tMapa[(*iPisoMax)][4][4].piso(iPiso);
 			tMapa[(*iPisoMax)][4][4].existe(true);
 			tMapa[(*iPisoMax)][4][4].visitado(true);
 			tMapa[iPiso][iRow][iCol].piso((*iPisoMax));
 			tMapa[iPiso][iRow][iCol].visitado(true);
-			// Poner como camino cerrado del piso actual
+			// It closes the path on the current floor
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 			robot->pasaRampa();
-			// Pone la posición en after rampa dependiendo de la direccion
+			// Moves the position to where it's going to be
 			iPiso = (*iPisoMax);
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
+		//Fixes the bug of not the after ramp and variables
+		//Front
 		if(mapa->caminoEnfrente()) {
 			if(!espacio(cDir, iCol, iRow, 'e'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
 		}
-		// Pared
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
-		// Lectura Derecha
-		// Libre
+		//Right
 		if(mapa->caminoDerecha()) {
 			robot->llenaArreglo(false);
 			if(!espacio(cDir, iCol, iRow, 'd'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'd');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 		}
-		// Pared
 		else{
 			robot->llenaArreglo(true);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 		}
-		// Lectura I<quierda
-		// Libre
+		//Left
 		if(mapa->caminoIzquierda()) {
 			if(!espacio(cDir, iCol, iRow, 'i'))
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
 		}
-		// Pared
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	}
+	//If everything's normal
 	else{
+		//Front
 		if(!(robot->getParedes()&0b00000010)) {
 			if(!espacio(cDir, iCol, iRow, 'e')) {
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 			}
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
 		}
-		// Pared
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
-		// Lectura Derecha
-		// Libre
+		//Right
 		if(!(robot->getParedes()&0b00000001)) {
 			robot->llenaArreglo(false);
 			if(!espacio(cDir, iCol, iRow, 'd')) {
@@ -518,29 +531,26 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 			}
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 		}
-		// Pared
 		else{
 			robot->llenaArreglo(true);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 		}
-		// Lectura I<quierda
-		// Libre
+		//Left
 		if(!(robot->getParedes()&0b00000100)) {
 			if(!espacio(cDir, iCol, iRow, 'i')) {
 				desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 			}
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
 		}
-		// Pared
 		else
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 	}
-	// Si es un cuadro negro
+	// If it's a black tile
 	iColor = robot->getColor();
 	if(iColor == 1) {
 		mapa->apantallanteLCD("NEGRO");
 		// delay(200);
-		// Poner pared a los cuatro lados
+		// Make that tile closed
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
@@ -550,18 +560,18 @@ void Mapear::llenaMapaVariable(Tile tMapa[kMapFloors][kMapSize][kMapSize], char 
 }
 
 void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cDir, uint8_t &iCol, uint8_t &iRow, uint8_t &iPiso) {
+	//Actually, after we started using the other function all the time, this is useless... but oh well.
 	if(mapa->sensarRampa() > kRampaLimit || mapa->sensarRampa() < -kRampaLimit) {
-		// tMapa[iPiso][iRow][iCol].bumper(false);
 		if(tMapa[iPiso][iRow][iCol].rampaAbajo() || tMapa[iPiso][iRow][iCol].rampaArriba()) {
 			uint8_t iTemp = iPiso, i = 0, j;
 			robot->pasaRampa();
 			iPiso = tMapa[iPiso][iRow][iCol].piso();
 			bool bT = false;
-			while(i < kMapSize && !bT) { // CAMBIO AQUI DE bT == false a !bT
+			while(i < kMapSize && !bT) {
 				j = 0;
 				while(j < kMapSize && !bT) {
 					if( (tMapa[iPiso][i][j].rampaAbajo() || tMapa[iPiso][i][j].rampaArriba()) && tMapa[iPiso][i][j].piso() == iTemp) {
-						// Aquí busca dónde está esa rampa en el mapa al que va y pone las coordenadas ahí
+						// I look where the ramp is and map it.
 						iCol = j;
 						iRow = i;
 						bT = true;
@@ -573,7 +583,7 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 			afterRampa(cDir, iCol, iRow);
 		}
 		else{
-			// Modifica el piso maximo
+			// Modifies max floor
 			(*iPisoMax)++;
 			if(mapa->sensarRampa() > kRampaLimit) {
 				tMapa[iPiso][iRow][iCol].rampaArriba(true);
@@ -583,37 +593,33 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 				tMapa[iPiso][iRow][iCol].rampaAbajo(true);
 				tMapa[(*iPisoMax)][4][4].rampaArriba(true);
 			}
-			// Pone a qué piso conectan
+			// Maps where it connects
 			tMapa[(*iPisoMax)][4][4].piso(iPiso);
 			tMapa[(*iPisoMax)][4][4].existe(true);
 			tMapa[(*iPisoMax)][4][4].visitado(true);
 			tMapa[iPiso][iRow][iCol].piso((*iPisoMax));
 			tMapa[iPiso][iRow][iCol].visitado(true);
-			// Poner como camino cerrado del piso actual
+			// Closes the path on current floor
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 			escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 			robot->pasaRampa();
-			// Pone la posición en after rampa dependiendo de la direccion
+			// Maps the new position
 			iPiso = (*iPisoMax);
 			iCol = iRow = 4;
 			afterRampa(cDir, iCol, iRow);
 		}
-		// TODO NETO
-		// robot->stop();
 	}
-	/////////////////////////////NORMAL//////////////////////////////////
+	//Front
 	if(mapa->caminoEnfrente()) {
 		if(!espacio(cDir, iCol, iRow, 'e')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'e');
 		}
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', true);
 	}
-	// Pared
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
-	// Lectura Derecha
-	// Libre
+	//Right
 	if(mapa->caminoDerecha()) {
 		robot->llenaArreglo(false);
 		if(!espacio(cDir, iCol, iRow, 'd')) {
@@ -621,36 +627,31 @@ void Mapear::llenaMapaSensor(Tile tMapa[kMapFloors][kMapSize][kMapSize], char cD
 		}
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', true);
 	}
-	// Pared
 	else{
 		robot->llenaArreglo(false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 	}
-	// Lectura I<quierda
-	// Libre
+	//Left
 	if(mapa->caminoIzquierda()) {
 		if(!espacio(cDir, iCol, iRow, 'i')) {
 			desplazaDatos(tMapa, cDir, iCol, iRow, iPiso, 'i');
 		}
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', true);
 	}
-	// Pared
 	else
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
-	// Si es un cuadro negro
 	iColor = mapa->color();
-	// mapa->apantallanteLCD(String(iColor));
 	if(iColor == 1) {
 		// mapa->apantallanteLCD("NEGRO");
 		// delay(200);
-		// Poner pared a los cuatro lados
+		// Close the black Tile
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'e', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'd', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'i', false);
 		escribeMapaLoP(tMapa, cDir, iCol, iRow, iPiso, 'a', false);
 		tMapa[iPiso][iRow][iCol].cuadroNegro(true);
 	}
-	////////////////////////////// PRUEBAS DE LOGICA/////////////////////////////////////////
+	////////////////////////////// Logic testes at home, I would introduce some letters so it would map according to them ////////////////////////////////////////
 	/*char inChar;
 	   Serial.println("Sensa Enfrente");
 	   // Delay(2000);
